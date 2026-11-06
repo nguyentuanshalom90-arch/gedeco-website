@@ -1,6 +1,6 @@
 export const siteConfig = {
   brand: "GEDECO",
-  officialUrl: "https://gedeco.vn",
+  officialUrl: process.env.SITE_URL || "https://gedeco.vn",
   defaultTitle: "GEDECO | Thương mại và xuất khẩu",
   defaultDescription: "GEDECO phát triển nguồn hàng Việt Nam và kết nối sản phẩm chất lượng với khách hàng, đối tác trong nước và quốc tế.",
   locale: "vi_VN",
