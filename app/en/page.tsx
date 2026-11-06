@@ -1,0 +1,14 @@
+import type { Metadata } from 'next';
+import Link from 'next/link';
+import { EnglishPage } from '../components/english-pages';
+
+export const metadata: Metadata = { title: 'Trade and export from Vietnam', description: 'GEDECO develops Vietnamese sources and connects quality products with international customers and partners.' };
+
+export default function EnglishHome() {
+  return <EnglishPage active="Home">
+    <section className="hero section-dark" style={{ backgroundImage: "url('/assets/banner-1.jpg')" }}><div className="hero-overlay" /><div className="container hero-content"><p className="eyebrow">GEDECO</p><h1>Connecting resources<br /><em>Creating value</em></h1><p className="hero-copy">GEDECO develops Vietnamese sources and connects quality products with customers and partners in Vietnam and worldwide.</p><div className="hero-actions"><Link className="button button-gold" href="#services">Explore our activities <span>→</span></Link><Link className="button button-outline" href="/en/lien-he">Contact us</Link></div></div></section>
+    <section className="about" id="about"><div className="container about-grid"><div className="about-image"><img src="/assets/banner-2.jpg" alt="GEDECO products and trade activities" /></div><div className="about-copy"><p className="eyebrow gold-text">ABOUT GEDECO</p><h2>Helping Vietnamese products reach new markets</h2><p>From source development to partner connection, GEDECO builds transparent, professional and sustainable trade relationships.</p><Link className="button button-gold" href="/en/gioi-thieu">Learn more <span>→</span></Link></div></div></section>
+    <section className="services section-dark" id="services"><div className="container"><div className="section-heading centered"><p className="eyebrow">OUR ACTIVITIES</p><h2>Trade and export solutions</h2></div><div className="service-grid">{[['Export & sourcing','Developing Vietnamese sources and finding suitable international buyers.','service-trade-derivative.png'],['Trade & distribution','Bringing quality products to the right market and customer.','service-sourcing-derivative.png'],['Business cooperation','Connecting manufacturers, processors and commercial partners.','service-export-derivative.png'],['Training & knowledge transfer','Sharing practical knowledge for sustainable development.','service-logistics-derivative.png']].map(([title,copy,image])=><article className="service-card" key={title}><h3>{title}</h3><p>{copy}</p><img src={`/assets/${image}`} alt={title} /></article>)}</div></div></section>
+    <section className="contact-cta"><div className="container"><p className="eyebrow">CONTACT GEDECO</p><h2>Let us build the right partnership together</h2><p>Tell us about your product, sourcing or cooperation needs.</p><Link className="button button-gold" href="/en/lien-he">Start a conversation <span>→</span></Link></div></section>
+  </EnglishPage>;
+}

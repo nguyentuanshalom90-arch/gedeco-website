@@ -1,0 +1,24 @@
+DO $$ BEGIN
+  CREATE TYPE "ArticleStatus" AS ENUM ('DRAFT', 'SCHEDULED', 'PUBLISHED');
+EXCEPTION
+  WHEN duplicate_object THEN NULL;
+END $$;
+
+ALTER TABLE "NewsArticle"
+  ADD COLUMN IF NOT EXISTS "content" TEXT,
+  ADD COLUMN IF NOT EXISTS "status" "ArticleStatus" NOT NULL DEFAULT 'DRAFT',
+  ADD COLUMN IF NOT EXISTS "tags" TEXT[] NOT NULL DEFAULT ARRAY[]::TEXT[],
+  ADD COLUMN IF NOT EXISTS "scheduledAt" TIMESTAMP(3);
+
+CREATE TABLE IF NOT EXISTS "MediaAsset" (
+  "id" TEXT NOT NULL,
+  "originalName" TEXT NOT NULL,
+  "originalFile" TEXT NOT NULL,
+  "optimizedFile" TEXT NOT NULL,
+  "mime" TEXT NOT NULL,
+  "width" INTEGER NOT NULL,
+  "height" INTEGER NOT NULL,
+  "sizeBytes" INTEGER NOT NULL,
+  "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT "MediaAsset_pkey" PRIMARY KEY ("id")
+);

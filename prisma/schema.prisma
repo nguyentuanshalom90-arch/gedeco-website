@@ -1,0 +1,172 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model ContactRequest {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  phone     String?
+  message   String?
+  createdAt DateTime @default(now())
+}
+
+model NewsArticle {
+  id              String        @id @default(cuid())
+  slug            String        @unique
+  title           String
+  category        String
+  categoryId      String?
+  excerpt         String?
+  content         String?
+  imageUrl        String?
+  ogImageUrl      String?
+  status          ArticleStatus @default(DRAFT)
+  tags            String[]
+  metaTitle       String?
+  metaDescription String?
+  focusKeyword    String?
+  canonicalUrl    String?
+  authorName      String?
+  robotsIndex     Boolean       @default(true)
+  robotsFollow    Boolean       @default(true)
+  isFeatured      Boolean       @default(false)
+  scheduledAt     DateTime?
+  publishedAt     DateTime?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  categoryRecord NewsCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+
+  @@index([categoryId])
+}
+
+model NewsCategory {
+  id              String   @id @default(cuid())
+  name            String
+  slug            String   @unique
+  description     String?
+  metaTitle       String?
+  metaDescription String?
+  canonicalUrl    String?
+  robotsIndex     Boolean  @default(true)
+  robotsFollow    Boolean  @default(true)
+  sortOrder       Int      @default(0)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  articles NewsArticle[]
+}
+
+model DashboardIntegration {
+  id        String              @id @default(cuid())
+  category  IntegrationCategory
+  provider  String
+  enabled   Boolean             @default(false)
+  config    Json?
+  createdAt DateTime            @default(now())
+  updatedAt DateTime            @updatedAt
+
+  @@unique([category, provider])
+  @@index([category])
+}
+
+enum IntegrationCategory {
+  PAYMENT
+  SHIPPING
+}
+
+enum ArticleStatus {
+  DRAFT
+  SCHEDULED
+  PUBLISHED
+}
+
+model MediaAsset {
+  id            String   @id @default(cuid())
+  originalName  String
+  originalFile  String
+  optimizedFile String
+  mime          String
+  width         Int
+  height        Int
+  sizeBytes     Int
+  createdAt     DateTime @default(now())
+}
+
+model SiteContentPage {
+  id              String   @id @default(cuid())
+  pageKey         String   @unique
+  name            String
+  route           String
+  h1              String?
+  metaTitle       String?
+  metaDescription String?
+  canonicalUrl    String?
+  robotsIndex     Boolean  @default(true)
+  robotsFollow    Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  dynamicContents SiteDynamicContent[]
+
+  @@index([route])
+}
+
+model SiteDynamicContent {
+  id          String   @id @default(cuid())
+  pageKey     String
+  sectionKey  String
+  fieldKey    String
+  label       String
+  value       String   @default("")
+  contentType String   @default("TEXT")
+  headingLevel String?
+  imageUrl    String?
+  altText     String?
+  isVisible   Boolean  @default(true)
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  page        SiteContentPage @relation(fields: [pageKey], references: [pageKey], onDelete: Cascade)
+
+  @@unique([pageKey, sectionKey, fieldKey])
+  @@index([pageKey, sortOrder])
+}
+
+enum SiteChromeArea {
+  HEADER
+  FOOTER
+}
+
+enum SiteChromeKind {
+  DYNAMIC
+  STATIC
+}
+
+model SiteChromeContent {
+  id          String         @id @default(cuid())
+  area        SiteChromeArea
+  kind        SiteChromeKind @default(DYNAMIC)
+  sectionKey  String
+  fieldKey    String
+  label       String
+  value       String         @default("")
+  url         String?
+  imageUrl    String?
+  altText     String?
+  isVisible   Boolean        @default(true)
+  sortOrder   Int            @default(0)
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  @@unique([area, sectionKey, fieldKey])
+  @@index([area, kind, sortOrder])
+}
+

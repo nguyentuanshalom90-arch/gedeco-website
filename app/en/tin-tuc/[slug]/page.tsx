@@ -1,0 +1,4 @@
+import Link from 'next/link';
+import { EnglishPage } from '../../../components/english-pages';
+import { InnerHero } from '../../../components/inner-pages';
+export default async function EnglishArticle({ params }: { params: Promise<{ slug: string }> }) { await params; return <EnglishPage active="News"><InnerHero eyebrow="GEDECO NEWS" title="Article translation in progress" subtitle="This article is currently available in Vietnamese." /><section className="inner-intro"><div className="container"><h2>Read the Vietnamese article</h2><p>We are preparing the English version of this article. You can read the current Vietnamese content or contact GEDECO for assistance.</p><Link className="button button-gold" href="/tin-tuc">Back to Vietnamese news <span>→</span></Link></div></section></EnglishPage>; }
