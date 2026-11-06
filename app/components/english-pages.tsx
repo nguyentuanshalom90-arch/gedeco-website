@@ -21,5 +21,5 @@ export function EnglishFooter() {
 
 export function EnglishPage({ children, active = '' }: { children: React.ReactNode; active?: string }) {
   useEffect(() => { document.documentElement.lang = 'en'; return () => { document.documentElement.lang = 'vi'; }; }, []);
-  return <div className="inner-site english-site"><EnglishHeader active={active} /><main id="main-content" className="inner-main">{children}</main><EnglishFooter /><ContactActions /></div>;
+  return <div className="inner-site english-site"><EnglishHeader active={active} /><main id="main-content" className="inner-main">{children}</main><EnglishFooter /><ContactActions english /></div>;
 }

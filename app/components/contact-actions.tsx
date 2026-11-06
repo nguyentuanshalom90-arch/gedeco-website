@@ -10,7 +10,7 @@ function ArrowUpIcon() {
   return <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M12 19V5M6.5 10.5 12 5l5.5 5.5" /></svg>;
 }
 
-export function ContactActions() {
+export function ContactActions({ english = false }: { english?: boolean }) {
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
@@ -20,9 +20,10 @@ export function ContactActions() {
     return () => window.removeEventListener('scroll', update);
   }, []);
 
-  return <div className="bimiFloatingTools" aria-label="Liên hệ nhanh">
-    <a className="bimiFloatingButton bimiFloatingContact bimiFloatingZalo" href="https://zalo.me/0914943653" target="_blank" rel="noopener noreferrer" aria-label="Chat qua Zalo" title="Chat qua Zalo"><img src="/assets/contact-icons/zalo-chat.png" alt="Zalo" /></a>
-    <a className="bimiFloatingButton bimiFloatingContact bimiFloatingPhone" href="tel:0914943653" aria-label="Gọi hotline 0914 94 3653" title="Gọi 0914 94 3653"><PhoneIcon /></a>
-    <button type="button" className={`bimiFloatingButton bimiFloatingTop${visible ? ' isVisible' : ''}`} aria-label="Lên đầu trang" title="Lên đầu trang" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}><ArrowUpIcon /></button>
+  const labels = english ? { quick: 'Quick contact', zalo: 'Chat on Zalo', phone: 'Call 0914 94 3653', top: 'Back to top' } : { quick: 'Liên hệ nhanh', zalo: 'Chat qua Zalo', phone: 'Gọi 0914 94 3653', top: 'Lên đầu trang' };
+  return <div className="bimiFloatingTools" aria-label={labels.quick}>
+    <a className="bimiFloatingButton bimiFloatingContact bimiFloatingZalo" href="https://zalo.me/0914943653" target="_blank" rel="noopener noreferrer" aria-label={labels.zalo} title={labels.zalo}><img src="/assets/contact-icons/zalo-chat.png" alt="Zalo" /></a>
+    <a className="bimiFloatingButton bimiFloatingContact bimiFloatingPhone" href="tel:0914943653" aria-label={labels.phone} title={labels.phone}><PhoneIcon /></a>
+    <button type="button" className={`bimiFloatingButton bimiFloatingTop${visible ? ' isVisible' : ''}`} aria-label={labels.top} title={labels.top} onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}><ArrowUpIcon /></button>
   </div>;
 }

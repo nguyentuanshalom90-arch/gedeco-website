@@ -68,8 +68,10 @@ export function InnerPage({ children, active, pageClass = '' }: { children: Reac
   return <div className={`inner-site ${pageClass}`}><InnerHeader active={active} /><main id="main-content" className="inner-main">{children}</main><InnerFooter /><ContactActions /></div>;
 }
 
-export function CTA({ title = 'Hãy để chúng tôi đồng hành cùng bạn', text = 'Kết nối ngay hôm nay để tìm kiếm cơ hội hợp tác và phát triển bền vững trên toàn cầu.' }: { title?: string; text?: string }) {
-  return <section className="inner-cta"><div className="container"><p className="eyebrow">LIÊN HỆ VỚI GEDECO</p><h2>{title}</h2><p>{text}</p><div className="hero-actions"><a className="button button-gold" href="/lien-he">Liên hệ ngay <Icon name="arrow" /></a><a className="button button-outline light" href="mailto:info@gedeco.vn">Gửi yêu cầu tư vấn</a></div></div></section>;
+export function CTA({ title = 'Hãy để chúng tôi đồng hành cùng bạn', text, language = 'vi' }: { title?: string; text?: string; language?: 'vi' | 'en' }) {
+  const english = language === 'en';
+  const body = text || (english ? 'Connect with GEDECO today to explore new cooperation and sustainable growth opportunities.' : 'Kết nối ngay hôm nay để tìm kiếm cơ hội hợp tác và phát triển bền vững trên toàn cầu.');
+  return <section className="inner-cta"><div className="container"><p className="eyebrow">{english ? 'CONTACT GEDECO' : 'LIÊN HỆ VỚI GEDECO'}</p><h2>{title}</h2><p>{body}</p><div className="hero-actions"><a className="button button-gold" href={english ? '/en/lien-he' : '/lien-he'}>{english ? 'Contact us' : 'Liên hệ ngay'} <Icon name="arrow" /></a><a className="button button-outline light" href="mailto:info@gedeco.vn">{english ? 'Send an enquiry' : 'Gửi yêu cầu tư vấn'}</a></div></div></section>;
 }
 
 export function NewsCard({ item, href = '/tin-tuc/chi-tiet' }: { item: string[]; href?: string }) {
