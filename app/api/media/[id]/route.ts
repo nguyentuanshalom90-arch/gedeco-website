@@ -11,7 +11,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
   try {
     const data = await readFile(containedMediaPath(asset.optimizedFile));
     if (!data.length) return new Response("Not found", { status: 404 });
-    return new Response(data, { headers: { "Content-Type": "image/webp", "Cache-Control": "public, max-age=31536000, immutable" } });
+    return new Response(new Uint8Array(data), { headers: { "Content-Type": "image/webp", "Cache-Control": "public, max-age=31536000, immutable" } });
   } catch {
     return new Response("Not found", { status: 404 });
   }
