@@ -5,7 +5,7 @@ import { useEffect } from 'react';
 import { ContactActions } from './contact-actions';
 import { LanguageSwitcher } from './language-switcher';
 
-const nav = [['Home', '/en'], ['About', '/en/gioi-thieu'], ['Activities', '/en#services'], ['Partners', '/en/doi-tac'], ['Projects', '/en/du-an'], ['News', '/en/tin-tuc'], ['Contact', '/en/lien-he']];
+const nav = [['Home', '/en'], ['About', '/en/gioi-thieu'], ['News', '/en/tin-tuc'], ['Products', '/en/san-pham'], ['Contact', '/en/lien-he']];
 
 export function EnglishHeader({ active = '' }: { active?: string }) {
   return <header className="site-header inner-header"><div className="nav-shell">
