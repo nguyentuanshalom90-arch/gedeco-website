@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Be_Vietnam_Pro, Playfair_Display } from "next/font/google";
 import "./globals.css";
+import "./shop-brand.css";
+import "./footer-spacing.css";
 import "./dashboard/bimi-dashboard.css";
 import { siteConfig } from "@/lib/site-config";
 

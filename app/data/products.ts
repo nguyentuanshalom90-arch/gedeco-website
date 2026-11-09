@@ -1,4 +1,5 @@
 export type GedecoProduct = {
+  slug?: string;
   image: string;
   title: string;
   category: 'Sản phẩm trong nước' | 'Sản phẩm xuất khẩu';
@@ -6,7 +7,7 @@ export type GedecoProduct = {
 };
 
 export const gedecoProducts: GedecoProduct[] = [
-  { image: '/assets/products/bot-matcha-huu-co.optimized.webp', title: 'BỘT MATCHA HỮU CƠ', category: 'Sản phẩm trong nước', description: 'Matcha có vị cỏ non, vị đắng dễ chịu cùng hương thơm đặc trưng của trà. Có thể dùng cho bánh Tiramisu, trà sữa matcha, matcha latte và cà phê matcha. Quy cách đóng gói: 50 gram, 100 gram và 500 gram.' },
+  { slug: 'bot-matcha-huu-co', image: '/assets/products/bot-matcha-huu-co.optimized.webp', title: 'BỘT MATCHA HỮU CƠ', category: 'Sản phẩm trong nước', description: 'Matcha có vị cỏ non, vị đắng dễ chịu cùng hương thơm đặc trưng của trà. Có thể dùng cho bánh Tiramisu, trà sữa matcha, matcha latte và cà phê matcha. Quy cách đóng gói: 50 gram, 100 gram và 500 gram.' },
   { image: '/assets/products/ca-phe-arabica.optimized.webp', title: 'CÀ PHÊ ARABICA', category: 'Sản phẩm xuất khẩu', description: 'Hạt cà phê Arabica chất lượng được rửa sạch hoàn toàn hoặc loại 1 sàng lọc 18, 16 và 13 tự nhiên, sạch.' },
   { image: '/assets/products/ca-phe-robusta.optimized.webp', title: 'CÀ PHÊ ROBUSTA', category: 'Sản phẩm xuất khẩu', description: 'Cà phê Robusta loại 1 sàng 18, sàng 16 đánh bóng ướt; loại 1 sàng 18, sàng 16 sạch; loại 2 sàng 13 sạch và các quy cách thông dụng khác.' },
   { image: '/assets/products/canned-pineapple.optimized.webp', title: 'CANNED PINEAPPLE', category: 'Sản phẩm xuất khẩu', description: 'No standard specification. Brix 10-UP, Acide 0,20-0,50%, pH 4.2, màu vàng sáng, thành phần 100% pineapple. Đóng gói: A10, 15oz, 30oz.' },

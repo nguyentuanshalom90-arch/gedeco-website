@@ -3,7 +3,9 @@
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { gedecoProducts, type GedecoProduct } from '../data/products';
+import { gedecoProductDetails } from '../data/product-details';
 import { Icon } from './inner-pages';
+import { ShopProductCard } from './shop-pages';
 
 const pageSize = 4;
 
@@ -12,12 +14,15 @@ function chunkProducts(items: GedecoProduct[]) {
 }
 
 export function ProductCarousel({ items = gedecoProducts, compact = false }: { items?: GedecoProduct[]; compact?: boolean }) {
-  const pages = useMemo(() => chunkProducts(items), [items]);
+  const [databaseItems, setDatabaseItems] = useState<GedecoProduct[] | null>(null);
+  useEffect(() => { fetch('/api/products?category=all').then((response) => response.ok ? response.json() : null).then((payload) => { if (payload?.items) setDatabaseItems(payload.items); }).catch(() => undefined); }, []);
+  const displayItems = databaseItems?.length ? databaseItems : items;
+  const pages = useMemo(() => chunkProducts(displayItems), [displayItems]);
   const [page, setPage] = useState(0);
   const [paused, setPaused] = useState(false);
   const [hoveredCard, setHoveredCard] = useState<number | null>(null);
 
-  useEffect(() => { setPage(0); }, [items]);
+  useEffect(() => { setPage(0); }, [displayItems]);
   useEffect(() => {
     if (compact || paused || pages.length < 2) return;
     const timer = window.setInterval(() => setPage((current) => (current + 1) % pages.length), 6000);
@@ -27,13 +32,13 @@ export function ProductCarousel({ items = gedecoProducts, compact = false }: { i
   const pause = () => setPaused(true);
   const resume = () => { setPaused(false); setHoveredCard(null); };
   const goTo = (nextPage: number) => setPage((nextPage + pages.length) % pages.length);
-  const renderCard = (product: GedecoProduct, cardIndex: number, key: string) => <article className={`product-card${hoveredCard === cardIndex ? ' is-hovered' : ''}`} key={key} onMouseEnter={() => setHoveredCard(cardIndex)} onFocus={() => setHoveredCard(cardIndex)}>
-    <img src={product.image} alt={product.title} />
-    <div className="product-card-body"><p className="product-category">{product.category.toUpperCase()}</p><h3>{product.title}</h3><p className="product-card-description">{product.description}</p><Link href="/lien-he" className="product-card-link">{compact ? 'Xem chi tiết' : 'Liên hệ về sản phẩm'} <Icon name="arrow" /></Link></div>
-  </article>;
+  const renderCard = (product: GedecoProduct, cardIndex: number, key: string) => {
+    const slug = product.slug || gedecoProductDetails.find((detail) => detail.title === product.title)?.slug;
+    return <ShopProductCard key={key} className={hoveredCard === cardIndex ? 'is-hovered' : ''} product={{ slug: slug || '', title: product.title, category: product.category, image: product.image }} onMouseEnter={() => setHoveredCard(cardIndex)} onFocus={() => setHoveredCard(cardIndex)} />;
+  };
 
   if (compact) return <div className={`product-carousel product-carousel-compact${hoveredCard !== null ? ' has-hover' : ''}`} onMouseEnter={pause} onMouseLeave={resume}>
-    <div className="product-carousel-viewport"><div className={`product-marquee-track${paused ? ' is-paused' : ''}`}><div className="product-marquee-set">{items.map((product, index) => renderCard(product, index, `marquee-a-${product.title}`))}</div><div className="product-marquee-set" aria-hidden="true">{items.map((product, index) => renderCard(product, index, `marquee-b-${product.title}`))}</div></div></div>
+    <div className="product-carousel-viewport"><div className={`product-marquee-track${paused ? ' is-paused' : ''}`}><div className="product-marquee-set">{displayItems.map((product, index) => renderCard(product, index, `marquee-a-${product.title}`))}</div><div className="product-marquee-set" aria-hidden="true">{displayItems.map((product, index) => renderCard(product, index, `marquee-b-${product.title}`))}</div></div></div>
   </div>;
 
   return <div className={`product-carousel${hoveredCard !== null ? ' has-hover' : ''}`} onMouseEnter={pause} onMouseLeave={resume} onFocusCapture={pause} onBlurCapture={resume}>

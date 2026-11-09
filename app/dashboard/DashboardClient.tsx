@@ -7,11 +7,12 @@ import { ContentManager } from "./ContentManager";
 import { SiteContentManager } from "./SiteContentManager";
 import { SiteChromeManager } from "./SiteChromeManager";
 import { IntegrationManager } from "./IntegrationManager";
+import { ProductManager } from "./ProductManager";
 import { listPosts } from "@/lib/dashboard/post-actions";
 import { listIntegrations } from "@/lib/dashboard/integration-actions";
 
-export type DashboardTab = "overview" | "posts" | "content" | "chrome" | "payment" | "shipping";
-const tabs: DashboardTab[] = ["overview", "posts", "content", "chrome", "payment", "shipping"];
+export type DashboardTab = "overview" | "posts" | "products" | "content" | "chrome" | "payment" | "shipping";
+const tabs: DashboardTab[] = ["overview", "posts", "products", "content", "chrome", "payment", "shipping"];
 
 export function DashboardClient({
   initialTab = "overview",
@@ -153,6 +154,7 @@ export function DashboardClient({
             <ContentManager />
           </section>
         )}
+        {tab === "products" && <section className={styles.content}><ProductManager /></section>}
         {tab === "content" && (
           <section className={styles.content}>
             <SiteContentManager />

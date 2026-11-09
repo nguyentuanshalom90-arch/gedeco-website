@@ -1,0 +1,73 @@
+.shop-site { --brand-action-blue: #1675E8; }
+
+.shop-site .shop-product-cta,
+.shop-site .shop-newsletter button,
+.shop-site .shop-pagination button.active,
+.shop-site .shop-pagination button:hover,
+.shop-site .shop-support h2,
+.shop-site .shop-news h2,
+.shop-site .shop-guarantee h2 { background: var(--brand-action-blue); }
+
+.shop-site .shop-product-cta { border-radius: 7px; min-height: 38px; padding-top: 0; padding-bottom: 0; }
+
+@media (max-width: 640px) {
+  .shop-site .shop-product-cta { min-height: 30px; }
+}
+
+.shop-site .shop-nav a.active,
+.shop-site .shop-nav a:hover,
+.shop-site .shop-product-body h3 a:hover { color: var(--brand-action-blue); }
+
+.shop-site .shop-nav a.active,
+.shop-site .shop-nav a:hover,
+.shop-site .shop-guarantee,
+.shop-site .shop-description-tab { border-color: var(--brand-action-blue); }
+
+.shop-site .shop-cart b,
+.shop-site .shop-guarantee li::marker { color: var(--brand-action-blue); }
+
+.shop-site .shop-detail-thumbs img.active { border-color: var(--brand-action-blue); }
+
+/* Chi tiết sản phẩm */
+.shop-site-no-hero .site-header { position: relative; margin-bottom: 0; }
+.shop-site-no-hero .shop-detail-layout { padding-top: 28px; }
+.shop-site .shop-description-tab { width: 100%; padding: 15px 0; text-align: left; }
+.shop-site .shop-buy { display: inline-flex; align-items: center; gap: 9px; border-radius: 7px; }
+.shop-site .shop-buy .icon-svg { width: 17px; height: 17px; }
+.shop-site .shop-product-contact { display: inline-flex; align-items: center; gap: 8px; border: 1px solid currentColor; border-radius: 7px; padding: 10px 14px; font-weight: 700; }
+.shop-site .shop-product-contact .icon-svg { width: 17px; height: 17px; }
+.shop-detail-thumbs button { flex: 0 0 auto; border: 1px solid #ddd; background: #fff; padding: 3px; cursor: pointer; }
+.shop-detail-thumbs button.active { border: 2px solid var(--brand-action-blue); padding: 2px; }
+.shop-detail-thumbs img { height: 66px; width: 66px; object-fit: cover; }
+.shop-guarantee ul { list-style: none; padding-left: 20px; }
+.shop-guarantee li { display: flex; align-items: flex-start; gap: 8px; }
+.shop-guarantee li + li { margin-top: 5px; }
+.shop-guarantee li .icon-svg { width: 16px; height: 16px; flex: none; margin-top: 3px; color: var(--brand-action-blue); }
+.shop-related-heading { display: flex; align-items: center; justify-content: space-between; gap: 18px; margin-bottom: 18px; }
+.shop-related h2 { margin: 0; }
+.shop-related-arrows { display: flex; gap: 8px; }
+.shop-related-arrows button { width: 40px; height: 40px; border: 1.5px solid #c6d5e5; border-radius: 50%; background: #fff; color: var(--brand-action-blue); font-size: 21px; font-weight: 900; line-height: 1; cursor: pointer; box-shadow: 0 3px 10px rgba(22,117,232,.12); }
+.shop-related-arrows button:hover { background: var(--brand-action-blue); color: #fff; }
+.shop-related-viewport { overflow: hidden; }
+.shop-related-track { --related-step: calc((100% - 45px) / 4 + 15px); display: flex; gap: 15px; transition: transform .45s ease; }
+.shop-related-track > .shop-product-card { flex: 0 0 calc((100% - 45px) / 4); }
+
+.main-nav, .main-nav a, .nav-submenu a { font-family: var(--font-body), Arial, sans-serif !important; font-synthesis: none; }
+.nav-submenu a,
+.nav-submenu a:hover,
+.nav-submenu a.active { font-style: normal !important; text-transform: none !important; letter-spacing: 0 !important; }
+.shop-site .nav-submenu a { color: #193558 !important; border: 0 !important; }
+.nav-submenu a:hover { background: #fff8e8 !important; color: #a2710f !important; font-weight: 600 !important; }
+.nav-submenu a.active { background: #fff0c9 !important; color: #9b6900 !important; font-weight: 700 !important; box-shadow: inset 4px 0 #e6b94d; }
+
+@media (max-width: 640px) {
+  .shop-site-no-hero .shop-detail-layout { padding-top: 20px; }
+  .shop-related-track { --related-step: calc((100% - 15px) / 2 + 10px); }
+  .shop-related-track > .shop-product-card { flex-basis: calc((100% - 15px) / 2); }
+}
+.shop-site .shop-detail-summary h1 {
+  font-family: Arial, sans-serif;
+  font-size: clamp(2rem, 3.2vw, 3rem);
+  line-height: 1.08;
+  letter-spacing: -0.02em;
+}

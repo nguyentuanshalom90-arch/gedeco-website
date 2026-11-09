@@ -1,0 +1,52 @@
+.footer { margin-top: 0; }
+
+.footer-bottom {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  column-gap: 24px;
+}
+.footer-bottom .footer-copyright { justify-self: center; text-align: center; }
+.footer-bottom .footer-credit { justify-self: end; white-space: nowrap; color: inherit; }
+
+.home-footer-grid {
+  grid-template-columns: max-content minmax(0, 1fr);
+  column-gap: 50px;
+  justify-content: initial;
+  align-items: start;
+}
+.home-footer-grid > div { width: max-content; min-width: max-content; }
+.home-footer-grid > div a { white-space: nowrap; }
+.home-footer-grid .footer-info-columns {
+  display: grid;
+  grid-template-columns: max-content 300px max-content;
+  align-items: start;
+  width: max-content;
+  min-width: max-content;
+  margin-left: auto;
+}
+.home-footer-grid .footer-info-columns > div:nth-child(2) { justify-self: center; text-align: center; }
+.home-footer-grid .footer-info-columns > div:nth-child(3) { justify-self: end; }
+.home-footer-grid .footer-info-columns > div:nth-child(2) a::before,
+.home-footer-grid .footer-info-columns > div:nth-child(3) a::before {
+  content: '•';
+  display: inline-block;
+  margin-right: 8px;
+  color: currentColor;
+}
+
+@media (max-width: 900px) {
+  .home-footer-grid { grid-template-columns: max-content; row-gap: 24px; }
+  .home-footer-grid > div { width: max-content; min-width: max-content; }
+  .home-footer-grid .footer-info-columns { margin-left: 0; grid-template-columns: max-content max-content max-content; column-gap: 40px; }
+}
+@media (max-width: 640px) {
+  .home-footer-grid { grid-template-columns: minmax(0, 1fr); }
+  .home-footer-grid > div { width: auto; min-width: 0; }
+  .home-footer-grid > .footer-brand { width: 100%; }
+  .home-footer-grid > div a { white-space: normal; }
+  .home-footer-grid .footer-info-columns { width: 100%; min-width: 0; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 18px; }
+  .home-footer-grid .footer-info-columns > div:nth-child(3) { grid-column: 1 / -1; justify-self: start; margin-top: 18px; }
+  .footer-bottom { grid-template-columns: 1fr; row-gap: 8px; }
+  .footer-bottom .footer-copyright, .footer-bottom .footer-credit { justify-self: start; text-align: left; }
+}

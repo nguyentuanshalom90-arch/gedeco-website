@@ -1,7 +1,11 @@
-import Link from 'next/link';
-import { InnerHero, InnerPage, CTA } from '../components/inner-pages';
-import { ProductCarousel } from '../components/product-carousel';
+import { listProducts } from '@/lib/products';
+import { ProductCatalog, ShopBreadcrumb, ShopShell, ShopSidebar } from '../components/shop-pages';
 
-export default function ProductsPage() {
-  return <InnerPage active="Sản phẩm"><InnerHero eyebrow="SẢN PHẨM GEDECO" title="Sản phẩm trong nước và xuất khẩu" subtitle="Danh mục sản phẩm tham khảo từ website GEDECO." /><section className="product-categories"><div className="container"><div className="product-category-tabs"><Link href="/san-pham?category=trong-nuoc">SẢN PHẨM TRONG NƯỚC</Link><Link href="/san-pham?category=xuat-khau">SẢN PHẨM XUẤT KHẨU</Link></div><ProductCarousel /></div></section><CTA title="Bạn quan tâm đến sản phẩm nào?" text="Gửi thông tin nhu cầu để GEDECO tư vấn sản phẩm và phương án hợp tác phù hợp." /></InnerPage>;
+const sourceOrder = ['bot-matcha-huu-co', 'ca-phe-arabica', 'ca-phe-robusta', 'canned-pineapple', 'dia-spithera-xoa-sach-nep-nhan', 'dong-trung-ha-thao-nguyen-con', 'durian', 'ca-tra-dau', 'tra-dinh-uop-bong-sen', 'ruou-dong-trung-ha-thao', 'thuc-pham-bao-ve-suc-khoe-carositol', 'tieu-den'];
+
+export default async function ProductsPage({ searchParams }: { searchParams: Promise<{ category?: string }> }) {
+  const products = [...await listProducts()].sort((a, b) => (sourceOrder.indexOf(a.slug) === -1 ? 99 : sourceOrder.indexOf(a.slug)) - (sourceOrder.indexOf(b.slug) === -1 ? 99 : sourceOrder.indexOf(b.slug)));
+  const category = (await searchParams).category;
+  const initialCategory = category === 'domestic' || category === 'trong-nuoc' ? 'domestic' : category === 'export' || category === 'xuat-khau' ? 'export' : 'all';
+  return <ShopShell current="Sản phẩm"><div className="shop-width shop-page-layout"><div className="shop-main"><ShopBreadcrumb current="Sản phẩm" /><ProductCatalog items={products} initialCategory={initialCategory} /></div><ShopSidebar /></div></ShopShell>;
 }

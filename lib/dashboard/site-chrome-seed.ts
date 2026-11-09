@@ -14,7 +14,7 @@ export const chromeSeed = [
   ["FOOTER", "STATIC", "brand", "tagline", "Tên tiếng Anh", "GEDECO CORPORATION", "", "", "", true, 3],
   ["FOOTER", "DYNAMIC", "contact", "phone", "Số điện thoại", "0914 94 3653", "tel:0914943653", "", "", true, 10],
   ["FOOTER", "DYNAMIC", "contact", "email", "Email", "info@gedeco.vn", "mailto:info@gedeco.vn", "", "", true, 11],
-  ["FOOTER", "DYNAMIC", "contact", "address", "Địa chỉ", "Số 60 Trung Kính, P. Trung Hòa, Q. Cầu Giấy, TP. Hà Nội, Việt Nam", "/lien-he", "", "", true, 12],
+  ["FOOTER", "DYNAMIC", "contact", "address", "Địa chỉ", "Tầng 14, Tòa nhà Đa năng, số 169 Nguyễn Ngọc Vũ, P. Yên Hòa, TP. Hà Nội, Việt Nam", "/lien-he", "", "", true, 12],
   ["FOOTER", "DYNAMIC", "social", "facebook", "Facebook URL", "", "https://www.facebook.com/www.gedeco.tra.thuong.hang", "", "", true, 20],
   ["FOOTER", "DYNAMIC", "social", "youtube", "YouTube URL", "", "https://www.youtube.com/", "", "", true, 21],
   ["FOOTER", "STATIC", "legal", "copyright", "Bản quyền", "© 2025 GEDECO. All rights reserved.", "", "", "", true, 30],

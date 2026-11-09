@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { ContactActions } from './contact-actions';
 import { LanguageSwitcher } from './language-switcher';
@@ -39,15 +38,30 @@ const nav = [['Trang chủ', '/'], ['Giới thiệu', '/gioi-thieu'], ['Tin tứ
 export function InnerHeader({ active = '' }: { active?: string }) {
   const [open, setOpen] = useState(false);
   const pathname = usePathname() || '/';
+  const [selectedCategory, setSelectedCategory] = useState('');
   const [chrome, setChrome] = useState<Record<string, { value: string; url: string; imageUrl: string; altText: string }>>({});
   useEffect(() => { fetch('/api/site-chrome?area=HEADER').then((response) => response.ok ? response.json() : null).then((payload) => { if (payload?.values) setChrome(payload.values); }).catch(() => undefined); }, []);
+  useEffect(() => {
+    const syncCategory = (event?: Event) => {
+      const detail = (event as CustomEvent<{ category?: string }> | undefined)?.detail;
+      const hasCategoryDetail = Boolean(detail && Object.prototype.hasOwnProperty.call(detail, 'category'));
+      const value = hasCategoryDetail ? detail?.category : new URLSearchParams(window.location.search).get('category');
+      const pathCategory = window.location.pathname.match(/^\/san-pham\/(trong-nuoc|xuat-khau)(?:\/|$)/)?.[1];
+      const selected = pathCategory || value;
+      setSelectedCategory(selected === 'trong-nuoc' || selected === 'domestic' ? 'trong-nuoc' : selected === 'xuat-khau' || selected === 'export' ? 'xuat-khau' : '');
+    };
+    syncCategory();
+    window.addEventListener('popstate', syncCategory);
+    window.addEventListener('gedeco:product-category', syncCategory);
+    return () => { window.removeEventListener('popstate', syncCategory); window.removeEventListener('gedeco:product-category', syncCategory); };
+  }, [pathname]);
   const get = (key: string, fallback: string) => chrome[key]?.value || fallback;
   const getUrl = (key: string, fallback: string) => chrome[key]?.url || fallback;
   const logo = '/assets/logo-new.png';
   return <header className="site-header inner-header"><div className="nav-shell">
     <a className="brand" href="/" aria-label="GEDECO trang chủ"><img src={logo} alt={chrome['brand.logo']?.altText || 'GEDECO'} /></a>
     <button className="menu-toggle" aria-label="Mở menu" aria-expanded={open} onClick={() => setOpen(!open)}><span /><span /><span /></button>
-    <nav className={`main-nav${open ? ' open' : ''}`} aria-label="Điều hướng chính"><a className={active === 'Trang chủ' ? 'active' : ''} href={getUrl('navigation.home', '/')} onClick={() => setOpen(false)}>{get('navigation.home', 'Trang chủ')}</a><a className={active === 'Giới thiệu' ? 'active' : ''} href={getUrl('navigation.about', '/gioi-thieu')} onClick={() => setOpen(false)}>{get('navigation.about', 'Giới thiệu')}</a><a className={active === 'Tin tức' ? 'active' : ''} href={getUrl('navigation.news', '/tin-tuc')} onClick={() => setOpen(false)}>{get('navigation.news', 'Tin tức')}</a><div className="nav-dropdown"><a className={active === 'Sản phẩm' ? 'active' : ''} href={getUrl('navigation.products', '/san-pham')} onClick={() => setOpen(false)}>{get('navigation.products', 'Sản phẩm')} <span className="nav-chevron" aria-hidden="true"><Icon name="chevron" /></span></a><div className="nav-submenu"><a href="/san-pham?category=trong-nuoc" onClick={() => setOpen(false)}>Sản phẩm trong nước</a><a href="/san-pham?category=xuat-khau" onClick={() => setOpen(false)}>Sản phẩm xuất khẩu</a></div></div><a className={active === 'Liên hệ' ? 'active' : ''} href={getUrl('navigation.contact', '/lien-he')} onClick={() => setOpen(false)}>{get('navigation.contact', 'Liên hệ')}</a></nav>
+    <nav className={`main-nav${open ? ' open' : ''}`} aria-label="Điều hướng chính"><a className={active === 'Trang chủ' ? 'active' : ''} href={getUrl('navigation.home', '/')} onClick={() => setOpen(false)}>{get('navigation.home', 'Trang chủ')}</a><a className={active === 'Giới thiệu' ? 'active' : ''} href={getUrl('navigation.about', '/gioi-thieu')} onClick={() => setOpen(false)}>{get('navigation.about', 'Giới thiệu')}</a><a className={active === 'Tin tức' ? 'active' : ''} href={getUrl('navigation.news', '/tin-tuc')} onClick={() => setOpen(false)}>{get('navigation.news', 'Tin tức')}</a><div className="nav-dropdown"><a className={active === 'Sản phẩm' || Boolean(selectedCategory) ? 'active' : ''} href={getUrl('navigation.products', '/san-pham')} onClick={() => setOpen(false)}>{get('navigation.products', 'Sản phẩm')} <span className="nav-chevron" aria-hidden="true"><Icon name="chevron" /></span></a><div className="nav-submenu"><a className={selectedCategory === 'trong-nuoc' ? 'active' : ''} href="/san-pham?category=trong-nuoc" onClick={() => setOpen(false)}>Sản phẩm trong nước</a><a className={selectedCategory === 'xuat-khau' ? 'active' : ''} href="/san-pham?category=xuat-khau" onClick={() => setOpen(false)}>Sản phẩm xuất khẩu</a></div></div><a className={active === 'Liên hệ' ? 'active' : ''} href={getUrl('navigation.contact', '/lien-he')} onClick={() => setOpen(false)}>{get('navigation.contact', 'Liên hệ')}</a></nav>
     <div className="nav-tools"><button className="search-btn" aria-label="Tìm kiếm"><Icon name="search" /></button><LanguageSwitcher /><a className="button button-gold button-small" href={getUrl('cta.label', '/lien-he')}>{get('cta.label', 'Liên hệ ngay')} <Icon name="arrow" /></a></div>
   </div></header>;
 }
@@ -57,7 +71,9 @@ export function InnerFooter() {
   useEffect(() => { fetch('/api/site-chrome?area=FOOTER').then((response) => response.ok ? response.json() : null).then((payload) => { if (payload?.values) setChrome(payload.values); }).catch(() => undefined); }, []);
   const get = (key: string, fallback: string) => chrome[key]?.value || fallback;
   const getUrl = (key: string, fallback: string) => chrome[key]?.url || fallback;
-  return <footer className="footer"><div className="container footer-grid"><div className="footer-brand"><img src={chrome['brand.logo']?.imageUrl || '/assets/logo-new-footer.png'} alt={chrome['brand.logo']?.altText || 'GEDECO'} /><p>{get('brand.company', 'CÔNG TY CỔ PHẦN GEDECO')}<br /><i>{get('brand.tagline', 'GEDECO CORPORATION')}</i></p><div className="socials"><a aria-label="Facebook" href={getUrl('social.facebook', 'https://www.facebook.com/www.gedeco.tra.thuong.hang')}><Icon name="facebook" /></a><a aria-label="YouTube" href={getUrl('social.youtube', '#')}><Icon name="youtube" /></a></div></div><div><h3>VỀ GEDECO</h3><a href="/gioi-thieu">Giới thiệu</a><a href="/gioi-thieu#tam-nhin">Tầm nhìn - Sứ mệnh</a><a href="/doi-tac">Đối tác</a></div><div><h3>HOẠT ĐỘNG</h3><a href="/#services">Xuất khẩu & sourcing</a><a href="/#services">Thương mại & phân phối</a><a href="/#services">Hợp tác phát triển</a><a href="/#services">Đào tạo & chuyển giao</a></div><div><h3>TIN TỨC</h3><a href="/tin-tuc">Nguồn hàng Việt</a><a href="/tin-tuc">Sản phẩm</a><a href="/tin-tuc">Hoạt động GEDECO</a></div><div><h3>LIÊN HỆ</h3><a href={getUrl('contact.phone', 'tel:0914943653')}><Icon name="phone" />{get('contact.phone', '0914 94 3653')}</a><a href={getUrl('contact.email', 'mailto:info@gedeco.vn')}><Icon name="mail" />{get('contact.email', 'info@gedeco.vn')}</a><a href="/lien-he"><Icon name="pin" />Trụ sở: Tầng 14, Tòa nhà Đa năng, số 169 Nguyễn Ngọc Vũ, P. Yên Hòa, TP. Hà Nội, Việt Nam</a><span>Liên hệ CV: Số 60 Trung Kính</span></div></div><div className="container footer-bottom"><span>{get('legal.copyright', '© 2025 GEDECO. All rights reserved.')}</span><span>Chính sách bảo mật &nbsp; | &nbsp; Điều khoản sử dụng &nbsp; | &nbsp; Liên hệ</span></div></footer>;
+  const address = get('contact.address', 'Trụ sở: Tầng 14, Tòa nhà Đa năng, số 169 Nguyễn Ngọc Vũ, P. Yên Hòa, TP. Hà Nội, Việt Nam');
+  const addressParts = address.split(', P. Yên Hòa');
+  return <footer className="footer"><div className="container footer-grid home-footer-grid"><div className="footer-brand"><img src={chrome['brand.logo']?.imageUrl || '/assets/logo-new-footer.png'} alt={chrome['brand.logo']?.altText || 'GEDECO'} /><p>{get('brand.company', 'CÔNG TY CỔ PHẦN GEDECO')}<br /><i>{get('brand.tagline', 'GEDECO CORPORATION')}</i></p><div className="socials"><a aria-label="Facebook" href={getUrl('social.facebook', 'https://www.facebook.com/www.gedeco.tra.thuong.hang')}><Icon name="facebook" /></a><a aria-label="YouTube" href={getUrl('social.youtube', '#')}><Icon name="youtube" /></a></div></div><div className="footer-info-columns"><div><h3>THÔNG TIN LIÊN HỆ</h3><a href={getUrl('contact.phone', 'tel:0914943653')}><Icon name="phone" />{get('contact.phone', '0914 94 3653')}</a><a href={getUrl('contact.email', 'mailto:info@gedeco.vn')}><Icon name="mail" />{get('contact.email', 'info@gedeco.vn')}</a><a href={getUrl('contact.address', '/lien-he')}><Icon name="pin" />{addressParts.length > 1 ? <>{addressParts[0]},<br />P. Yên Hòa{addressParts.slice(1).join(', P. Yên Hòa')}</> : address}</a></div><div><h3>LIÊN KẾT NHANH</h3><a href="/gioi-thieu">Giới thiệu</a><a href="/san-pham">Sản phẩm</a><a href="/tin-tuc">Tin tức</a><a href="/lien-he">Liên hệ</a></div><div><h3>HỖ TRỢ</h3><a href="/chinh-sach-bao-mat">Chính sách bảo mật thông tin</a><a href="/dieu-khoan-su-dung">Điều khoản sử dụng</a><a href="/chinh-sach-ban-hang">Chính sách bán hàng/giao dịch</a></div></div></div><div className="container footer-bottom"><span>Mã số doanh nghiệp: 0109613491</span><span className="footer-copyright">{get('legal.copyright', '© 2025 GEDECO. All rights reserved.')}</span><a className="footer-credit" href="https://vimigo.vn/" target="_blank" rel="noopener noreferrer">Thiết kế bởi Vimigo.vn</a></div></footer>;
 }
 
 export function InnerHero({ eyebrow, title, subtitle, image = '/assets/banner-1.jpg' }: { eyebrow: string; title: string; subtitle: string; image?: string }) {

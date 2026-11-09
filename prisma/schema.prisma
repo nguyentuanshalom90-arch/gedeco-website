@@ -100,6 +100,46 @@ model MediaAsset {
   createdAt     DateTime @default(now())
 }
 
+model Product {
+  id              String        @id @default(cuid())
+  slug            String        @unique
+  title           String
+  category        ProductCategory
+  description     String        @default("")
+  contentHtml     String        @default("") @db.Text
+  summaryHtml     String        @default("") @db.Text
+  priceText       String        @default("Liên hệ")
+  stockText       String        @default("Còn hàng")
+  imageUrl        String        @default("")
+  shipperImageUrl String        @default("")
+  isPublished     Boolean       @default(true)
+  sortOrder       Int           @default(0)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  gallery         ProductMedia[]
+
+  @@index([category, isPublished, sortOrder])
+}
+
+model ProductMedia {
+  id        String  @id @default(cuid())
+  productId String
+  url       String
+  altText   String  @default("")
+  sortOrder Int     @default(0)
+  isPrimary Boolean @default(false)
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId, sortOrder])
+}
+
+enum ProductCategory {
+  DOMESTIC
+  EXPORT
+}
+
 model SiteContentPage {
   id              String   @id @default(cuid())
   pageKey         String   @unique

@@ -15,7 +15,7 @@ export default async function ContactPage() {
   const content = await getPublicSiteContent('lien-he');
   return <InnerPage active="Liên hệ" pageClass="contact-design">
     <InnerHero eyebrow="LIÊN HỆ VỚI GEDECO" title={content.values['hero.title'] || 'Liên hệ với GEDECO'} subtitle={content.values['hero.subtitle'] || 'Kết nối – Tư vấn – Hợp tác'} />
-    <section className="contact-intro"><div className="container inner-split"><div className="inner-image"><img src="/assets/banner-2.jpg" alt="Sản phẩm và hoạt động thương mại của GEDECO" /></div><div><p className="eyebrow gold-text">(GEDECO CORPORATION)</p><h2>CÔNG TY CỔ PHẦN GEDECO</h2><p>Hotline: +84 914.94.3653<br/>Email: info@gedeco.vn<br/>Website: www.gedeco.vn</p><p>Liên hệ CV: Số 60 Trung Kính, P. Trung Hòa, Q. Cầu Giấy, TP. Hà Nội.</p><p>Hãy liên hệ để trao đổi nhu cầu sản phẩm, hợp tác hoặc phân phối.</p></div></div></section>
+    <section className="contact-intro"><div className="container inner-split"><div className="inner-image"><img src="/assets/banner-2.jpg" alt="Sản phẩm và hoạt động thương mại của GEDECO" /></div><div><p className="eyebrow gold-text">(GEDECO CORPORATION)</p><h2>CÔNG TY CỔ PHẦN GEDECO</h2><p>Hotline: +84 914.94.3653<br/>Email: info@gedeco.vn<br/>Website: www.gedeco.vn</p><p>Hãy liên hệ để trao đổi nhu cầu sản phẩm, hợp tác hoặc phân phối.</p></div></div></section>
     <section className="contact-card-band"><div className="container contact-card-grid">{contactCards.map(([icon,title,value,copy])=><article key={title}><Icon name={icon as any}/><div><h3>{title}</h3><b>{value}</b><p>{copy}</p></div></article>)}</div></section>
     <section className="contact-page"><div className="container contact-page-grid">
       <ContactForm />

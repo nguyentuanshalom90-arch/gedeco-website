@@ -1,0 +1,33 @@
+.catalog { margin-bottom: 18px; }
+.toolbar { display: flex; gap: 14px; align-items: center; justify-content: flex-end; padding: 10px 14px; border: 1px solid #e4ebf2; border-radius: 14px; background: linear-gradient(135deg, #f8fbff, #fff); box-shadow: 0 8px 22px rgba(11,43,84,.06); }
+.searchWrap { display: flex; align-items: center; gap: 10px; min-width: 0; flex: 1; color: #9a7a25; }
+.searchWrap svg { width: 20px; height: 20px; flex: none; }
+.searchWrap input { width: 100%; border: 0; outline: 0; background: transparent; color: #17395d; font: inherit; font-size: 13px; }
+.searchWrap input::placeholder { color: #96a4b5; }
+.searchWrap button { border: 0; background: transparent; color: #8392a3; font-size: 22px; line-height: 1; cursor: pointer; }
+.sortWrap { display: flex; align-items: center; gap: 8px; color: #8190a2; font-size: 11px; white-space: nowrap; }
+.sortWrap select { border: 0; outline: 0; color: #17395d; background: transparent; font: inherit; font-size: 12px; font-weight: 700; cursor: pointer; }
+.filterRow { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 18px 0 22px; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chips button { border: 1px solid #dfe7f0; border-radius: 999px; padding: 9px 13px; color: #526b85; background: #fff; font: inherit; font-size: 11px; font-weight: 700; cursor: pointer; transition: .2s ease; }
+.chips button:hover, .activeChip { border-color: #1675E8 !important; background: #1675E8 !important; color: #fff !important; box-shadow: 0 5px 12px rgba(22,117,232,.2); }
+.chips b { margin-left: 4px; font-size: 10px; opacity: .7; }
+.viewAndCount { display: flex; align-items: center; justify-content: flex-end; gap: 10px; margin-left: auto; color: #8795a6; font-size: 11px; white-space: nowrap; }
+.inlineSearchWrap { display: flex; align-items: center; gap: 10px; width: 280px; height: 46px; padding: 0 14px; border: 1px solid #e4ebf2; border-radius: 14px; background: #fff; color: #9a7a25; box-shadow: 0 8px 22px rgba(11,43,84,.06); }
+.inlineSearchWrap svg { width: 17px; height: 17px; flex: none; }
+.inlineSearchWrap input { width: 100%; min-width: 0; border: 0; outline: 0; color: #17395d; background: transparent; font: inherit; font-size: 12px; }
+.inlineSearchWrap input::placeholder { color: #96a4b5; }
+.inlineSearchWrap button { border: 0; background: transparent; color: #8392a3; font-size: 19px; line-height: 1; cursor: pointer; }
+.views { display: flex; gap: 3px; padding: 3px; border: 1px solid #e1e8f0; border-radius: 9px; }
+.views button { width: 25px; height: 25px; border: 0; border-radius: 6px; color: #9ca9b7; background: transparent; font-size: 15px; line-height: 1; cursor: pointer; }
+.views button:hover, .activeView { background: #eaf3fb !important; color: #0b4f8c !important; }
+.clear { border: 0; color: #a2710f; background: transparent; font: inherit; font-size: 11px; font-weight: 700; cursor: pointer; }
+.empty { display: grid; justify-items: center; gap: 8px; padding: 50px 20px; border: 1px dashed #ccd9e6; border-radius: 14px; color: #718196; text-align: center; }
+.empty strong { color: #17395d; font-family: Georgia, serif; font-size: 18px; }
+.empty button { margin-top: 6px; border: 0; border-radius: 999px; padding: 10px 16px; color: #fff; background: #1675E8; font: inherit; font-size: 11px; font-weight: 700; cursor: pointer; }
+.pagination { display: flex; align-items: center; justify-content: center; gap: 8px; margin: 28px 0 8px; }
+.pagination button { min-width: 38px; height: 38px; padding: 0 12px; border: 1px solid #dbe5f0; border-radius: 7px; color: #153a63; background: #fff; font: inherit; font-size: 12px; font-weight: 700; cursor: pointer; transition: .2s ease; }
+.pagination button:hover:not(:disabled), .activePage { border-color: #1675E8 !important; color: #fff !important; background: #1675E8 !important; box-shadow: 0 5px 12px rgba(22,117,232,.2); }
+.pagination button:disabled { opacity: .4; cursor: not-allowed; }
+@media (max-width: 700px) { .toolbar, .filterRow { align-items: stretch; flex-direction: column; } .sortWrap { justify-content: space-between; padding-top: 4px; } .filterRow { margin-top: 14px; } .viewAndCount { justify-content: space-between; flex-wrap: wrap; } .inlineSearchWrap { order: -1; width: 100%; } .catalog :global(.shop-products-grid) { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; } }
+@media (max-width: 640px) { .pagination { gap: 5px; margin-top: 22px; } .pagination button { min-width: 34px; height: 34px; padding: 0 9px; font-size: 12px; } }

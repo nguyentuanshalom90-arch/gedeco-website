@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation';
 import { ContactActions } from './components/contact-actions';
 import { LanguageSwitcher } from './components/language-switcher';
 import { ProductCarousel } from './components/product-carousel';
+import { InnerFooter } from './components/inner-pages';
 
 type IconName = 'globe' | 'handshake' | 'chart' | 'people' | 'box' | 'ship' | 'truck' | 'building' | 'globeAlt' | 'handshakeAlt' | 'team' | 'search' | 'phone' | 'mail' | 'pin' | 'arrow' | 'chevron' | 'facebook' | 'music' | 'youtube' | 'linkedin';
 
@@ -53,12 +54,6 @@ const news = [
 ];
 
 const defaultHeroBanners = ['/assets/banner-1.jpg', '/assets/banner-2.jpg'];
-function HomeFooter({ chrome }: { chrome: Record<string, ChromeValue> }) {
-  const get = (key: string, fallback: string) => chrome[key]?.value || fallback;
-  const getUrl = (key: string, fallback: string) => chrome[key]?.url || fallback;
-  return <footer className="footer"><div className="container footer-grid home-footer-grid"><div className="footer-brand"><img src={chrome['brand.logo']?.imageUrl || '/assets/logo-new-footer.png'} alt={chrome['brand.logo']?.altText || 'GEDECO'} /><p>{get('brand.company', 'CÔNG TY CỔ PHẦN GEDECO')}<br /><i>{get('brand.tagline', 'GEDECO CORPORATION')}</i></p><div className="socials"><a aria-label="Facebook" href={getUrl('social.facebook', 'https://www.facebook.com/www.gedeco.tra.thuong.hang')}><Icon name="facebook" /></a><a aria-label="YouTube" href={getUrl('social.youtube', '#')}><Icon name="youtube" /></a></div></div><div><h3>THÔNG TIN LIÊN HỆ</h3><a href={getUrl('contact.phone', 'tel:0914943653')}><Icon name="phone" />0914 94 3653</a><a href={getUrl('contact.email', 'mailto:info@gedeco.vn')}><Icon name="mail" />info@gedeco.vn</a><a href={getUrl('contact.address', '#contact')}><Icon name="pin" />Trụ sở: Tầng 14, Tòa nhà Đa năng, số 169 Nguyễn Ngọc Vũ, P. Yên Hòa, TP. Hà Nội, Việt Nam</a><span className="footer-note">Liên hệ CV: Số 60 Trung Kính</span></div><div><h3>LIÊN KẾT NHANH</h3><a href="#about">Giới thiệu</a><a href="/san-pham">Sản phẩm</a><a href="/tin-tuc">Tin tức</a><a href="/lien-he">Liên hệ</a></div><div><h3>HỖ TRỢ</h3><a href="/chinh-sach-bao-mat">Chính sách bảo mật thông tin</a><a href="/dieu-khoan-su-dung">Điều khoản sử dụng</a><a href="/chinh-sach-ban-hang">Chính sách bán hàng/giao dịch</a></div></div><div className="container footer-bottom"><span>Mã số doanh nghiệp: 0109613491</span><span>{get('legal.copyright', '© 2025 GEDECO. All rights reserved.')}</span></div></footer>;
-}
-
 export default function HomePage() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [heroSlide, setHeroSlide] = useState(0);
@@ -136,6 +131,6 @@ export default function HomePage() {
       <section className="news section-dark" id="news"><div className="container news-grid" aria-live="polite" onMouseEnter={() => setNewsPaused(true)} onMouseLeave={() => setNewsPaused(false)} onFocusCapture={() => setNewsPaused(true)} onBlurCapture={() => setNewsPaused(false)}><div className="news-intro"><h2>Tin tức nổi bật</h2><p className="news-auto-status">{newsPaused ? 'Đang tạm dừng' : 'Tự động chuyển tin'}</p></div><div className="news-carousel"><div className="news-cards-track" style={{ transform: `translateX(calc(-${newsSlide * 33.333333}% - ${newsSlide * 4.666667}px))` }}>{carouselNews.map(([image, category, date, title], index) => <article className="news-card" key={`${title}-${index}`}><picture><source srcSet={`/assets/${image.replace('.png', '.optimized.webp')}`} type="image/webp" /><img src={`/assets/${image}`} alt={title} /></picture><small>{category}<span>{date}</span></small><h3>{title}</h3><a href="/tin-tuc">Đọc thêm <Icon name="arrow" /></a></article>)}</div><div className="news-controls" aria-label="Điều hướng tin tức"><button type="button" aria-label="Tin trước" onClick={() => setNewsSlide((current) => current === 0 ? news.length - 1 : current - 1)}><Icon name="chevron" className="chevron-left" /></button><button type="button" aria-label="Tin sau" onClick={() => setNewsSlide((current) => current + 1)}><Icon name="chevron" /></button></div></div></div></section>
     </main>
 
-    <HomeFooter chrome={chrome} /><ContactActions />
+    <InnerFooter /><ContactActions />
   </>;
 }

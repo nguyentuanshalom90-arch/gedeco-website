@@ -11,6 +11,7 @@ type BimiSidebarProps = {
 const navItems: Array<{ id: DashboardTab; label: string; icon: string }> = [
   { id: "overview", label: "Tổng quan", icon: "home" },
   { id: "posts", label: "Quản lý bài viết", icon: "feather" },
+  { id: "products", label: "Quản lý sản phẩm", icon: "box" },
   { id: "content", label: "Quản lý body", icon: "layers" },
   { id: "chrome", label: "Quản lý header & footer", icon: "grid" },
   { id: "payment", label: "Thanh toán", icon: "creditCard" },
