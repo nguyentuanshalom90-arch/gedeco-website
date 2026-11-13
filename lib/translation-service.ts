@@ -93,10 +93,12 @@ async function translateText(text: string, config: TranslationProviderConfig) {
     return payload.data?.translations?.[0]?.translatedText || text;
   }
 
+  const form = new URLSearchParams({ q: text, source: "vi", target: "en", format: "text" });
+  if (config.key) form.set("api_key", config.key);
   const response = await fetch(`${config.baseUrl}/translate`, {
     method: "POST",
-    headers: { "content-type": "application/json" },
-    body: JSON.stringify({ q: text, source: "vi", target: "en", format: "text", ...(config.key ? { api_key: config.key } : {}) }),
+    headers: { "content-type": "application/x-www-form-urlencoded" },
+    body: form.toString(),
     cache: "no-store",
     signal: AbortSignal.timeout(30_000),
   });
@@ -108,10 +110,12 @@ async function translateText(text: string, config: TranslationProviderConfig) {
 async function translateHtml(html: string, config: TranslationProviderConfig) {
   if (!html.trim()) return html;
   if (config.provider === "libretranslate") {
+    const form = new URLSearchParams({ q: html, source: "vi", target: "en", format: "html" });
+    if (config.key) form.set("api_key", config.key);
     const response = await fetch(`${config.baseUrl}/translate`, {
       method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ q: html, source: "vi", target: "en", format: "html", ...(config.key ? { api_key: config.key } : {}) }),
+      headers: { "content-type": "application/x-www-form-urlencoded" },
+      body: form.toString(),
       cache: "no-store",
       signal: AbortSignal.timeout(30_000),
     });
