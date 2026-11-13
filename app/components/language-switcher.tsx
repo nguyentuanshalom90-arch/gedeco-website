@@ -15,7 +15,16 @@ function UnitedKingdomFlag() {
 export function LanguageSwitcher({ english = false }: { english?: boolean }) {
   const pathname = usePathname() || '/';
   const [queryString, setQueryString] = useState('');
-  useEffect(() => { setQueryString(window.location.search); }, [pathname]);
+  useEffect(() => {
+    const syncQuery = () => setQueryString(window.location.search);
+    syncQuery();
+    window.addEventListener('popstate', syncQuery);
+    window.addEventListener('gedeco:product-category', syncQuery);
+    return () => {
+      window.removeEventListener('popstate', syncQuery);
+      window.removeEventListener('gedeco:product-category', syncQuery);
+    };
+  }, [pathname]);
   const routeMap: Record<string, string> = { '/gioi-thieu': '/about', '/tin-tuc/danh-muc': '/news/category', '/tin-tuc': '/news', '/du-an': '/projects', '/doi-tac': '/partners', '/lien-he': '/contact', '/san-pham': '/products', '/chinh-sach-bao-mat': '/privacy-policy', '/dieu-khoan-su-dung': '/terms-of-use', '/chinh-sach-ban-hang': '/sales-policy' };
   const translatePath = (path: string, toEnglish: boolean) => { const entries = Object.entries(routeMap); const match = entries.find(([vi, en]) => path === (toEnglish ? vi : en) || path.startsWith(`${toEnglish ? vi : en}/`)); if (!match) return path; const from = toEnglish ? match[0] : match[1]; const to = toEnglish ? match[1] : match[0]; return `${to}${path.slice(from.length)}`; };
   const basePath = pathname.replace(/^\/en(?=\/|$)/, '') || '/';
