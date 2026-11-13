@@ -13,7 +13,7 @@ function chunkProducts(items: GedecoProduct[]) {
   return Array.from({ length: Math.ceil(items.length / pageSize) }, (_, page) => items.slice(page * pageSize, page * pageSize + pageSize));
 }
 
-export function ProductCarousel({ items = gedecoProducts, compact = false }: { items?: GedecoProduct[]; compact?: boolean }) {
+export function ProductCarousel({ items = gedecoProducts, compact = false, language = 'vi' }: { items?: GedecoProduct[]; compact?: boolean; language?: 'vi' | 'en' }) {
   const [databaseItems, setDatabaseItems] = useState<GedecoProduct[] | null>(null);
   useEffect(() => { fetch('/api/products?category=all').then((response) => response.ok ? response.json() : null).then((payload) => { if (payload?.items) setDatabaseItems(payload.items); }).catch(() => undefined); }, []);
   const displayItems = databaseItems?.length ? databaseItems : items;
@@ -34,7 +34,7 @@ export function ProductCarousel({ items = gedecoProducts, compact = false }: { i
   const goTo = (nextPage: number) => setPage((nextPage + pages.length) % pages.length);
   const renderCard = (product: GedecoProduct, cardIndex: number, key: string) => {
     const slug = product.slug || gedecoProductDetails.find((detail) => detail.title === product.title)?.slug;
-    return <ShopProductCard key={key} className={hoveredCard === cardIndex ? 'is-hovered' : ''} product={{ slug: slug || '', title: product.title, category: product.category, image: product.image }} onMouseEnter={() => setHoveredCard(cardIndex)} onFocus={() => setHoveredCard(cardIndex)} />;
+    return <ShopProductCard key={key} className={hoveredCard === cardIndex ? 'is-hovered' : ''} language={language} product={{ slug: slug || '', title: product.title, category: product.category, image: product.image }} onMouseEnter={() => setHoveredCard(cardIndex)} onFocus={() => setHoveredCard(cardIndex)} />;
   };
 
   if (compact) return <div className={`product-carousel product-carousel-compact${hoveredCard !== null ? ' has-hover' : ''}`} onMouseEnter={pause} onMouseLeave={resume}>

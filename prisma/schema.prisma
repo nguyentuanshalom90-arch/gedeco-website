@@ -147,6 +147,7 @@ model TranslationEntry {
 enum TranslationEntity {
   PRODUCT
   NEWS_ARTICLE
+  SITE_PAGE
   SITE_CONTENT
   SITE_CHROME
 }
@@ -174,6 +175,25 @@ model ProductMedia {
 enum ProductCategory {
   DOMESTIC
   EXPORT
+}
+
+model SitePage {
+  id              String       @id @default(cuid())
+  slug            String       @unique
+  name            String
+  title           String
+  excerpt         String?
+  sections        Json
+  metaTitle       String?
+  metaDescription String?
+  canonicalUrl    String?
+  robotsIndex     Boolean      @default(true)
+  robotsFollow    Boolean      @default(true)
+  status          ArticleStatus @default(DRAFT)
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  @@index([status, updatedAt])
 }
 
 model SiteContentPage {

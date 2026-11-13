@@ -130,7 +130,7 @@ export function ProductCatalog({ items, initialCategory, language = 'vi' }: { it
   const localItems = useMemo(() => {
     const normalizedQuery = query.trim().toLocaleLowerCase('vi-VN');
     const filtered = items.filter((item) => {
-      const matchesCategory = category === 'all' || (category === 'domestic' ? item.category === 'Sản phẩm trong nước' : item.category === 'Sản phẩm xuất khẩu');
+      const matchesCategory = category === 'all' || (category === 'domestic' ? ['Sản phẩm trong nước', 'Domestic products'].includes(item.category) : ['Sản phẩm xuất khẩu', 'Export products'].includes(item.category));
       const matchesQuery = !normalizedQuery || `${item.title} ${item.description}`.toLocaleLowerCase('vi-VN').includes(normalizedQuery);
       return matchesCategory && matchesQuery;
     });

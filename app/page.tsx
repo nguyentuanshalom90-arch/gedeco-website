@@ -54,7 +54,16 @@ const news = [
 ];
 
 const defaultHeroBanners = ['/assets/banner-1.jpg', '/assets/banner-2.jpg'];
-export default function HomePage() {
+type HomeLanguage = 'vi' | 'en';
+
+const homeCopy = {
+  vi: {
+    ariaHome: 'GEDECO trang chủ', menu: 'Mở menu', search: 'Tìm kiếm', home: 'Trang chủ', about: 'Giới thiệu', news: 'Tin tức', products: 'Sản phẩm', contact: 'Liên hệ', domestic: 'Sản phẩm trong nước', export: 'Sản phẩm xuất khẩu', cta: 'Liên hệ ngay', heroEyebrow: 'GEDECO', heroTitle: 'Kết nối nguồn lực\nMở rộng giá trị', heroCopy: 'GEDECO phát triển nguồn hàng Việt Nam và kết nối sản phẩm chất lượng với khách hàng, đối tác trong nước và quốc tế.', explore: 'Khám phá sản phẩm', consult: 'Liên hệ tư vấn', highlights: [['Mở rộng thị trường','Kết nối doanh nghiệp toàn cầu'],['Đối tác tin cậy','Đồng hành phát triển bền vững'],['Giải pháp toàn diện','Từ nguồn hàng đến giao nhận'],['Đồng hành bền vững','Cùng phát triển lâu dài']], aboutTitle: 'CÔNG TY CỔ PHẦN GEDECO', aboutBody: ['Gedeco là một trong những Công ty kinh tế tư nhân đa ngành. Gedeco hoạt động trong 3 lĩnh vực kinh doanh cốt lõi, bao gồm: Nông nghiệp, Công nghiệp, Thương mại Dịch vụ.','Với mong muốn đem đến cho thị trường những sản phẩm – dịch vụ theo tiêu chuẩn quốc tế và những trải nghiệm hoàn toàn mới về phong cách sống hiện đại, ở bất cứ lĩnh vực nào Gedeco cũng chứng tỏ vai trò tiên phong, dẫn dắt sự thay đổi xu hướng tiêu dùng.'], learn: 'Tìm hiểu thêm về GEDECO', projectsTitle: 'Dự án tiêu biểu', projectsAll: 'Xem tất cả dự án →', projectMore: 'Xem chi tiết', productsTitle: 'Sản phẩm nổi bật', productsAll: 'Xem tất cả sản phẩm →', newsTitle: 'Tin tức nổi bật', newsPaused: 'Đang tạm dừng', newsAuto: 'Tự động chuyển tin', prev: 'Tin trước', next: 'Tin sau', read: 'Đọc thêm' },
+  en: {
+    ariaHome: 'GEDECO home', menu: 'Open menu', search: 'Search', home: 'Home', about: 'About', news: 'News', products: 'Products', contact: 'Contact', domestic: 'Domestic products', export: 'Export products', cta: 'Contact us', heroEyebrow: 'GEDECO', heroTitle: 'Connecting resources\nCreating value', heroCopy: 'GEDECO develops Vietnamese sources and connects quality products with customers and partners in Vietnam and worldwide.', explore: 'Explore products', consult: 'Contact us', highlights: [['Expanding markets','Connecting businesses worldwide'],['Trusted partner','Growing together sustainably'],['Complete solutions','From source to delivery'],['Long-term support','Building lasting relationships']], aboutTitle: 'GEDECO CORPORATION', aboutBody: ['GEDECO is a multi-sector private enterprise operating across agriculture, industry and trade services.','We bring internationally aligned products and services to the market while creating modern, practical and sustainable value for customers and partners.'], learn: 'Learn more about GEDECO', projectsTitle: 'Featured projects', projectsAll: 'View all projects →', projectMore: 'View project', productsTitle: 'Featured products', productsAll: 'View all products →', newsTitle: 'Featured news', newsPaused: 'Paused', newsAuto: 'Auto-playing news', prev: 'Previous news', next: 'Next news', read: 'Read more' },
+} as const;
+
+export default function HomePage({ language = 'vi' }: { language?: HomeLanguage }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [heroSlide, setHeroSlide] = useState(0);
   const [newsSlide, setNewsSlide] = useState(0);
@@ -62,6 +71,7 @@ export default function HomePage() {
   const [content, setContent] = useState<Record<string, string>>({});
   const [chrome, setChrome] = useState<Record<string, ChromeValue>>({});
   const pathname = usePathname() || '/';
+  const copy = homeCopy[language];
   useEffect(() => {
     const sections = [...document.querySelectorAll('main section[id]')];
     const links = [...document.querySelectorAll('.main-nav a')];
@@ -86,24 +96,28 @@ export default function HomePage() {
     return () => window.clearTimeout(timer);
   }, [newsSlide]);
   useEffect(() => {
-    fetch('/api/site-content?page=home').then((response) => response.ok ? response.json() : null).then((payload) => {
+    fetch(`/api/site-content?page=home&lang=${language}`).then((response) => response.ok ? response.json() : null).then((payload) => {
       if (payload?.values) setContent({ ...payload.values, ...Object.fromEntries(Object.entries(payload.staticValues || {}).map(([key, value]) => [`static.${key}`, value as string])) });
     }).catch(() => undefined);
   }, []);
   useEffect(() => {
     Promise.all([
-      fetch('/api/site-chrome?area=HEADER').then((response) => response.ok ? response.json() : null),
-      fetch('/api/site-chrome?area=FOOTER').then((response) => response.ok ? response.json() : null),
+      fetch(`/api/site-chrome?area=HEADER&lang=${language}`).then((response) => response.ok ? response.json() : null),
+      fetch(`/api/site-chrome?area=FOOTER&lang=${language}`).then((response) => response.ok ? response.json() : null),
     ]).then(([header, footer]) => setChrome({ ...(header?.values || {}), ...(footer?.values || {}) })).catch(() => undefined);
   }, []);
 
   const closeMenu = () => setMenuOpen(false);
-  const chromeGet = (key: string, fallback: string) => chrome[key]?.value || fallback;
+  const chromeGet = (key: string, fallback: string) => language === 'en' ? fallback : (chrome[key]?.value || fallback);
   const chromeUrl = (key: string, fallback: string) => chrome[key]?.url || fallback;
-  const heroTitle = content['hero.title'] || 'Kết nối nguồn lực\nMở rộng giá trị';
+  const heroTitle = language === 'en' ? copy.heroTitle : (content['hero.title'] || copy.heroTitle);
   const [heroLead, heroAccent = ''] = heroTitle.split(/\r?\n/);
   const heroBanners = [content['hero.banner1'] || defaultHeroBanners[0], content['hero.banner2'] || defaultHeroBanners[1]];
-  const featuredProjects = [
+  const featuredProjects = language === 'en' ? [
+    ['/assets/service-export-derivative.png', 'Agricultural source development', 'Building reliable Vietnamese agricultural sources.'],
+    ['/assets/service-sourcing-derivative.png', 'Tea product cooperation', 'Connecting tea regions, processors and distribution partners.'],
+    ['/assets/news-1-derivative.png', 'Export market connection', 'Supporting businesses as they prepare for new markets.'],
+  ] : [
     [content['projects.1.image'] || '/assets/service-export-derivative.png', content['projects.1.title'] || 'Phát triển nguồn hàng nông sản', content['projects.1.copy'] || 'Xây dựng nguồn hàng Việt Nam có chất lượng và giá trị bền vững.'],
     [content['projects.2.image'] || '/assets/service-sourcing-derivative.png', content['projects.2.title'] || 'Hợp tác sản phẩm trà', content['projects.2.copy'] || 'Kết nối vùng nguyên liệu, đơn vị chế biến và đối tác phân phối.'],
     [content['projects.3.image'] || '/assets/news-1-derivative.png', content['projects.3.title'] || 'Kết nối xuất khẩu', content['projects.3.copy'] || 'Đồng hành cùng doanh nghiệp trong chuẩn bị và mở rộng thị trường.'],
@@ -111,26 +125,26 @@ export default function HomePage() {
   const carouselNews = [...news, ...news];
   return <>
     <header className="site-header" id="top"><div className="nav-shell">
-      <a className="brand" href="#top" aria-label="GEDECO trang chủ"><img src="/assets/logo-new.png" alt={chrome['brand.logo']?.altText || 'GEDECO'} /></a>
-      <button className="menu-toggle" aria-label="Mở menu" aria-expanded={menuOpen} onClick={() => setMenuOpen(!menuOpen)}><span /><span /><span /></button>
+      <a className="brand" href="#top" aria-label={copy.ariaHome}><img src="/assets/logo-new.png" alt={chrome['brand.logo']?.altText || 'GEDECO'} /></a>
+      <button className="menu-toggle" aria-label={copy.menu} aria-expanded={menuOpen} onClick={() => setMenuOpen(!menuOpen)}><span /><span /><span /></button>
       <nav className={`main-nav${menuOpen ? ' open' : ''}`} aria-label="Điều hướng chính">
-        <a className="active" href="#top" onClick={closeMenu}>{chromeGet('navigation.home', 'Trang chủ')}</a>
-        <a href="/gioi-thieu" onClick={closeMenu}>{chromeGet('navigation.about', 'Giới thiệu')}</a>
-        <a href="/tin-tuc" onClick={closeMenu}>{chromeGet('navigation.news', 'Tin tức')}</a>
-        <div className="nav-dropdown"><a href="/san-pham" onClick={closeMenu}>{chromeGet('navigation.products', 'Sản phẩm')} <span className="nav-chevron" aria-hidden="true"><Icon name="chevron" /></span></a><div className="nav-submenu"><a href="/san-pham?category=trong-nuoc" onClick={closeMenu}>Sản phẩm trong nước</a><a href="/san-pham?category=xuat-khau" onClick={closeMenu}>Sản phẩm xuất khẩu</a></div></div>
-        <a href="/lien-he" onClick={closeMenu}>{chromeGet('navigation.contact', 'Liên hệ')}</a>
+        <a className="active" href="#top" onClick={closeMenu}>{chromeGet('navigation.home', copy.home)}</a>
+        <a href={language === 'en' ? '/en/about' : '/gioi-thieu'} onClick={closeMenu}>{chromeGet('navigation.about', copy.about)}</a>
+        <a href={language === 'en' ? '/en/news' : '/tin-tuc'} onClick={closeMenu}>{chromeGet('navigation.news', copy.news)}</a>
+        <div className="nav-dropdown"><a href={language === 'en' ? '/en/products' : '/san-pham'} onClick={closeMenu}>{chromeGet('navigation.products', copy.products)} <span className="nav-chevron" aria-hidden="true"><Icon name="chevron" /></span></a><div className="nav-submenu"><a href={`${language === 'en' ? '/en/products' : '/san-pham'}?category=trong-nuoc`} onClick={closeMenu}>{copy.domestic}</a><a href={`${language === 'en' ? '/en/products' : '/san-pham'}?category=xuat-khau`} onClick={closeMenu}>{copy.export}</a></div></div>
+        <a href={language === 'en' ? '/en/contact' : '/lien-he'} onClick={closeMenu}>{chromeGet('navigation.contact', copy.contact)}</a>
       </nav>
-      <div className="nav-tools"><button className="search-btn" aria-label="Tìm kiếm"><Icon name="search" /></button><LanguageSwitcher /><a className="button button-gold button-small" href={chromeUrl('cta.label', '#contact')}>{chromeGet('cta.label', 'Liên hệ ngay')} <Icon name="arrow" /></a></div>
+      <div className="nav-tools"><button className="search-btn" aria-label={copy.search}><Icon name="search" /></button><LanguageSwitcher /><a className="button button-gold button-small" href={chromeUrl('cta.label', language === 'en' ? '/en/contact' : '#contact')}>{chromeGet('cta.label', copy.cta)} <Icon name="arrow" /></a></div>
     </div></header>
 
     <main id="main-content">
-      <section className="hero section-dark" style={{ backgroundImage: `url('${heroBanners[heroSlide]}')` }}><div className="hero-overlay" /><div className="hero-slide-controls" aria-label="Điều hướng banner hero"><button type="button" aria-label="Banner trước" onClick={() => setHeroSlide((current) => (current - 1 + heroBanners.length) % heroBanners.length)}>‹</button><button type="button" aria-label="Banner tiếp theo" onClick={() => setHeroSlide((current) => (current + 1) % heroBanners.length)}>›</button></div><div className="hero-slide-dots" aria-label="Chuyển banner hero">{heroBanners.map((banner, index) => <button key={banner} type="button" className={heroSlide === index ? 'active' : ''} aria-label={`Banner ${index + 1}`} aria-pressed={heroSlide === index} onClick={() => setHeroSlide(index)} />)}</div><div className="container hero-content"><p className="eyebrow">GEDECO</p><h1>{heroLead}<br /><em>{heroAccent}</em></h1><p className="hero-copy">{content['hero.copy'] || 'GEDECO phát triển nguồn hàng Việt Nam và kết nối sản phẩm chất lượng với khách hàng, đối tác trong nước và quốc tế.'}</p><div className="hero-actions"><a className="button button-gold" href="/san-pham">Khám phá sản phẩm <Icon name="arrow" /></a><a className="button button-outline" href="/lien-he">Liên hệ tư vấn</a></div><div className="hero-highlights"><div><span className="highlight-icon"><Icon name="globe" /></span><div><strong>Mở rộng thị trường</strong><small>Kết nối doanh nghiệp toàn cầu</small></div></div><div><span className="highlight-icon"><Icon name="handshake" /></span><div><strong>Đối tác tin cậy</strong><small>Đồng hành phát triển bền vững</small></div></div><div><span className="highlight-icon"><Icon name="chart" /></span><div><strong>Giải pháp toàn diện</strong><small>Từ nguồn hàng đến giao nhận</small></div></div><div><span className="highlight-icon"><Icon name="people" /></span><div><strong>Đồng hành bền vững</strong><small>Cùng phát triển lâu dài</small></div></div></div></div></section>
-      <section className="about" id="about"><div className="container about-grid"><div className="about-image"><img src="/assets/banner-2.jpg" alt="Sản phẩm và hoạt động thương mại của GEDECO" /></div><div className="about-copy"><h2>CÔNG TY CỔ PHẦN GEDECO</h2><p>Gedeco là một trong những Công ty kinh tế tư nhân đa ngành. Gedeco hoạt động trong 3 lĩnh vực kinh doanh cốt lõi, bao gồm: Nông nghiệp, Công nghiệp, Thương mại Dịch vụ.</p><p>Với mong muốn đem đến cho thị trường những sản phẩm – dịch vụ theo tiêu chuẩn quốc tế và những trải nghiệm hoàn toàn mới về phong cách sống hiện đại, ở bất cứ lĩnh vực nào Gedeco cũng chứng tỏ vai trò tiên phong, dẫn dắt sự thay đổi xu hướng tiêu dùng.</p><a className="button button-gold" href="/gioi-thieu">Tìm hiểu thêm về GEDECO <Icon name="arrow" /></a></div></div></section>
-      <section className="home-projects"><div className="container"><div className="partner-head"><div><h2>Dự án tiêu biểu</h2></div><a href="/du-an">Xem tất cả dự án →</a></div><div className="home-project-grid">{featuredProjects.map(([image,title,copy])=><article key={title}><img src={image} alt={title}/><div><h3>{title}</h3><p>{copy}</p><a href="/du-an">Xem chi tiết <Icon name="arrow" /></a></div></article>)}</div></div></section>
-      <section className="home-products" id="products"><div className="container"><div className="partner-head"><div><h2>Sản phẩm nổi bật</h2></div><a href="/san-pham">Xem tất cả sản phẩm →</a></div><ProductCarousel compact /></div></section>
-      <section className="news section-dark" id="news"><div className="container news-grid" aria-live="polite" onMouseEnter={() => setNewsPaused(true)} onMouseLeave={() => setNewsPaused(false)} onFocusCapture={() => setNewsPaused(true)} onBlurCapture={() => setNewsPaused(false)}><div className="news-intro"><h2>Tin tức nổi bật</h2><p className="news-auto-status">{newsPaused ? 'Đang tạm dừng' : 'Tự động chuyển tin'}</p></div><div className="news-carousel"><div className="news-cards-track" style={{ transform: `translateX(calc(-${newsSlide * 33.333333}% - ${newsSlide * 4.666667}px))` }}>{carouselNews.map(([image, category, date, title], index) => <article className="news-card" key={`${title}-${index}`}><picture><source srcSet={`/assets/${image.replace('.png', '.optimized.webp')}`} type="image/webp" /><img src={`/assets/${image}`} alt={title} /></picture><small>{category}<span>{date}</span></small><h3>{title}</h3><a href="/tin-tuc">Đọc thêm <Icon name="arrow" /></a></article>)}</div><div className="news-controls" aria-label="Điều hướng tin tức"><button type="button" aria-label="Tin trước" onClick={() => setNewsSlide((current) => current === 0 ? news.length - 1 : current - 1)}><Icon name="chevron" className="chevron-left" /></button><button type="button" aria-label="Tin sau" onClick={() => setNewsSlide((current) => current + 1)}><Icon name="chevron" /></button></div></div></div></section>
+      <section className="hero section-dark" style={{ backgroundImage: `url('${heroBanners[heroSlide]}')` }}><div className="hero-overlay" /><div className="hero-slide-controls" aria-label={copy.newsTitle}><button type="button" aria-label={copy.prev} onClick={() => setHeroSlide((current) => (current - 1 + heroBanners.length) % heroBanners.length)}>‹</button><button type="button" aria-label={copy.next} onClick={() => setHeroSlide((current) => (current + 1) % heroBanners.length)}>›</button></div><div className="hero-slide-dots" aria-label={copy.newsTitle}>{heroBanners.map((banner, index) => <button key={banner} type="button" className={heroSlide === index ? 'active' : ''} aria-label={`Banner ${index + 1}`} aria-pressed={heroSlide === index} onClick={() => setHeroSlide(index)} />)}</div><div className="container hero-content"><p className="eyebrow">{copy.heroEyebrow}</p><h1>{heroLead}<br /><em>{heroAccent}</em></h1><p className="hero-copy">{language === 'en' ? copy.heroCopy : (content['hero.copy'] || copy.heroCopy)}</p><div className="hero-actions"><a className="button button-gold" href={language === 'en' ? '/en/products' : '/san-pham'}>{copy.explore} <Icon name="arrow" /></a><a className="button button-outline" href={language === 'en' ? '/en/contact' : '/lien-he'}>{copy.consult}</a></div><div className="hero-highlights">{copy.highlights.map(([title, description], index) => <div key={title}><span className="highlight-icon"><Icon name={(['globe','handshake','chart','people'] as const)[index]} /></span><div><strong>{title}</strong><small>{description}</small></div></div>)}</div></div></section>
+      <section className="about" id="about"><div className="container about-grid"><div className="about-image"><img src="/assets/banner-2.jpg" alt={copy.aboutTitle} /></div><div className="about-copy"><h2>{copy.aboutTitle}</h2><p>{copy.aboutBody[0]}</p><p>{copy.aboutBody[1]}</p><a className="button button-gold" href={language === 'en' ? '/en/about' : '/gioi-thieu'}>{copy.learn} <Icon name="arrow" /></a></div></div></section>
+      <section className="home-projects"><div className="container"><div className="partner-head"><div><h2>{copy.projectsTitle}</h2></div><a href={language === 'en' ? '/en/projects' : '/du-an'}>{copy.projectsAll}</a></div><div className="home-project-grid">{featuredProjects.map(([image,title,projectCopy])=><article key={title}><img src={image} alt={title}/><div><h3>{title}</h3><p>{projectCopy}</p><a href={language === 'en' ? '/en/projects' : '/du-an'}>{copy.projectMore} <Icon name="arrow" /></a></div></article>)}</div></div></section>
+      <section className="home-products" id="products"><div className="container"><div className="partner-head"><div><h2>{copy.productsTitle}</h2></div><a href={language === 'en' ? '/en/products' : '/san-pham'}>{copy.productsAll}</a></div><ProductCarousel compact language={language} /></div></section>
+      <section className="news section-dark" id="news"><div className="container news-grid" aria-live="polite" onMouseEnter={() => setNewsPaused(true)} onMouseLeave={() => setNewsPaused(false)} onFocusCapture={() => setNewsPaused(true)} onBlurCapture={() => setNewsPaused(false)}><div className="news-intro"><h2>{copy.newsTitle}</h2><p className="news-auto-status">{newsPaused ? copy.newsPaused : copy.newsAuto}</p></div><div className="news-carousel"><div className="news-cards-track" style={{ transform: `translateX(calc(-${newsSlide * 33.333333}% - ${newsSlide * 4.666667}px))` }}>{carouselNews.map(([image, category, date, title], index) => <article className="news-card" key={`${title}-${index}`}><picture><source srcSet={`/assets/${image.replace('.png', '.optimized.webp')}`} type="image/webp" /><img src={`/assets/${image}`} alt={title} /></picture><small>{category}<span>{date}</span></small><h3>{title}</h3><a href={language === 'en' ? '/en/news' : '/tin-tuc'}>{copy.read} <Icon name="arrow" /></a></article>)}</div><div className="news-controls" aria-label={copy.newsTitle}><button type="button" aria-label={copy.prev} onClick={() => setNewsSlide((current) => current === 0 ? news.length - 1 : current - 1)}><Icon name="chevron" className="chevron-left" /></button><button type="button" aria-label={copy.next} onClick={() => setNewsSlide((current) => current + 1)}><Icon name="chevron" /></button></div></div></div></section>
     </main>
 
-    <InnerFooter /><ContactActions />
+    <InnerFooter language={language} /><ContactActions />
   </>;
 }

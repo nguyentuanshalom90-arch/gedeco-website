@@ -1,4 +1,5 @@
 import crypto from "node:crypto";
+import type { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 
 type TranslationPayload = Record<string, string>;
@@ -38,6 +39,17 @@ type SimpleContentSource = {
   h1?: string;
   metaTitle?: string;
   metaDescription?: string;
+  updatedAt: Date;
+};
+
+export type SitePageSource = {
+  id: string;
+  slug: string;
+  title: string;
+  excerpt: string | null;
+  sections: unknown;
+  metaTitle: string | null;
+  metaDescription: string | null;
   updatedAt: Date;
 };
 
@@ -164,7 +176,7 @@ export async function translateArticle(source: ArticleSource) {
   return { provider: config.provider, payload: { title, category, excerpt, content, metaTitle, metaDescription, focusKeyword, tags: JSON.stringify(tags) }, slug: slugify(title) };
 }
 
-type TranslationEntityType = "PRODUCT" | "NEWS_ARTICLE" | "SITE_CONTENT" | "SITE_CHROME";
+type TranslationEntityType = "PRODUCT" | "NEWS_ARTICLE" | "SITE_PAGE" | "SITE_CONTENT" | "SITE_CHROME";
 
 async function saveFailure(entityType: TranslationEntityType, entityId: string, sourceUpdatedAt: Date, sourceHash: string, errorMessage: string) {
   return prisma.translationEntry.upsert({
@@ -238,5 +250,46 @@ export async function syncArticleTranslation(source: ArticleSource) {
     });
   } catch (error) {
     return saveFailure("NEWS_ARTICLE", source.id, source.updatedAt, sourceHash, error instanceof Error ? error.message : "Unknown translation error.");
+  }
+}
+
+const nonTranslatableKeys = new Set(["type", "id", "slug", "href", "url", "image", "imageUrl", "src", "altText"]);
+
+async function translatePageValue(value: unknown, config: TranslationProviderConfig, key?: string): Promise<unknown> {
+  if (typeof value === "string") return key && nonTranslatableKeys.has(key) ? value : translateText(value, config);
+  if (Array.isArray(value)) return Promise.all(value.map((item) => translatePageValue(item, config)));
+  if (value && typeof value === "object") {
+    const entries = await Promise.all(Object.entries(value as Record<string, unknown>).map(async ([entryKey, entryValue]) => [entryKey, await translatePageValue(entryValue, config, entryKey)] as const));
+    return Object.fromEntries(entries);
+  }
+  return value;
+}
+
+export async function translateSitePage(source: SitePageSource) {
+  const config = getProviderConfig();
+  const [title, excerpt, metaTitle, metaDescription, sections] = await Promise.all([
+    translateText(source.title, config),
+    translateText(source.excerpt || "", config),
+    translateText(source.metaTitle || source.title, config),
+    translateText(source.metaDescription || source.excerpt || "", config),
+    translatePageValue(source.sections, config),
+  ]);
+  return { provider: config.provider, payload: { title, excerpt, metaTitle, metaDescription, sections: sections as Prisma.InputJsonValue }, slug: source.slug };
+}
+
+export async function syncSitePageTranslation(source: SitePageSource) {
+  const sourceHash = hashSource({ slug: source.slug, title: source.title, excerpt: source.excerpt, sections: source.sections, metaTitle: source.metaTitle, metaDescription: source.metaDescription });
+  const current = await prisma.translationEntry.findUnique({ where: { entityType_entityId_locale: { entityType: "SITE_PAGE", entityId: source.id, locale: "en" } } });
+  if (current?.sourceHash === sourceHash && current.status === "TRANSLATED") return current;
+  if (current?.manualOverride) return prisma.translationEntry.update({ where: { id: current.id }, data: { sourceUpdatedAt: source.updatedAt, sourceHash, status: "NEEDS_REVIEW", errorMessage: null } });
+  try {
+    const translated = await translateSitePage(source);
+    return prisma.translationEntry.upsert({
+      where: { entityType_entityId_locale: { entityType: "SITE_PAGE", entityId: source.id, locale: "en" } },
+      create: { entityType: "SITE_PAGE", entityId: source.id, locale: "en", slug: translated.slug, payload: translated.payload, sourceUpdatedAt: source.updatedAt, sourceHash, status: "TRANSLATED", provider: translated.provider, translatedAt: new Date() },
+      update: { slug: translated.slug, payload: translated.payload, sourceUpdatedAt: source.updatedAt, sourceHash, status: "TRANSLATED", provider: translated.provider, errorMessage: null, translatedAt: new Date() },
+    });
+  } catch (error) {
+    return saveFailure("SITE_PAGE", source.id, source.updatedAt, sourceHash, error instanceof Error ? error.message : "Unknown translation error.");
   }
 }

@@ -28,7 +28,7 @@ export default async function NewsPage({ searchParams }: { searchParams: Promise
   const params = await searchParams;
   const requestedPage = Number.parseInt(params.trang || "1", 10);
   const currentPage = Number.isFinite(requestedPage) && requestedPage > 0 ? requestedPage : 1;
-  const pageSize = 3;
+  const pageSize = 9;
   const [articles, categories, content] = await Promise.all([
     prisma.newsArticle.findMany({
       where: {
@@ -64,9 +64,6 @@ export default async function NewsPage({ searchParams }: { searchParams: Promise
     href: `/tin-tuc/${article.slug}`,
     excerpt: article.excerpt || "",
   }));
-  const pageCount = Math.max(1, Math.ceil(cmsItemsAll.length / pageSize));
-  const safePage = Math.min(currentPage, pageCount);
-  const cmsItems = cmsItemsAll.slice((safePage - 1) * pageSize, safePage * pageSize);
   const fallbackItems = innerNews.concat(innerNews).map((item, index) => ({
     item: [item[0], item[1], item[2], index < innerNews.length ? item[3] : [
       "Logistics xanh – Xu hướng tất yếu hướng tới phát triển bền vững",
@@ -76,8 +73,11 @@ export default async function NewsPage({ searchParams }: { searchParams: Promise
     href: "/tin-tuc/chi-tiet",
     excerpt: "Cập nhật những chuyển động mới của thị trường và các giải pháp giúp doanh nghiệp nâng cao năng lực cạnh tranh.",
   }));
-  const displayItems = (cmsItems.length ? cmsItems : fallbackItems).slice(0, 7);
-  const featured = displayItems[0];
+  const fallbackOnly = fallbackItems.filter(({ item }) => !cmsItemsAll.some(({ item: cmsItem }) => cmsItem[3] === item[3]));
+  const allItems = cmsItemsAll.length ? [...cmsItemsAll, ...fallbackOnly] : fallbackItems;
+  const pageCount = Math.max(1, Math.ceil(allItems.length / pageSize));
+  const safePage = Math.min(currentPage, pageCount);
+  const displayItems = allItems.slice((safePage - 1) * pageSize, safePage * pageSize);
   return (
     <InnerPage active="Tin tức" pageClass="news-design">
       <InnerHero
@@ -85,33 +85,6 @@ export default async function NewsPage({ searchParams }: { searchParams: Promise
         title={content.values["hero.title"] || "Cập nhật xu hướng, kết nối cơ hội"}
         subtitle={content.values["hero.subtitle"] || "Những thông tin mới nhất về thị trường, hợp tác và hoạt động của GEDECO."}
       />
-      <section className="news-feature">
-        <div className="container inner-split">
-          <div className="inner-image">
-            <img
-              src={featured?.item[0] || "/assets/news-1-derivative.png"}
-              alt={featured?.item[3] || innerNews[0]?.[3] || ""}
-            />
-          </div>
-          <div>
-            <p className="eyebrow gold-text">
-              {featured?.item[1] || innerNews[0]?.[1]} ·{" "}
-              {featured?.item[2] || innerNews[0]?.[2]}
-            </p>
-            <h2>{featured?.item[3] || innerNews[0]?.[3]}</h2>
-            <p>
-              {featured?.excerpt ||
-                "Doanh nghiệp Việt đang có thêm nhiều cơ hội tiếp cận thị trường quốc tế. Cùng GEDECO cập nhật xu hướng và chuẩn bị tốt hơn cho hành trình mở rộng kinh doanh."}
-            </p>
-            <a
-              className="button button-gold"
-              href={featured?.href || "/tin-tuc/chi-tiet"}
-            >
-              Đọc chi tiết <Icon name="arrow" />
-            </a>
-          </div>
-        </div>
-      </section>
       <section className="inner-news-list">
         <div className="container">
           <div className="inner-title">
@@ -128,15 +101,14 @@ export default async function NewsPage({ searchParams }: { searchParams: Promise
               </a>
             ))}
           </nav>
-          <div className="news-content-layout"><div className="inner-news-grid">
-            {displayItems.slice(1).map(({ item, href }, index) => (
-              <NewsCard key={`${href}-${index}`} item={item} href={href} />
+          <div className="news-three-column-grid">
+            {displayItems.map(({ item, href, excerpt }, index) => (
+              <NewsCard key={`${href}-${index}`} item={item} href={href} excerpt={excerpt} />
             ))}
-          </div><aside className="news-sidebar"><div className="side-box"><h3>Xu hướng & phân tích nổi bật</h3>{displayItems.slice(1,4).map(({item},index)=><div className="mini-news" key={`${item[3]}-mini-${index}`}><img src={item[0].startsWith('/') ? item[0] : `/assets/${item[0]}`} alt="" /><b>{item[3]}</b></div>)}</div><div className="side-box topic-box"><h3>Tin theo chủ đề</h3>{['Thị trường logistics','Chuỗi cung ứng','Vận tải quốc tế','Kiến thức & chia sẻ','Hoạt động GEDECO'].map((label,index)=><p key={label}><span>{label}</span><b>{[42,28,36,24,18][index]}</b></p>)}</div><div className="market-report"><p className="eyebrow">BÁO CÁO THỊ TRƯỜNG</p><h3>Toàn cảnh Logistics 2025</h3><p>Nhận báo cáo phân tích xu hướng, đánh giá thị trường và khuyến nghị.</p><a className="button button-gold" href="/lien-he">Tải báo cáo ngay</a></div></aside></div>
+          </div>
           {pageCount > 1 && <nav className="news-pagination" aria-label="Phân trang tin tức">{safePage > 1 && <a href={`/tin-tuc?trang=${safePage - 1}`}>← Trang trước</a>}<span>Trang {safePage} / {pageCount}</span>{safePage < pageCount && <a href={`/tin-tuc?trang=${safePage + 1}`}>Trang sau →</a>}</nav>}
         </div>
       </section>
-      <section className="news-subscribe"><div className="container"><p className="eyebrow">CẬP NHẬT TIN TỨC TỪ GEDECO</p><h2>Đăng ký nhận bản tin</h2><p>Nhận các bài viết mới nhất về thị trường, xu hướng logistics và giải pháp dành cho doanh nghiệp.</p><form><input type="email" aria-label="Email của bạn" placeholder="Nhập email của bạn" /><button className="button button-gold" type="button">Đăng ký ngay <Icon name="arrow" /></button></form></div></section>
       <CTA
         title="Đừng bỏ lỡ những cơ hội mới"
         text="Đăng ký nhận thông tin từ GEDECO để luôn cập nhật những chuyển động quan trọng của thị trường."

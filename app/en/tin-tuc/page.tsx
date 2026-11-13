@@ -1,7 +1,38 @@
 import { EnglishPage } from '../../components/english-pages';
-import { redirect } from 'next/navigation';
-import { CTA, Icon, InnerHero } from '../../components/inner-pages';
-const items = [['news-1-derivative.png','SOURCE DEVELOPMENT','Vietnamese agricultural products and international markets','Businesses have more opportunities to reach international customers.'],['news-2-derivative.png','COOPERATION','Connecting manufacturers with the right partners','Quality, transparency and shared goals are the basis of long-term cooperation.'],['news-3-derivative.png','PRODUCTS','Quality and transparency in commercial cooperation','From product requirements to market opportunities, preparation matters.']];
-function EnglishNewsPage() { const [featured, ...rest] = items; return <EnglishPage active="News"><InnerHero eyebrow="NEWS & INSIGHTS" title="GEDECO news" subtitle="Market updates, Vietnamese products and cooperation opportunities" /><section className="news-feature"><div className="container inner-split"><div className="inner-image"><img src={`/assets/${featured[0]}`} alt={featured[2]} /></div><div><p className="eyebrow gold-text">{featured[1]} · 2025</p><h2>{featured[2]}</h2><p>{featured[3]}</p><a className="button button-gold" href="/en/news/market-opportunities">Read the article <Icon name="arrow" /></a></div></div></section><section className="inner-news-list"><div className="container"><div className="inner-title"><p className="eyebrow gold-text">LATEST UPDATES</p><h2>Information for better cooperation</h2></div><nav className="news-filters" aria-label="Article categories"><a className="active" href="/en/news">All</a><a href="/en/news">Market</a><a href="/en/news">Supply chain</a><a href="/en/news">Cooperation</a></nav><div className="news-content-layout"><div className="inner-news-grid">{rest.map(([image,category,title,copy]) => <article className="inner-news-card" key={title}><img src={`/assets/${image}`} alt={title} /><small>{category} <span>2025</span></small><h3>{title}</h3><p>{copy}</p><a href="/en/news/market-opportunities">Read more <Icon name="arrow" /></a></article>)}</div><aside className="news-sidebar"><div className="side-box"><h3>Featured insights</h3>{rest.map(([image,,title]) => <div className="mini-news" key={title}><img src={`/assets/${image}`} alt="" /><b>{title}</b></div>)}</div><div className="side-box topic-box"><h3>Topics</h3>{['Logistics markets','Supply chain','International transport','Knowledge & insights','GEDECO activities'].map((label,index) => <p key={label}><span>{label}</span><b>{[42,28,36,24,18][index]}</b></p>)}</div><div className="market-report"><p className="eyebrow">MARKET REPORT</p><h3>Logistics outlook 2025</h3><p>Receive analysis and practical recommendations for your market.</p><a className="button button-gold" href="/en/contact">Request the report</a></div></aside></div></div></section><section className="news-subscribe"><div className="container"><p className="eyebrow">GEDECO NEWSLETTER</p><h2>Stay informed</h2><p>Receive updates about markets, supply chains and business solutions.</p><form><input type="email" aria-label="Your email" placeholder="Enter your email" /><button className="button button-gold" type="button">Subscribe <Icon name="arrow" /></button></form></div></section><CTA language="en" title="Do not miss new opportunities" text="Stay connected with GEDECO and follow important market developments." /></EnglishPage>; }
+import { CTA, InnerHero, NewsCard } from '../../components/inner-pages';
+
+const items = [
+  ['news-1-derivative.png', 'SOURCE DEVELOPMENT', 'Vietnamese agricultural products and international markets', 'Businesses have more opportunities to reach international customers.'],
+  ['news-2-derivative.png', 'COOPERATION', 'Connecting manufacturers with the right partners', 'Quality, transparency and shared goals are the basis of long-term cooperation.'],
+  ['news-3-derivative.png', 'PRODUCTS', 'Quality and transparency in commercial cooperation', 'From product requirements to market opportunities, preparation matters.'],
+  ['news-1-derivative.png', 'MARKET', 'New opportunities for Vietnamese products', 'Market insights help businesses prepare better for international demand.'],
+  ['news-2-derivative.png', 'SUPPLY CHAIN', 'Building a more reliable supply chain', 'Clear standards and close coordination create sustainable value.'],
+  ['news-3-derivative.png', 'INSIGHTS', 'Practical knowledge for business growth', 'Useful information supports confident commercial decisions.'],
+  ['news-1-derivative.png', 'EXPORT', 'Preparing products for international markets', 'Clear product information and reliable delivery plans help partners move forward.'],
+  ['news-2-derivative.png', 'PARTNERSHIP', 'Finding the right cooperation model', 'The right partners create stronger and more sustainable commercial opportunities.'],
+  ['news-3-derivative.png', 'LOGISTICS', 'Planning a more efficient delivery journey', 'Practical logistics planning supports better service and long-term growth.'],
+  ['news-1-derivative.png', 'QUALITY', 'Quality information builds market confidence', 'Consistent product standards make international cooperation more predictable.'],
+  ['news-2-derivative.png', 'TRADE', 'From Vietnamese sources to global buyers', 'A clear commercial story helps the right products reach the right markets.'],
+  ['news-3-derivative.png', 'NETWORK', 'Growing through trusted connections', 'Long-term partnerships start with shared expectations and transparent communication.'],
+];
+
+async function EnglishNewsPage({ searchParams }: { searchParams: Promise<{ trang?: string }> }) {
+  const params = await searchParams;
+  const requestedPage = Number.parseInt(params.trang || '1', 10);
+  const pageSize = 9;
+  const pageCount = Math.ceil(items.length / pageSize);
+  const safePage = Number.isFinite(requestedPage) && requestedPage > 0 ? Math.min(requestedPage, pageCount) : 1;
+  const pageItems = items.slice((safePage - 1) * pageSize, safePage * pageSize);
+  return <EnglishPage active="News">
+    <InnerHero eyebrow="NEWS & INSIGHTS" title="GEDECO news" subtitle="Market updates, Vietnamese products and cooperation opportunities" />
+    <section className="inner-news-list"><div className="container">
+      <div className="inner-title"><p className="eyebrow gold-text">LATEST UPDATES</p><h2>Information for better cooperation</h2></div>
+      <nav className="news-filters" aria-label="Article categories"><a className="active" href="/en/news">All</a><a href="/en/news">News</a><a href="/en/news">Supply chain</a><a href="/en/news">GEDECO activities</a><a href="/en/news">Cooperation</a><a href="/en/news">Knowledge &amp; insights</a><a href="/en/news">Logistics</a><a href="/en/news">Market</a></nav>
+      <div className="news-three-column-grid">{pageItems.map(([image, category, title, copy]) => <NewsCard key={title} item={[image, category, '2025', title]} excerpt={copy} href="/en/news/market-opportunities" readLabel="Read more" />)}</div>
+      {pageCount > 1 && <nav className="news-pagination" aria-label="News pagination">{safePage > 1 && <a href={`/en/news?trang=${safePage - 1}`}>← Previous</a>}<span>Page {safePage} / {pageCount}</span>{safePage < pageCount && <a href={`/en/news?trang=${safePage + 1}`}>Next →</a>}</nav>}
+    </div></section>
+    <CTA language="en" title="Do not miss new opportunities" text="Stay connected with GEDECO and follow important market developments." />
+  </EnglishPage>;
+}
 
 export default EnglishNewsPage;

@@ -1,14 +1,8 @@
 import type { Metadata } from 'next';
-import { CTA, Icon, InnerHero, InnerPage } from '../components/inner-pages';
+import SharedAboutPage from '../components/about-page';
 
 export const metadata: Metadata = { title: 'Giới thiệu', description: 'Giới thiệu Công ty Cổ phần GEDECO, các lĩnh vực hoạt động và giá trị theo đuổi.', alternates: { canonical: '/gioi-thieu' } };
 
-export default async function AboutPage() {
-  return <InnerPage active="Giới thiệu" pageClass="about-design">
-    <InnerHero eyebrow="GEDECO" title="CÔNG TY CỔ PHẦN GEDECO" subtitle="Doanh nghiệp kinh tế tư nhân đa ngành" />
-    <section className="inner-intro"><div className="container inner-split"><div className="inner-image"><img src="/assets/banner-2.jpg" alt="Hoạt động của Công ty Cổ phần GEDECO" /></div><div><p className="eyebrow gold-text">CÔNG TY CỔ PHẦN GEDECO</p><h2>Doanh nghiệp kinh tế tư nhân đa ngành</h2><p>Gedeco là một trong những Công ty kinh tế tư nhân đa ngành.</p><p>Gedeco hoạt động trong 3 lĩnh vực kinh doanh cốt lõi, bao gồm: Nông nghiệp, Công nghiệp, Thương mại Dịch vụ.</p><p>Với mong muốn đem đến cho thị trường những sản phẩm – dịch vụ theo tiêu chuẩn quốc tế và những trải nghiệm hoàn toàn mới về phong cách sống hiện đại, ở bất cứ lĩnh vực nào Gedeco cũng chứng tỏ vai trò tiên phong, dẫn dắt sự thay đổi xu hướng tiêu dùng.</p><a className="button button-gold" href="/lien-he">Liên hệ với GEDECO <Icon name="arrow" /></a></div></div></section>
-    <section className="inner-dark-cards" id="tam-nhin"><div className="container"><div className="inner-title centered"><p className="eyebrow">ĐIỀU GEDECO THEO ĐUỔI</p><h2>Sứ mệnh và giá trị cốt lõi</h2></div><div className="value-grid"><article><div className="feature-icon"><Icon name="globe" /></div><h3>Sứ mệnh</h3><p>Luôn đề cao Chất lượng - Giá trị - Chuyên nghiệp - Nhân văn.</p></article><article><div className="feature-icon"><Icon name="handshake" /></div><h3>Giá trị cốt lõi</h3><p>Gedeco liên kết sản xuất và thương mại nhiều lĩnh vực và sản phẩm khác nhau. Chúng tôi luôn cung cấp sản phẩm có chất lượng hàng đầu.</p></article><article><div className="feature-icon"><Icon name="people" /></div><h3>Đồng hành cùng đối tác</h3><p>Ngoài hợp tác và đưa ra giải pháp, chúng tôi cùng tham gia trực tiếp với các đơn vị sản xuất và doanh nghiệp trên nhiều vùng miền.</p></article></div></div></section>
-    <section className="inner-capabilities"><div className="container"><div className="inner-title"><p className="eyebrow gold-text">GIÁ TRỊ GEDECO MANG LẠI</p><h2>Chất lượng, hợp tác và niềm tin</h2></div><div className="capability-grid"><article><Icon name="box" /><h3>Sản phẩm chất lượng</h3><p>Gedeco luôn cung cấp sản phẩm có chất lượng hàng đầu.</p></article><article><Icon name="handshake" /><h3>Hợp tác và giải pháp</h3><p>Đồng hành cùng các đơn vị sản xuất và doanh nghiệp trên nhiều vùng miền.</p></article><article><Icon name="people" /><h3>Đặt niềm tin con người</h3><p>Cốt lõi đích thực nhân văn cho mọi người, là nơi đặt niềm tin cậy lớn của đối tác và khách hàng.</p></article></div></div></section>
-    <CTA title="Cùng GEDECO kiến tạo giá trị bền vững" text="Hãy chia sẻ nhu cầu của bạn để chúng tôi đề xuất giải pháp phù hợp." />
-  </InnerPage>;
+export default function AboutPage() {
+  return <SharedAboutPage />;
 }
