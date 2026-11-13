@@ -134,7 +134,7 @@ export default function HomePage({ language = 'vi' }: { language?: HomeLanguage 
         <div className="nav-dropdown"><a href={language === 'en' ? '/en/products' : '/san-pham'} onClick={closeMenu}>{chromeGet('navigation.products', copy.products)} <span className="nav-chevron" aria-hidden="true"><Icon name="chevron" /></span></a><div className="nav-submenu"><a href={`${language === 'en' ? '/en/products' : '/san-pham'}?category=trong-nuoc`} onClick={closeMenu}>{copy.domestic}</a><a href={`${language === 'en' ? '/en/products' : '/san-pham'}?category=xuat-khau`} onClick={closeMenu}>{copy.export}</a></div></div>
         <a href={language === 'en' ? '/en/contact' : '/lien-he'} onClick={closeMenu}>{chromeGet('navigation.contact', copy.contact)}</a>
       </nav>
-      <div className="nav-tools"><button className="search-btn" aria-label={copy.search}><Icon name="search" /></button><LanguageSwitcher /><a className="button button-gold button-small" href={chromeUrl('cta.label', language === 'en' ? '/en/contact' : '#contact')}>{chromeGet('cta.label', copy.cta)} <Icon name="arrow" /></a></div>
+      <div className="nav-tools"><button className="search-btn" aria-label={copy.search}><Icon name="search" /></button><LanguageSwitcher english={language === 'en'} /><a className="button button-gold button-small" href={chromeUrl('cta.label', language === 'en' ? '/en/contact' : '#contact')}>{chromeGet('cta.label', copy.cta)} <Icon name="arrow" /></a></div>
     </div></header>
 
     <main id="main-content">
