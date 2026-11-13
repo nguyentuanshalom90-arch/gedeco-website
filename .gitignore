@@ -6,4 +6,5 @@ node_modules/
 *.log
 .uploads/
 release-package-*/
+release-*.tar
 gedeco-*.tar.gz
