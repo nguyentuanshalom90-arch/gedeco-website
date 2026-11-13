@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { ContactActions } from './contact-actions';
-import { EnglishFooter, EnglishHeader } from './english-pages';
+import { EnglishHeader } from './english-pages';
 import { Icon, InnerFooter, InnerHeader, InnerHero } from './inner-pages';
 import type { GedecoProductDetail } from '../data/product-details';
 
@@ -41,7 +41,7 @@ export function ShopSidebar({ language = 'vi' }: { language?: ShopLanguage }) {
 
 export function ShopShell({ children, hero = true, current = 'Sản phẩm', language = 'vi' }: { children: React.ReactNode; hero?: boolean; current?: string; language?: ShopLanguage }) {
   useEffect(() => { document.documentElement.lang = language; return () => { document.documentElement.lang = 'vi'; }; }, [language]);
-  return <div className={`shop-site${hero ? '' : ' shop-site-no-hero'}${language === 'en' ? ' shop-site-en' : ''}`}><ShopHeader language={language} />{hero && <ShopHero title={current} language={language} />}<main>{children}</main>{language === 'en' ? <EnglishFooter /> : <InnerFooter />}<ContactActions english={language === 'en'} /></div>;
+  return <div className={`shop-site${hero ? '' : ' shop-site-no-hero'}${language === 'en' ? ' shop-site-en' : ''}`}><ShopHeader language={language} />{hero && <ShopHero title={current} language={language} />}<main>{children}</main><InnerFooter language={language} /><ContactActions english={language === 'en'} /></div>;
 }
 
 type ProductCardItem = Pick<GedecoProductDetail, 'slug' | 'title' | 'image'> & { category: string };
