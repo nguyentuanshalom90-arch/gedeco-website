@@ -5,6 +5,7 @@ import "./shop-brand.css";
 import "./footer-spacing.css";
 import "./dashboard/bimi-dashboard.css";
 import { siteConfig } from "@/lib/site-config";
+import { LanguageAwareSkipLink } from "./components/language-aware-skip-link";
 
 const bodyFont = Be_Vietnam_Pro({
   subsets: ["latin", "vietnamese"],
@@ -67,9 +68,7 @@ export default function RootLayout({
   return (
     <html lang="vi">
       <body className={`${bodyFont.variable} ${displayFont.variable}`}>
-        <a className="skip-link" href="#main-content">
-          Bỏ qua đến nội dung chính
-        </a>
+        <LanguageAwareSkipLink />
         {children}
         <script
           type="application/ld+json"

@@ -1,6 +1,7 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
+import { syncArticleTranslation } from "@/lib/translation-service";
 import type { PostInput, PostListItem } from "./post-types";
 
 function slugify(value: string): string {
@@ -64,7 +65,7 @@ export async function listPosts(): Promise<PostListItem[]> {
 
 export async function savePost(
   input: PostInput,
-): Promise<{ ok: true; post: PostListItem }> {
+): Promise<{ ok: true; post: PostListItem; translation: { status: string; errorMessage: string | null } }> {
   assertDashboardWriteAllowed();
   const title = input.title.trim();
   if (!title) throw new Error("Tiêu đề bài viết không được để trống.");
@@ -114,7 +115,8 @@ export async function savePost(
   const row = input.id
     ? await prisma.newsArticle.update({ where: { id: input.id }, data })
     : await prisma.newsArticle.create({ data });
-  return { ok: true, post: toListItem(row) };
+  const translation = await syncArticleTranslation(row);
+  return { ok: true, post: toListItem(row), translation: { status: translation.status, errorMessage: translation.errorMessage } };
 }
 
 export async function deletePost(id: string): Promise<{ ok: true }> {

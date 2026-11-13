@@ -327,7 +327,7 @@ export function PostComposer() {
         result.post,
         ...current.filter((item) => item.id !== result.post.id),
       ]);
-      setMessage("Đã lưu bài viết thành công.");
+      setMessage(`Đã lưu bài viết · English: ${result.translation.status === "TRANSLATED" ? "đã sinh" : result.translation.status === "FAILED" ? "dịch lỗi — bản cũ được giữ nguyên" : "cần rà soát"}.`);
     } catch (reason) {
       setError(
         reason instanceof Error ? reason.message : "Lưu bài viết thất bại.",

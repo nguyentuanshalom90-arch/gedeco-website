@@ -98,7 +98,7 @@ export function SiteContentManager() {
       const result = await saveSiteContent(kind, editing);
       setItems((current) => [result.item, ...current.filter((item) => item.id !== result.item.id)]);
       setEditing({ ...result.item });
-      setNotice("Đã lưu nội dung và thông tin SEO.");
+      setNotice(`Đã lưu nội dung và SEO. English: ${result.translation.status === "TRANSLATED" ? "đã sinh" : result.translation.status === "FAILED" ? "dịch lỗi — bản cũ được giữ nguyên" : "cần rà soát"}.`);
     } catch (error) {
       setNotice(error instanceof Error ? error.message : "Không thể lưu nội dung.");
     } finally {

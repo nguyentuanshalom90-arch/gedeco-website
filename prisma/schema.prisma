@@ -122,6 +122,42 @@ model Product {
   @@index([category, isPublished, sortOrder])
 }
 
+model TranslationEntry {
+  id              String            @id @default(cuid())
+  entityType      TranslationEntity
+  entityId        String
+  locale          String            @default("en")
+  slug            String?
+  payload         Json
+  sourceUpdatedAt DateTime
+  sourceHash      String
+  status          TranslationStatus @default(PENDING)
+  provider        String?
+  errorMessage    String?
+  manualOverride  Boolean           @default(false)
+  translatedAt    DateTime?
+  reviewedAt      DateTime?
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+
+  @@unique([entityType, entityId, locale])
+  @@index([entityType, locale, slug])
+}
+
+enum TranslationEntity {
+  PRODUCT
+  NEWS_ARTICLE
+  SITE_CONTENT
+  SITE_CHROME
+}
+
+enum TranslationStatus {
+  PENDING
+  TRANSLATED
+  NEEDS_REVIEW
+  FAILED
+}
+
 model ProductMedia {
   id        String  @id @default(cuid())
   productId String

@@ -13,9 +13,11 @@ function UnitedKingdomFlag() {
 
 export function LanguageSwitcher({ english = false }: { english?: boolean }) {
   const pathname = usePathname() || '/';
-  const vietnamesePath = pathname.replace(/^\/en/, '') || '/';
-  const englishPath = `/en${pathname === '/' ? '' : pathname}`;
-  return <div className="language-switcher" aria-label="Chuyển ngôn ngữ">
+  const routeMap: Record<string, string> = { '/gioi-thieu': '/about', '/tin-tuc': '/news', '/du-an': '/projects', '/doi-tac': '/partners', '/lien-he': '/contact', '/san-pham': '/products', '/chinh-sach-bao-mat': '/privacy-policy', '/dieu-khoan-su-dung': '/terms-of-use', '/chinh-sach-ban-hang': '/sales-policy' };
+  const translatePath = (path: string, toEnglish: boolean) => { const entries = Object.entries(routeMap); const match = entries.find(([vi, en]) => path === (toEnglish ? vi : en) || path.startsWith(`${toEnglish ? vi : en}/`)); if (!match) return path; const from = toEnglish ? match[0] : match[1]; const to = toEnglish ? match[1] : match[0]; return `${to}${path.slice(from.length)}`; };
+  const vietnamesePath = translatePath(pathname.replace(/^\/en/, '') || '/', false);
+  const englishPath = `/en${translatePath(pathname === '/' ? '' : pathname, true)}`;
+  return <div className="language-switcher" aria-label="Language switcher">
     {english ? <Link className="language-option language-option-vietnamese" href={vietnamesePath} aria-label="Tiếng Việt"><VietnamFlag /><span>VI</span></Link> : <span className="language-option language-option-vietnamese current" aria-label="Tiếng Việt"><VietnamFlag /><span>VI</span></span>}
     {english ? <span className="language-option language-option-english current" aria-label="English"><UnitedKingdomFlag /><span>EN</span></span> : <Link className="language-option language-option-english" href={englishPath} aria-label="English"><UnitedKingdomFlag /><span>EN</span></Link>}
   </div>;

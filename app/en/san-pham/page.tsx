@@ -1,8 +1,15 @@
-import Link from 'next/link';
-import { EnglishPage } from '../../components/english-pages';
-import { InnerHero, CTA, Icon } from '../../components/inner-pages';
-import { gedecoProductDetails } from '../../data/product-details';
+import { listEnglishProducts } from '@/lib/products';
+import type { Metadata } from 'next';
+import { ProductCatalog, ShopBreadcrumb, ShopShell, ShopSidebar } from '../../components/shop-pages';
 
-export default function EnglishProducts() {
-  return <EnglishPage active="Products"><InnerHero eyebrow="GEDECO PRODUCTS" title="Domestic and export products" subtitle={`${gedecoProductDetails.length} products from the GEDECO source catalog.`} /><section className="product-categories"><div className="container"><div className="product-category-tabs"><Link href="/en/san-pham?category=domestic">DOMESTIC PRODUCTS</Link><Link href="/en/san-pham?category=export">EXPORT PRODUCTS</Link></div><div className="product-page-grid">{gedecoProductDetails.map((product) => <article key={product.slug}><img src={product.image} alt={product.title} /><div><p className="eyebrow gold-text">{product.category === 'Sản phẩm trong nước' ? 'DOMESTIC PRODUCTS' : 'EXPORT PRODUCTS'}</p><h2>{product.title}</h2><p>{product.description || 'Product information from the GEDECO source catalog.'}</p><Link href={`/en/san-pham/${product.slug}`} className="product-detail-link">View product details <Icon name="arrow" /></Link></div></article>)}</div></div></section><CTA language="en" title="Which product are you interested in?" text="Tell us what you need and our team will suggest a suitable product and cooperation path." /></EnglishPage>;
+const sourceOrder = ['bot-matcha-huu-co', 'ca-phe-arabica', 'ca-phe-robusta', 'canned-pineapple', 'dia-spithera-xoa-sach-nep-nhan', 'dong-trung-ha-thao-nguyen-con', 'durian', 'ca-tra-dau', 'tra-dinh-uop-bong-sen', 'ruou-dong-trung-ha-thao', 'thuc-pham-bao-ve-suc-khoe-carositol', 'tieu-den'];
+
+export const dynamic = 'force-dynamic';
+export const metadata: Metadata = { title: 'Products | GEDECO', description: 'Explore GEDECO domestic and export products.', alternates: { canonical: '/en/products', languages: { vi: '/san-pham', en: '/en/products' } } };
+
+export default async function EnglishProductsPage({ searchParams }: { searchParams: Promise<{ category?: string }> }) {
+  const products = [...await listEnglishProducts()].sort((a, b) => (sourceOrder.indexOf(a.sourceSlug) === -1 ? 99 : sourceOrder.indexOf(a.sourceSlug)) - (sourceOrder.indexOf(b.sourceSlug) === -1 ? 99 : sourceOrder.indexOf(b.sourceSlug)));
+  const category = (await searchParams).category;
+  const initialCategory = category === 'domestic' || category === 'trong-nuoc' ? 'domestic' : category === 'export' || category === 'xuat-khau' ? 'export' : 'all';
+  return <ShopShell language="en" current="Products"><div className="shop-width shop-page-layout"><div className="shop-main"><ShopBreadcrumb language="en" current="Products" /><ProductCatalog items={products} initialCategory={initialCategory} language="en" /></div><ShopSidebar language="en" /></div></ShopShell>;
 }

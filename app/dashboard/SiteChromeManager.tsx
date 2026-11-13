@@ -53,7 +53,7 @@ export function SiteChromeManager() {
   }
   async function save() {
     setBusy(true);
-    try { const result = await saveSiteChrome(editing); setItems((current) => [result.item, ...current.filter((item) => item.id !== result.item.id)]); setEditing({ ...result.item }); setNotice("Đã lưu nội dung Header/Footer."); } catch (error) { setNotice(error instanceof Error ? error.message : "Không thể lưu nội dung."); } finally { setBusy(false); }
+    try { const result = await saveSiteChrome(editing); setItems((current) => [result.item, ...current.filter((item) => item.id !== result.item.id)]); setEditing({ ...result.item }); setNotice(`Đã lưu nội dung Header/Footer. English: ${result.translation.status === "TRANSLATED" ? "đã sinh" : result.translation.status === "FAILED" ? "dịch lỗi — bản cũ được giữ nguyên" : "cần rà soát"}.`); } catch (error) { setNotice(error instanceof Error ? error.message : "Không thể lưu nội dung."); } finally { setBusy(false); }
   }
   async function remove() {
     if (!editing.id || !window.confirm("Xóa nội dung Header/Footer này?")) return;

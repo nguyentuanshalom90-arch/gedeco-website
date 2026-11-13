@@ -3,6 +3,7 @@
 import { prisma } from "@/lib/prisma";
 import { chromeSeed } from "./site-chrome-seed";
 import type { SiteChromeArea, SiteChromeInput, SiteChromeItem, SiteChromeKind } from "./site-chrome-types";
+import { syncSiteChromeTranslation } from "@/lib/translation-service";
 
 function assertDashboardWriteAllowed() {
   if (process.env.NODE_ENV === "production") throw new Error("Chưa cấu hình xác thực quản trị cho môi trường production.");
@@ -28,7 +29,7 @@ export async function listSiteChrome(area: SiteChromeArea, kind: SiteChromeKind 
   return rows.map(toItem);
 }
 
-export async function saveSiteChrome(input: SiteChromeInput): Promise<{ ok: true; item: SiteChromeItem }> {
+export async function saveSiteChrome(input: SiteChromeInput): Promise<{ ok: true; item: SiteChromeItem; translation: { status: string; errorMessage: string | null } }> {
   assertDashboardWriteAllowed();
   if (!input.sectionKey.trim() || !input.fieldKey.trim() || !input.label.trim()) throw new Error("Vui lòng nhập section key, field key và nhãn nội dung.");
   const data = {
@@ -45,7 +46,9 @@ export async function saveSiteChrome(input: SiteChromeInput): Promise<{ ok: true
     sortOrder: Number.isFinite(input.sortOrder) ? input.sortOrder : 0,
   };
   const row = await prisma.siteChromeContent.upsert({ where: { area_sectionKey_fieldKey: { area: input.area, sectionKey: data.sectionKey, fieldKey: data.fieldKey } }, update: data, create: data });
-  return { ok: true, item: toItem(row) };
+  const item = toItem(row);
+  const translation = await syncSiteChromeTranslation({ id: item.id, label: item.label, value: item.value, altText: item.altText, updatedAt: new Date(item.updatedAt) });
+  return { ok: true, item, translation: { status: translation.status, errorMessage: translation.errorMessage } };
 }
 
 export async function deleteSiteChrome(id: string): Promise<{ ok: true }> {

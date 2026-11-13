@@ -5,6 +5,7 @@ import { readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { contentPages, dynamicSeed } from "./site-content-seed";
 import type { SiteContentInput, SiteContentItem, SiteContentKind } from "./site-content-types";
+import { syncSiteContentTranslation } from "@/lib/translation-service";
 
 function assertDashboardWriteAllowed() {
   if (process.env.NODE_ENV === "production") throw new Error("Chưa cấu hình xác thực quản trị cho môi trường production.");
@@ -75,7 +76,7 @@ export async function listSiteContent(kind: SiteContentKind): Promise<SiteConten
   return rows.map(toItem);
 }
 
-export async function saveSiteContent(kind: SiteContentKind, input: SiteContentInput): Promise<{ ok: true; item: SiteContentItem }> {
+export async function saveSiteContent(kind: SiteContentKind, input: SiteContentInput): Promise<{ ok: true; item: SiteContentItem; translation: { status: string; errorMessage: string | null } }> {
   assertDashboardWriteAllowed();
   const pageKey = input.pageKey.trim();
   const sectionKey = input.sectionKey.trim();
@@ -139,10 +140,14 @@ export async function saveSiteContent(kind: SiteContentKind, input: SiteContentI
     else rows.push(staticRow);
     await writeStaticContent(rows);
     const pageRecord = await prisma.siteContentPage.findUnique({ where: { pageKey } });
-    return { ok: true, item: toItem({ ...staticRow, page: pageRecord }) };
+    const item = toItem({ ...staticRow, page: pageRecord });
+    const translation = await syncSiteContentTranslation({ id: item.id, label: item.label, value: item.value, altText: item.altText, h1: item.h1, metaTitle: item.metaTitle, metaDescription: item.metaDescription, updatedAt: new Date(item.updatedAt) });
+    return { ok: true, item, translation: { status: translation.status, errorMessage: translation.errorMessage } };
   }
   const row = await prisma.siteDynamicContent.upsert({ where: { pageKey_sectionKey_fieldKey: { pageKey, sectionKey, fieldKey } }, update: data, create: data, include: { page: true } });
-  return { ok: true, item: toItem({ ...row, page: page || row.page }) };
+  const item = toItem({ ...row, page: page || row.page });
+  const translation = await syncSiteContentTranslation({ id: item.id, label: item.label, value: item.value, altText: item.altText, h1: item.h1, metaTitle: item.metaTitle, metaDescription: item.metaDescription, updatedAt: new Date(item.updatedAt) });
+  return { ok: true, item, translation: { status: translation.status, errorMessage: translation.errorMessage } };
 }
 
 export async function deleteSiteContent(kind: SiteContentKind, id: string): Promise<{ ok: true }> {
