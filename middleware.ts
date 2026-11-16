@@ -6,7 +6,11 @@ export function middleware(request: NextRequest) {
   if (process.env.NODE_ENV !== "production") return NextResponse.next();
 
   const forwardedProto = request.headers.get("x-forwarded-proto") || request.nextUrl.protocol.replace(":", "");
-  const host = request.headers.get("host")?.split(":")[0].toLowerCase();
+  const hostHeader = request.headers.get("host")?.toLowerCase() || "";
+  const host = hostHeader.split(":")[0];
+  const isLocalPreview = hostHeader.startsWith("localhost") || hostHeader.startsWith("127.0.0.1") || hostHeader.startsWith("[::1]");
+
+  if (isLocalPreview) return NextResponse.next();
 
   if (host !== canonicalHost || forwardedProto !== "https") {
     const url = request.nextUrl.clone();

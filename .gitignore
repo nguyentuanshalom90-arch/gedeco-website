@@ -1,6 +1,8 @@
 node_modules/
 .next/
+.next-local/
 .next-stale-*/
+.next-build-*/
 .env
 .env.local
 *.log

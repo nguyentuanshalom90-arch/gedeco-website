@@ -29,7 +29,7 @@
 .shop-site .shop-detail-thumbs img.active { border-color: var(--brand-action-blue); }
 
 /* Chi tiết sản phẩm */
-.shop-site-no-hero .site-header { position: relative; margin-bottom: 0; }
+.shop-site-no-hero .site-header { position: sticky !important; top: 0 !important; z-index: 50 !important; margin-bottom: 0; }
 .shop-site-no-hero .shop-detail-layout { padding-top: 28px; }
 .shop-site .shop-description-tab { width: 100%; padding: 15px 0; text-align: left; }
 .shop-site .shop-buy { display: inline-flex; align-items: center; gap: 9px; border-radius: 7px; }

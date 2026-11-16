@@ -1,4 +1,18 @@
 import { prisma } from '@/lib/prisma';
+import nodemailer from 'nodemailer';
+
+function getSmtpTransport() {
+  const user = process.env.SMTP_USER?.trim();
+  const pass = process.env.SMTP_PASS?.trim();
+  if (!user || !pass) return null;
+
+  return nodemailer.createTransport({
+    host: process.env.SMTP_HOST || 'smtp.gmail.com',
+    port: Number(process.env.SMTP_PORT || 465),
+    secure: process.env.SMTP_SECURE !== 'false',
+    auth: { user, pass },
+  });
+}
 
 export async function POST(request: Request) {
   try {
@@ -11,20 +25,32 @@ export async function POST(request: Request) {
     const message = String(input.message || '').trim();
     const website = String(input.website || '').trim();
     if (website) return Response.json({ ok: true, emailDelivered: false });
-    if (name.length < 2 || !email.includes('@') || phone.length < 8 || message.length < 5 || input.consent !== 'on') {
+    if (name.length < 2 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || phone.length < 8 || input.consent !== 'on') {
       return Response.json({ error: 'Vui lòng điền đầy đủ thông tin bắt buộc.' }, { status: 400 });
     }
     const context = [company ? `Doanh nghiệp: ${company}` : '', productInterest ? `Sản phẩm quan tâm: ${productInterest}` : ''].filter(Boolean).join('\n');
     const storedMessage = context ? `${context}\n${message}` : message;
     await prisma.contactRequest.create({ data: { name, email, phone, message: storedMessage } });
     let emailDelivered = false;
-    if (process.env.RESEND_API_KEY && process.env.MAIL_FROM) {
-      const emailResponse = await fetch('https://api.resend.com/emails', {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${process.env.RESEND_API_KEY}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ from: process.env.MAIL_FROM, to: ['info@gedeco.vn'], subject: `Yêu cầu liên hệ mới từ ${name}`, text: `Họ tên: ${name}\nEmail: ${email}\nĐiện thoại: ${phone}\n\n${storedMessage}` }),
+    const smtp = getSmtpTransport();
+    const receiver = process.env.CONTACT_EMAIL?.trim() || process.env.SMTP_USER?.trim();
+    if (smtp && receiver) {
+      const subject = `Yêu cầu liên hệ mới từ ${name}`;
+      const leadText = `Họ tên: ${name}\nEmail: ${email}\nĐiện thoại: ${phone}\n\n${storedMessage}`;
+      await smtp.sendMail({
+        from: process.env.MAIL_FROM?.trim() || process.env.SMTP_USER?.trim(),
+        to: receiver,
+        replyTo: email,
+        subject,
+        text: leadText,
       });
-      emailDelivered = emailResponse.ok;
+      await smtp.sendMail({
+        from: process.env.MAIL_FROM?.trim() || process.env.SMTP_USER?.trim(),
+        to: email,
+        subject: 'GEDECO đã nhận được yêu cầu liên hệ của bạn',
+        text: `Kính gửi ${name},\n\nGEDECO đã nhận được thông tin liên hệ của quý khách. Cảm ơn quý khách đã quan tâm và gửi yêu cầu cho chúng tôi. Đội ngũ GEDECO sẽ xem xét nội dung và liên hệ lại trong thời gian sớm nhất.\n\nTrân trọng,\nGEDECO\nHotline: 0914 94 3653\nEmail: ${receiver}`,
+      });
+      emailDelivered = true;
     }
     return Response.json({ ok: true, emailDelivered });
   } catch {

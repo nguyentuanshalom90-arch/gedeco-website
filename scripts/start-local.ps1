@@ -1,0 +1,82 @@
+param(
+  [int]$Port = 3000
+)
+
+$ErrorActionPreference = 'Stop'
+$projectRoot = Split-Path -Parent $PSScriptRoot
+$logPath = Join-Path $projectRoot '.codex-preview.log'
+$errorLogPath = Join-Path $projectRoot '.codex-preview.error.log'
+$url = "http://127.0.0.1:$Port/lien-he"
+$projectPattern = [regex]::Escape($projectRoot)
+
+function Get-ProjectProcesses {
+  @(Get-CimInstance Win32_Process | Where-Object {
+    $_.CommandLine -and $_.CommandLine -match $projectPattern -and $_.CommandLine -match 'next|npm'
+  })
+}
+
+function Test-LocalServer {
+  try {
+    $response = Invoke-WebRequest -UseBasicParsing $url -MaximumRedirection 0 -TimeoutSec 3
+    if ($response.StatusCode -ne 200) { return $false }
+
+    $cssPaths = [regex]::Matches($response.Content, '/_next/static/css/[^" ]+\.css') | ForEach-Object { $_.Value } | Select-Object -Unique
+    if (-not $cssPaths) { return $false }
+
+    $validCss = $false
+    foreach ($cssPath in $cssPaths) {
+      $cssResponse = Invoke-WebRequest -UseBasicParsing ("http://127.0.0.1:$Port" + $cssPath) -MaximumRedirection 0 -TimeoutSec 3
+      if ($cssResponse.StatusCode -eq 200 -and $cssResponse.Content.Length -gt 1000) {
+        $validCss = $true
+      }
+      if ($cssResponse.Content -match 'contact-card-grid') {
+        return $true
+      }
+    }
+
+    return $false
+  } catch {
+    return $false
+  }
+}
+
+if (Test-LocalServer) {
+  Write-Output "Local server is already healthy at http://localhost:$Port"
+  exit 0
+}
+
+foreach ($process in (Get-ProjectProcesses)) {
+  Stop-Process -Id $process.ProcessId -Force -ErrorAction SilentlyContinue
+}
+
+Start-Sleep -Seconds 2
+
+$listeners = @(Get-NetTCPConnection -LocalPort $Port -State Listen -ErrorAction SilentlyContinue)
+foreach ($listener in $listeners) {
+  $process = Get-CimInstance Win32_Process -Filter "ProcessId=$($listener.OwningProcess)" -ErrorAction SilentlyContinue
+  if ($process -and $process.CommandLine -and $process.CommandLine.Contains($projectRoot) -and $process.CommandLine.Contains('next')) {
+    Stop-Process -Id $listener.OwningProcess -Force -ErrorAction SilentlyContinue
+  } elseif ($process) {
+    throw "Port $Port is already used by another process: PID $($listener.OwningProcess)."
+  }
+}
+
+Remove-Item -LiteralPath $logPath -Force -ErrorAction SilentlyContinue
+Remove-Item -LiteralPath $errorLogPath -Force -ErrorAction SilentlyContinue
+
+Start-Process -FilePath 'npm.cmd' `
+  -ArgumentList @('run', 'start', '--', '-p', $Port) `
+  -WorkingDirectory $projectRoot `
+  -WindowStyle Hidden `
+  -RedirectStandardOutput $logPath `
+  -RedirectStandardError $errorLogPath | Out-Null
+
+for ($attempt = 0; $attempt -lt 30; $attempt++) {
+  Start-Sleep -Seconds 1
+  if (Test-LocalServer) {
+    Write-Output "Local server started at http://localhost:$Port"
+    exit 0
+  }
+}
+
+throw "Local server did not become healthy. Check $logPath and $errorLogPath."

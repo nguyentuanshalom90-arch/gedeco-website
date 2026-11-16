@@ -49,10 +49,19 @@ export async function listAllProducts() {
 }
 
 export async function getProductBySlug(slug: string) {
-  const row = await prisma.product.findUnique({
+  let row = await prisma.product.findUnique({
     where: { slug },
     include: { gallery: { orderBy: { sortOrder: "asc" } } },
   });
+  if (!row) {
+    const englishEntry = Object.values(englishProductTranslations).find((item) => item.slug === slug);
+    if (englishEntry) {
+      row = await prisma.product.findUnique({
+        where: { slug: englishEntry.sourceSlug },
+        include: { gallery: { orderBy: { sortOrder: "asc" } } },
+      });
+    }
+  }
   return row && toProductDetail(row);
 }
 

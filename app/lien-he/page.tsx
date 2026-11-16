@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { CTA, Icon, InnerHero, InnerPage } from '../components/inner-pages';
+import { Icon, InnerHero, InnerPage } from '../components/inner-pages';
 import { ContactForm } from '../components/contact-form';
 import { getPublicSiteContent } from '@/lib/site-content-public';
 
@@ -8,7 +8,7 @@ export const metadata: Metadata = { title: 'Liên hệ', description: 'Liên h�
 const contactCards = [
   ['phone', 'Hotline tư vấn', '0914 94 3653', 'Hỗ trợ nhanh chóng, tư vấn giải pháp phù hợp cho doanh nghiệp.'],
   ['mail', 'Email liên hệ', 'info@gedeco.vn', 'Tiếp nhận yêu cầu, báo giá và hợp tác kinh doanh.'],
-  ['pin', 'Trụ sở GEDECO', 'Tầng 14, số 169 Nguyễn Ngọc Vũ', 'P. Yên Hòa, TP. Hà Nội, Việt Nam.'],
+  ['pin', 'Trụ sở GEDECO', 'Tầng 14, số 169 Nguyễn Ngọc\u00a0Vũ', 'P. Yên Hòa, TP. Hà Nội, Việt Nam.'],
 ] as const;
 
 export default async function ContactPage({ language = 'vi' }: { language?: 'vi' | 'en' } = {}) {
@@ -25,10 +25,9 @@ export default async function ContactPage({ language = 'vi' }: { language?: 'vi'
   return <InnerPage active={copy.active} pageClass="contact-design" language={language}>
     <InnerHero eyebrow={copy.eyebrow} title={copy.title} subtitle={copy.subtitle} />
     <section className="contact-intro"><div className="container inner-split"><div className="inner-image"><img src="/assets/banner-2.jpg" alt={copy.imageAlt} /></div><div><p className="eyebrow gold-text">(GEDECO CORPORATION)</p><h2>{english ? 'GEDECO CORPORATION' : 'CÔNG TY CỔ PHẦN GEDECO'}</h2><p>Hotline: +84 914.94.3653<br />Email: info@gedeco.vn<br />Website: www.gedeco.vn</p><p>{copy.intro}</p></div></div></section>
-    <section className="contact-card-band"><div className="container contact-card-grid">{copy.cards.map(([icon, title, value, cardCopy]) => <article key={title}><Icon name={icon as any} /><div><h3>{title}</h3><b>{value}</b><p>{cardCopy}</p></div></article>)}</div></section>
+    <section className="contact-card-band"><div className="container contact-card-grid">{copy.cards.map(([icon, title, value, cardCopy]) => <article className={icon === 'pin' ? 'contact-card-address' : undefined} key={title}><Icon name={icon as any} /><div><h3>{title}</h3><b>{value}</b><p>{cardCopy}</p></div></article>)}</div></section>
     <section className="contact-page"><div className="container contact-page-grid"><ContactForm english={english} /><div className="contact-location"><h2>{copy.locationTitle}</h2><div className="contact-map"><img src="/assets/banner-2.jpg" alt={copy.locationAlt} /><span><Icon name="pin" /> GEDECO</span></div><div className="contact-info-list"><div><Icon name="pin" /><span><b>{copy.office}</b><span>{copy.address}</span></span></div><div><Icon name="chart" /><span><b>{copy.hours}</b><span>{copy.schedule}</span></span></div></div></div></div></section>
     <section className="quick-contact"><div className="container"><h2>{copy.quickTitle}</h2><div className="quick-contact-grid"><a href="tel:0914943653"><Icon name="phone" /><span><b>{copy.call}</b>0914 94 3653</span><Icon name="arrow" /></a><a href="https://zalo.me/0914943653" target="_blank" rel="noopener noreferrer"><span className="chat-badge zalo">Zalo</span><span><b>{copy.zalo}</b>{copy.zaloCopy}</span><Icon name="arrow" /></a><a href="https://www.facebook.com/www.gedeco.tra.thuong.hang" target="_blank" rel="noopener noreferrer"><span className="chat-badge messenger">M</span><span><b>{copy.messenger}</b>{copy.messengerCopy}</span><Icon name="arrow" /></a></div></div></section>
     <section className="faq-section"><div className="container faq-layout"><div><p className="eyebrow">{copy.faqEyebrow}</p><h2>{copy.faqTitle}</h2></div><div className="faq-grid">{copy.faqQuestions.map((question) => <details key={question}><summary>{question}<Icon name="chevron" /></summary><p>{copy.faqAnswer}</p></details>)}</div></div></section>
-    <CTA language={language} title={copy.ctaTitle} text={copy.ctaText} />
   </InnerPage>;
 }
