@@ -21,7 +21,7 @@ export function LoginForm() {
     const payload = await response.json().catch(() => ({}));
     setBusy(false);
     if (!response.ok) return setError(payload.error || "Không thể đăng nhập.");
-    window.location.href = "/dashboard?view=dashboard";
+    window.location.href = "/dashboard";
   }
 
   return (

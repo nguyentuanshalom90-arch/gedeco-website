@@ -20,7 +20,10 @@ const EMPTY_POST: PostInput = {
   shortDesc: "",
   content: "",
   coverImage: null,
+  coverImageAlt: "",
+  coverImageCaption: "",
   ogImage: null,
+  ogImageAlt: "",
   status: "DRAFT",
   categoryName: "Tin tức",
   categoryId: null,
@@ -36,13 +39,13 @@ const EMPTY_POST: PostInput = {
   isFeatured: false,
 };
 
-async function uploadImage(file: File): Promise<string> {
+async function uploadImage(file: File): Promise<MediaAssetItem> {
   const body = new FormData();
   body.append("file", file);
   const response = await fetch("/api/media", { method: "POST", body });
   const payload = await response.json().catch(() => ({}));
   if (!response.ok) throw new Error(payload.error || "Tải ảnh thất bại.");
-  return payload.url;
+  return payload as MediaAssetItem;
 }
 
 function seoAudit(post: PostInput) {
@@ -139,10 +142,12 @@ function ChipInput({
 function ImagePicker({
   value,
   onChange,
+  onSelect,
   label,
 }: {
   value: string | null;
   onChange: (url: string | null) => void;
+  onSelect?: (asset: MediaAssetItem) => void;
   label: string;
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
@@ -166,7 +171,9 @@ function ImagePicker({
     if (!file) return;
     setBusy(true);
     try {
-      onChange(await uploadImage(file));
+      const asset = await uploadImage(file);
+      onChange(asset.url);
+      onSelect?.(asset);
     } finally {
       setBusy(false);
       event.target.value = "";
@@ -231,6 +238,7 @@ function ImagePicker({
                   key={asset.id}
                   onClick={() => {
                     onChange(asset.url);
+                    onSelect?.(asset);
                     setOpen(false);
                   }}
                 >
@@ -775,8 +783,11 @@ export function PostComposer() {
             <ImagePicker
               value={post.coverImage}
               onChange={(value) => set("coverImage", value)}
+              onSelect={(asset) => setPost((current) => ({ ...current, coverImage: asset.url, coverImageAlt: asset.altText, coverImageCaption: asset.caption }))}
               label="Ảnh bìa"
             />
+            <label>Alt ảnh bìa<input value={post.coverImageAlt} onChange={(event) => set("coverImageAlt", event.target.value)} placeholder="Mô tả ngắn, đúng nội dung ảnh" /></label>
+            <label>Chú thích ảnh<textarea rows={2} value={post.coverImageCaption} onChange={(event) => set("coverImageCaption", event.target.value)} /></label>
             <small className="cms-help">Khuyến nghị 1200 × 630 px.</small>
           </section>
           <section className="panel cms-card">
@@ -784,8 +795,10 @@ export function PostComposer() {
             <ImagePicker
               value={post.ogImage}
               onChange={(value) => set("ogImage", value)}
+              onSelect={(asset) => setPost((current) => ({ ...current, ogImage: asset.url, ogImageAlt: asset.altText }))}
               label="Ảnh mạng xã hội"
             />
+            <label>Alt ảnh chia sẻ<input value={post.ogImageAlt} onChange={(event) => set("ogImageAlt", event.target.value)} /></label>
             <small className="cms-help">Nếu để trống sẽ dùng ảnh bìa.</small>
           </section>
         </aside>

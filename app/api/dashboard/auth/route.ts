@@ -1,19 +1,27 @@
 import { NextResponse } from "next/server";
+import { createDashboardSession, DASHBOARD_COOKIE, verifyDashboardCredentials } from "@/lib/dashboard/auth";
 
 export async function POST(request: Request) {
-  if (process.env.NODE_ENV === "production") {
-    return NextResponse.json({ error: "Đăng nhập production chưa được cấu hình." }, { status: 503 });
-  }
-
   const body = await request.json().catch(() => ({}));
   const username = typeof body.username === "string" ? body.username.trim() : "";
   const password = typeof body.password === "string" ? body.password : "";
-  const expectedUsername = process.env.DASHBOARD_USERNAME || "admin";
-  const expectedPassword = process.env.DASHBOARD_PASSWORD || "Gedeco@2025!";
-
-  if (username !== expectedUsername || password !== expectedPassword) {
+  let valid = false;
+  try {
+    valid = verifyDashboardCredentials(username, password);
+  } catch (error) {
+    return NextResponse.json({ error: error instanceof Error ? error.message : "Dashboard chưa được cấu hình." }, { status: 503 });
+  }
+  if (!valid) {
     return NextResponse.json({ error: "Tên đăng nhập hoặc mật khẩu không đúng." }, { status: 401 });
   }
-
-  return NextResponse.json({ ok: true });
+  const session = createDashboardSession(username);
+  const response = NextResponse.json({ ok: true });
+  response.cookies.set(DASHBOARD_COOKIE, session.value, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "strict",
+    path: "/",
+    maxAge: session.maxAge,
+  });
+  return response;
 }

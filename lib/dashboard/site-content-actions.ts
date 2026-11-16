@@ -6,10 +6,7 @@ import path from "node:path";
 import { contentPages, dynamicSeed } from "./site-content-seed";
 import type { SiteContentInput, SiteContentItem, SiteContentKind } from "./site-content-types";
 import { syncSiteContentTranslation } from "@/lib/translation-service";
-
-function assertDashboardWriteAllowed() {
-  if (process.env.NODE_ENV === "production") throw new Error("Chưa cấu hình xác thực quản trị cho môi trường production.");
-}
+import { requireDashboardSession } from "./auth";
 
 async function ensureSeeded() {
   for (const page of contentPages) {
@@ -65,6 +62,7 @@ function toItem(row: any): SiteContentItem {
 }
 
 export async function listSiteContent(kind: SiteContentKind): Promise<SiteContentItem[]> {
+  await requireDashboardSession();
   await ensureSeeded();
   const rows = kind === "dynamic"
     ? await prisma.siteDynamicContent.findMany({ include: { page: true }, orderBy: [{ pageKey: "asc" }, { sortOrder: "asc" }] })
@@ -77,7 +75,7 @@ export async function listSiteContent(kind: SiteContentKind): Promise<SiteConten
 }
 
 export async function saveSiteContent(kind: SiteContentKind, input: SiteContentInput): Promise<{ ok: true; item: SiteContentItem; translation: { status: string; errorMessage: string | null } }> {
-  assertDashboardWriteAllowed();
+  await requireDashboardSession();
   const pageKey = input.pageKey.trim();
   const sectionKey = input.sectionKey.trim();
   const fieldKey = input.fieldKey.trim();
@@ -151,7 +149,7 @@ export async function saveSiteContent(kind: SiteContentKind, input: SiteContentI
 }
 
 export async function deleteSiteContent(kind: SiteContentKind, id: string): Promise<{ ok: true }> {
-  assertDashboardWriteAllowed();
+  await requireDashboardSession();
   if (kind === "dynamic") await prisma.siteDynamicContent.delete({ where: { id } });
   else await writeStaticContent((await readStaticContent()).filter((row) => row.id !== id));
   return { ok: true };

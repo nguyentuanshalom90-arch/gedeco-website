@@ -1,11 +1,14 @@
 import { DashboardClient, type DashboardTab } from './DashboardClient';
-import { LoginForm } from './LoginForm';
+import { getDashboardSession } from '@/lib/dashboard/auth';
+import { redirect } from 'next/navigation';
 
 export const dynamic = 'force-dynamic';
 
 export default async function DashboardPage({ searchParams }: { searchParams: Promise<{ view?: string; tab?: string }> }) {
   const params = await searchParams;
-  const allowedTabs: DashboardTab[] = ['overview', 'posts', 'products', 'content', 'chrome', 'payment', 'shipping'];
+  const allowedTabs: DashboardTab[] = ['overview', 'posts', 'products', 'pages', 'content', 'chrome', 'payment', 'shipping'];
   const initialTab = allowedTabs.includes(params.tab as DashboardTab) ? params.tab as DashboardTab : 'overview';
-  return params.view === 'dashboard' ? <DashboardClient initialTab={initialTab} /> : <LoginForm />;
+  const session = await getDashboardSession();
+  if (!session) redirect('/vmg-login');
+  return <DashboardClient initialTab={initialTab} />;
 }

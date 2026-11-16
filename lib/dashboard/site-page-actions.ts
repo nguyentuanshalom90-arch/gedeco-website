@@ -2,10 +2,7 @@
 
 import { prisma } from "@/lib/prisma";
 import { syncSitePageTranslation } from "@/lib/translation-service";
-
-function assertDashboardWriteAllowed() {
-  if (process.env.NODE_ENV === "production") throw new Error("Chưa cấu hình xác thực quản trị cho môi trường production.");
-}
+import { requireDashboardSession } from "./auth";
 
 export type SitePageInput = {
   id?: string;
@@ -23,11 +20,12 @@ export type SitePageInput = {
 };
 
 export async function listSitePages() {
+  await requireDashboardSession();
   return prisma.sitePage.findMany({ orderBy: { updatedAt: "desc" }, select: { id: true, slug: true, name: true, title: true, status: true, updatedAt: true } });
 }
 
 export async function saveSitePage(input: SitePageInput) {
-  assertDashboardWriteAllowed();
+  await requireDashboardSession();
   const slug = input.slug.trim().toLowerCase().replace(/[^a-z0-9-]+/g, "-").replace(/^-+|-+$/g, "");
   if (!slug || !input.name.trim() || !input.title.trim()) throw new Error("Slug, tên page và tiêu đề là bắt buộc.");
   if (!input.metaTitle.trim() || input.metaTitle.trim().length > 60) throw new Error("SEO title bắt buộc và không vượt quá 60 ký tự.");

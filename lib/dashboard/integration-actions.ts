@@ -2,8 +2,10 @@
 
 import { prisma } from "@/lib/prisma";
 import { integrationDefaults, type IntegrationCategory, type IntegrationItem } from "./integration-types";
+import { requireDashboardSession } from "./auth";
 
 export async function listIntegrations(category: IntegrationCategory): Promise<IntegrationItem[]> {
+  await requireDashboardSession();
   const stored = await prisma.dashboardIntegration.findMany({ where: { category }, orderBy: { createdAt: "asc" } });
   const map = new Map(stored.map((item) => [item.provider, item]));
   return integrationDefaults.filter((item) => item.category === category).map((item) => {
@@ -16,7 +18,7 @@ export async function listIntegrations(category: IntegrationCategory): Promise<I
 }
 
 export async function saveIntegration(input: IntegrationItem): Promise<{ ok: true }> {
-  if (process.env.NODE_ENV === "production") throw new Error("Chưa cấu hình xác thực quản trị cho môi trường production.");
+  await requireDashboardSession();
   if (!integrationDefaults.some((item) => item.category === input.category && item.provider === input.provider)) throw new Error("Tích hợp không hợp lệ.");
   const existing = await prisma.dashboardIntegration.findUnique({ where: { category_provider: { category: input.category, provider: input.provider } } });
   const existingConfig = existing?.config && typeof existing.config === "object" && !Array.isArray(existing.config) ? existing.config as Record<string, string | boolean | number> : {};

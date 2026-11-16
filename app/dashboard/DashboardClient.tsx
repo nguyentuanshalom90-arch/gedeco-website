@@ -57,8 +57,9 @@ export function DashboardClient({
     url.searchParams.set("tab", next);
     window.history.replaceState({}, "", url);
   }
-  function logout() {
-    window.location.href = "/dashboard";
+  async function logout() {
+    await fetch("/api/dashboard/logout", { method: "POST" }).catch(() => undefined);
+    window.location.href = "/vmg-login";
   }
   return (
     <div className={`lw vimigo dashboard-shell ${styles.shell}`}>

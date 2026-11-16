@@ -3,22 +3,34 @@ import { randomUUID } from "node:crypto";
 import sharp, { type Metadata } from "sharp";
 import { prisma } from "@/lib/prisma";
 import { containedMediaPath, mediaRoot } from "@/lib/media-storage";
+import { requireDashboardSession } from "@/lib/dashboard/auth";
 
 export const runtime = "nodejs";
 const MAX_BYTES = 8 * 1024 * 1024;
 const allowedFormats = new Map([["jpeg", "jpg"], ["png", "png"], ["webp", "webp"]]);
 
 export async function GET() {
+  try {
+    await requireDashboardSession();
+  } catch (error) {
+    return Response.json({ error: error instanceof Error ? error.message : "Chưa đăng nhập." }, { status: 401 });
+  }
   const assets = await prisma.mediaAsset.findMany({ orderBy: { createdAt: "desc" }, take: 100 });
   return Response.json({
-    assets: assets.map((asset) => ({ id: asset.id, name: asset.originalName, url: `/api/media/${asset.id}`, width: asset.width, height: asset.height })),
+    assets: assets.map((asset) => ({ id: asset.id, name: asset.originalName, url: `/api/media/${asset.id}`, width: asset.width, height: asset.height, altText: asset.altText, caption: asset.caption })),
   });
 }
 
 export async function POST(request: Request) {
-  if (process.env.NODE_ENV === "production") return Response.json({ error: "Upload đang chờ cấu hình xác thực dashboard production." }, { status: 503 });
+  try {
+    await requireDashboardSession();
+  } catch (error) {
+    return Response.json({ error: error instanceof Error ? error.message : "Chưa đăng nhập." }, { status: 401 });
+  }
   const form = await request.formData();
   const file = form.get("file");
+  const altText = typeof form.get("altText") === "string" ? String(form.get("altText")).trim().slice(0, 300) : "";
+  const caption = typeof form.get("caption") === "string" ? String(form.get("caption")).trim().slice(0, 500) : "";
   if (!(file instanceof File)) return Response.json({ error: "Không tìm thấy file." }, { status: 400 });
   if (file.size <= 0 || file.size > MAX_BYTES) return Response.json({ error: "Ảnh phải nhỏ hơn 8 MB." }, { status: 413 });
 
@@ -56,9 +68,11 @@ export async function POST(request: Request) {
         width: optimized.info.width,
         height: optimized.info.height,
         sizeBytes: input.length,
+        altText,
+        caption,
       },
     });
-    return Response.json({ id: asset.id, name: asset.originalName, url: `/api/media/${asset.id}`, width: asset.width, height: asset.height });
+    return Response.json({ id: asset.id, name: asset.originalName, url: `/api/media/${asset.id}`, width: asset.width, height: asset.height, altText: asset.altText, caption: asset.caption });
   } catch (error) {
     await Promise.allSettled([unlink(containedMediaPath(originalTmp)), unlink(containedMediaPath(optimizedTmp))]);
     return Response.json({ error: error instanceof Error ? error.message : "Không thể lưu ảnh." }, { status: 500 });

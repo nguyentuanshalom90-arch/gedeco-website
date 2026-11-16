@@ -7,7 +7,10 @@ export type PostInput = {
   shortDesc: string;
   content: string;
   coverImage: string | null;
+  coverImageAlt: string;
+  coverImageCaption: string;
   ogImage: string | null;
+  ogImageAlt: string;
   status: PostStatus;
   categoryName: string;
   categoryId: string | null;
@@ -36,4 +39,6 @@ export type MediaAssetItem = {
   url: string;
   width: number;
   height: number;
+  altText: string;
+  caption: string;
 };

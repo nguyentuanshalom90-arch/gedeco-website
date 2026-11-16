@@ -26,7 +26,10 @@ model NewsArticle {
   excerpt         String?
   content         String?
   imageUrl        String?
+  imageAlt        String?
+  imageCaption    String?
   ogImageUrl      String?
+  ogImageAlt      String?
   status          ArticleStatus @default(DRAFT)
   tags            String[]
   metaTitle       String?
@@ -97,7 +100,10 @@ model MediaAsset {
   width         Int
   height        Int
   sizeBytes     Int
+  altText       String   @default("")
+  caption       String   @default("")
   createdAt     DateTime @default(now())
+  updatedAt     DateTime @default(now()) @updatedAt
 }
 
 model Product {

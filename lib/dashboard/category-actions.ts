@@ -2,6 +2,7 @@
 
 import { prisma } from "@/lib/prisma";
 import type { CategoryInput, CategoryListItem } from "./category-types";
+import { requireDashboardSession } from "./auth";
 
 function slugify(value: string) {
   const slug = value
@@ -14,13 +15,6 @@ function slugify(value: string) {
     .replace(/^-+|-+$/g, "")
     .slice(0, 120);
   return slug || `danh-muc-${Date.now()}`;
-}
-
-function assertWriteAllowed() {
-  if (process.env.NODE_ENV === "production")
-    throw new Error(
-      "Chưa cấu hình xác thực quản trị cho môi trường production.",
-    );
 }
 
 type CategoryRow = Awaited<
@@ -45,6 +39,7 @@ function toItem(row: CategoryRow): CategoryListItem {
 }
 
 export async function listCategories(): Promise<CategoryListItem[]> {
+  await requireDashboardSession();
   const rows = await prisma.newsCategory.findMany({
     include: { _count: { select: { articles: true } } },
     orderBy: [{ sortOrder: "asc" }, { name: "asc" }],
@@ -55,7 +50,7 @@ export async function listCategories(): Promise<CategoryListItem[]> {
 export async function saveCategory(
   input: CategoryInput,
 ): Promise<{ ok: true; category: CategoryListItem }> {
-  assertWriteAllowed();
+  await requireDashboardSession();
   const name = input.name.trim();
   if (!name) throw new Error("Tên danh mục không được để trống.");
   const slug = slugify(input.slug || name);
@@ -88,7 +83,7 @@ export async function saveCategory(
 }
 
 export async function deleteCategory(id: string): Promise<{ ok: true }> {
-  assertWriteAllowed();
+  await requireDashboardSession();
   await prisma.newsCategory.delete({ where: { id } });
   return { ok: true };
 }

@@ -3,6 +3,7 @@
 import { prisma } from "@/lib/prisma";
 import { syncArticleTranslation } from "@/lib/translation-service";
 import type { PostInput, PostListItem } from "./post-types";
+import { requireDashboardSession } from "./auth";
 
 function slugify(value: string): string {
   const out = value
@@ -17,13 +18,6 @@ function slugify(value: string): string {
   return out || `bai-viet-${Date.now()}`;
 }
 
-function assertDashboardWriteAllowed() {
-  if (process.env.NODE_ENV === "production")
-    throw new Error(
-      "Chưa cấu hình xác thực quản trị cho môi trường production.",
-    );
-}
-
 type ArticleRow = NonNullable<
   Awaited<ReturnType<typeof prisma.newsArticle.findFirst>>
 >;
@@ -36,7 +30,10 @@ function toListItem(row: ArticleRow): PostListItem {
     shortDesc: row.excerpt ?? "",
     content: row.content ?? "",
     coverImage: row.imageUrl,
+    coverImageAlt: row.imageAlt ?? "",
+    coverImageCaption: row.imageCaption ?? "",
     ogImage: row.ogImageUrl,
+    ogImageAlt: row.ogImageAlt ?? "",
     status: row.status,
     categoryName: row.category,
     categoryId: row.categoryId,
@@ -57,6 +54,7 @@ function toListItem(row: ArticleRow): PostListItem {
 }
 
 export async function listPosts(): Promise<PostListItem[]> {
+  await requireDashboardSession();
   const rows = await prisma.newsArticle.findMany({
     orderBy: { updatedAt: "desc" },
   });
@@ -66,7 +64,7 @@ export async function listPosts(): Promise<PostListItem[]> {
 export async function savePost(
   input: PostInput,
 ): Promise<{ ok: true; post: PostListItem; translation: { status: string; errorMessage: string | null } }> {
-  assertDashboardWriteAllowed();
+  await requireDashboardSession();
   const title = input.title.trim();
   if (!title) throw new Error("Tiêu đề bài viết không được để trống.");
   if (input.status === "SCHEDULED" && !input.scheduledAt)
@@ -92,7 +90,10 @@ export async function savePost(
     excerpt: input.shortDesc.trim() || null,
     content: input.content.trim() || null,
     imageUrl: input.coverImage || null,
+    imageAlt: input.coverImageAlt.trim() || null,
+    imageCaption: input.coverImageCaption.trim() || null,
     ogImageUrl: input.ogImage || input.coverImage || null,
+    ogImageAlt: input.ogImageAlt.trim() || input.coverImageAlt.trim() || null,
     status: input.status,
     tags: [...new Set(input.tags.map((tag) => tag.trim()).filter(Boolean))],
     metaTitle: input.metaTitle.trim() || null,
@@ -120,7 +121,7 @@ export async function savePost(
 }
 
 export async function deletePost(id: string): Promise<{ ok: true }> {
-  assertDashboardWriteAllowed();
+  await requireDashboardSession();
   await prisma.newsArticle.delete({ where: { id } });
   return { ok: true };
 }
