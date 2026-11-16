@@ -55,9 +55,15 @@ model NewsCategory {
   name            String
   slug            String   @unique
   description     String?
+  nameEn          String?
+  slugEn          String?  @unique
+  descriptionEn   String?
   metaTitle       String?
   metaDescription String?
+  metaTitleEn     String?
+  metaDescriptionEn String?
   canonicalUrl    String?
+  canonicalUrlEn  String?
   robotsIndex     Boolean  @default(true)
   robotsFollow    Boolean  @default(true)
   sortOrder       Int      @default(0)
@@ -156,7 +162,7 @@ model TranslationEntry {
   updatedAt       DateTime          @updatedAt
 
   @@unique([entityType, entityId, locale])
-  @@index([entityType, locale, slug])
+  @@unique([entityType, locale, slug])
 }
 
 enum TranslationEntity {

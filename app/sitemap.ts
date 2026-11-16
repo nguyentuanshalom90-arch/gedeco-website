@@ -2,6 +2,8 @@ import type { MetadataRoute } from "next";
 import { prisma } from "@/lib/prisma";
 import { absoluteUrl } from "@/lib/site-config";
 
+export const dynamic = "force-dynamic";
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const [articles, categories, products, pages, translations] = await Promise.all([
     prisma.newsArticle.findMany({
@@ -16,11 +18,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }),
     prisma.newsCategory.findMany({
       where: { robotsIndex: true },
-      select: { slug: true, updatedAt: true },
+      select: { slug: true, slugEn: true, updatedAt: true },
     }),
     prisma.product.findMany({ where: { isPublished: true, robotsIndex: true }, select: { id: true, slug: true, category: true, updatedAt: true } }),
     prisma.sitePage.findMany({ where: { status: "PUBLISHED", robotsIndex: true }, select: { id: true, slug: true, updatedAt: true } }),
-    prisma.translationEntry.findMany({ where: { locale: "en", status: { in: ["TRANSLATED", "NEEDS_REVIEW"] }, entityType: { in: ["PRODUCT", "NEWS_ARTICLE", "SITE_PAGE"] } }, select: { entityType: true, entityId: true, slug: true } }),
+    prisma.translationEntry.findMany({ where: { locale: "en", status: { in: ["TRANSLATED", "NEEDS_REVIEW", "FAILED"] }, slug: { not: null }, entityType: { in: ["PRODUCT", "NEWS_ARTICLE", "SITE_PAGE"] } }, select: { entityType: true, entityId: true, slug: true } }),
   ]);
   const translatedSlug = new Map(translations.map((item) => [`${item.entityType}:${item.entityId}`, item.slug]));
   const staticPages = [
@@ -37,23 +39,21 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   })));
   return [
     ...staticPages,
-    ...categories.map((item) => ({
-      url: absoluteUrl(`/tin-tuc/danh-muc/${item.slug}`),
-      lastModified: item.updatedAt,
-      changeFrequency: "weekly" as const,
-      priority: 0.7,
-    })),
-    ...articles.map((item) => ({
-      url: absoluteUrl(`/tin-tuc/${item.slug}`),
-      lastModified: item.updatedAt,
-      changeFrequency: "monthly" as const,
-      priority: 0.75,
-    })),
+    ...categories.flatMap((item) => {
+      const vi = absoluteUrl(`/tin-tuc/danh-muc/${item.slug}`);
+      const enSlug = item.slugEn;
+      if (!enSlug) return [{ url: vi, lastModified: item.updatedAt, changeFrequency: "weekly" as const, priority: 0.7 }];
+      const en = absoluteUrl(`/en/news/category/${enSlug}`);
+      const alternates = { languages: { vi, en, "x-default": vi } };
+      return [{ url: vi, lastModified: item.updatedAt, changeFrequency: "weekly" as const, priority: 0.7, alternates }, { url: en, lastModified: item.updatedAt, changeFrequency: "weekly" as const, priority: 0.7, alternates }];
+    }),
     ...articles.flatMap((item) => {
       const enSlug = translatedSlug.get(`NEWS_ARTICLE:${item.id}`);
-      if (!enSlug) return [];
-      const vi = absoluteUrl(`/tin-tuc/${item.slug}`); const en = absoluteUrl(`/en/news/${enSlug}`);
-      return [{ url: en, lastModified: item.updatedAt, changeFrequency: "monthly" as const, priority: 0.75, alternates: { languages: { vi, en, "x-default": vi } } }];
+      const vi = absoluteUrl(`/tin-tuc/${item.slug}`);
+      if (!enSlug) return [{ url: vi, lastModified: item.updatedAt, changeFrequency: "monthly" as const, priority: 0.75 }];
+      const en = absoluteUrl(`/en/news/${enSlug}`);
+      const alternates = { languages: { vi, en, "x-default": vi } };
+      return [{ url: vi, lastModified: item.updatedAt, changeFrequency: "monthly" as const, priority: 0.75, alternates }, { url: en, lastModified: item.updatedAt, changeFrequency: "monthly" as const, priority: 0.75, alternates }];
     }),
     ...products.flatMap((item) => {
       const category = item.category === "EXPORT" ? "xuat-khau" : "trong-nuoc";

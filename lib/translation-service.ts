@@ -30,6 +30,9 @@ type ArticleSource = {
   category: string;
   excerpt: string | null;
   content: string | null;
+  imageAlt: string | null;
+  imageCaption: string | null;
+  ogImageAlt: string | null;
   tags: string[];
   metaTitle: string | null;
   metaDescription: string | null;
@@ -178,17 +181,20 @@ export async function translateProduct(source: ProductSource) {
 
 export async function translateArticle(source: ArticleSource) {
   const config = getProviderConfig();
-  const [title, category, excerpt, content, metaTitle, metaDescription, focusKeyword] = await Promise.all([
+  const [title, category, excerpt, content, imageAlt, imageCaption, ogImageAlt, metaTitle, metaDescription, focusKeyword] = await Promise.all([
     translateText(source.title, config),
     translateText(source.category, config),
     translateText(source.excerpt || "", config),
     translateHtml(source.content || "", config),
+    translateText(source.imageAlt || source.title, config),
+    translateText(source.imageCaption || "", config),
+    translateText(source.ogImageAlt || source.imageAlt || source.title, config),
     translateText(source.metaTitle || source.title, config),
     translateText(source.metaDescription || source.excerpt || "", config),
     translateText(source.focusKeyword || "", config),
   ]);
   const tags = await Promise.all(source.tags.map((tag) => translateText(tag, config)));
-  return { provider: config.provider, payload: { title, category, excerpt, content, metaTitle, metaDescription, focusKeyword, tags: JSON.stringify(tags) }, slug: slugify(title) };
+  return { provider: config.provider, payload: { title, category, excerpt, content, imageAlt, imageCaption, ogImageAlt, metaTitle, metaDescription, focusKeyword, tags: JSON.stringify(tags) }, slug: slugify(title) };
 }
 
 type TranslationEntityType = "PRODUCT" | "NEWS_ARTICLE" | "SITE_PAGE" | "SITE_CONTENT" | "SITE_CHROME";
@@ -252,7 +258,7 @@ export async function syncProductTranslation(source: ProductSource) {
 }
 
 export async function syncArticleTranslation(source: ArticleSource) {
-  const sourceHash = hashSource({ title: source.title, category: source.category, excerpt: source.excerpt, content: source.content, tags: source.tags, metaTitle: source.metaTitle, metaDescription: source.metaDescription, focusKeyword: source.focusKeyword });
+  const sourceHash = hashSource({ title: source.title, category: source.category, excerpt: source.excerpt, content: source.content, imageAlt: source.imageAlt, imageCaption: source.imageCaption, ogImageAlt: source.ogImageAlt, tags: source.tags, metaTitle: source.metaTitle, metaDescription: source.metaDescription, focusKeyword: source.focusKeyword });
   const current = await prisma.translationEntry.findUnique({ where: { entityType_entityId_locale: { entityType: "NEWS_ARTICLE", entityId: source.id, locale: "en" } } });
   if (current?.sourceHash === sourceHash && current.status === "TRANSLATED") return current;
   if (current?.manualOverride) return prisma.translationEntry.update({ where: { id: current.id }, data: { sourceUpdatedAt: source.updatedAt, sourceHash, status: "NEEDS_REVIEW", errorMessage: null } });

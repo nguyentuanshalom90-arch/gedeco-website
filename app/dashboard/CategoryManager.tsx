@@ -17,9 +17,15 @@ const EMPTY_CATEGORY: CategoryInput = {
   name: "",
   slug: "",
   description: "",
+  nameEn: "",
+  slugEn: "",
+  descriptionEn: "",
   metaTitle: "",
   metaDescription: "",
+  metaTitleEn: "",
+  metaDescriptionEn: "",
   canonicalUrl: "",
+  canonicalUrlEn: "",
   robotsIndex: true,
   robotsFollow: true,
   sortOrder: 0,
@@ -270,6 +276,49 @@ export function CategoryManager() {
               }
             />
           </label>
+          <div className="cms-category-seo">
+            <p className="eyebrow">NỘI DUNG TIẾNG ANH</p>
+            <label className="field">
+              <span>Tên danh mục English</span>
+              <input
+                className="input"
+                value={draft.nameEn}
+                onChange={(event) => set("nameEn", event.target.value)}
+                placeholder="VD: Market"
+              />
+            </label>
+            <label className="field">
+              <span>English slug</span>
+              <input
+                className="input"
+                value={draft.slugEn}
+                onChange={(event) => set("slugEn", slugify(event.target.value))}
+                placeholder="market"
+              />
+            </label>
+            <label className="field">
+              <span>Mô tả English <small>{draft.descriptionEn.length}/300</small></span>
+              <textarea
+                className="input"
+                maxLength={300}
+                value={draft.descriptionEn}
+                onChange={(event) => set("descriptionEn", event.target.value)}
+                placeholder="Short category introduction…"
+              />
+            </label>
+            <label className="field">
+              <span>English SEO title <small>{draft.metaTitleEn.length}/65</small></span>
+              <input className="input" maxLength={70} value={draft.metaTitleEn} onChange={(event) => set("metaTitleEn", event.target.value)} placeholder={draft.nameEn || "Category title"} />
+            </label>
+            <label className="field">
+              <span>English meta description <small>{draft.metaDescriptionEn.length}/160</small></span>
+              <textarea className="input" maxLength={170} value={draft.metaDescriptionEn} onChange={(event) => set("metaDescriptionEn", event.target.value)} placeholder={draft.descriptionEn || "Description shown in search results"} />
+            </label>
+            <label className="field">
+              <span>English canonical URL</span>
+              <input className="input" type="url" value={draft.canonicalUrlEn} onChange={(event) => set("canonicalUrlEn", event.target.value)} placeholder="https://gedeco.vn/en/news/category/..." />
+            </label>
+          </div>
           <div className="cms-category-seo">
             <p className="eyebrow">SEO TRANG DANH MỤC</p>
             <label className="field">

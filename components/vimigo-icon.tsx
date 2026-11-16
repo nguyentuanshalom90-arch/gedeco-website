@@ -10,6 +10,7 @@ const ICONS: Record<string, string> = {
   search: "M11 4a7 7 0 105 12 7 7 0 00-5-12zM20 21l-4.3-4.3",
   bell: "M18 8a6 6 0 10-12 0c0 7-3 8-3 8h18s-3-1-3-8M13.7 21a2 2 0 01-3.4 0",
   plus: "M12 5v14M5 12h14",
+  close: "M6 6l12 12M18 6L6 18",
   chevron: "M9 6l6 6-6 6",
   check: "M5 13l4 4L19 7",
   settings:

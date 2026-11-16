@@ -34,12 +34,17 @@ export async function generateMetadata({
   const canonical =
     article.canonicalUrl || absoluteUrl(`/tin-tuc/${article.slug}`);
   const image = article.ogImageUrl || article.imageUrl;
+  const english = await prisma.translationEntry.findUnique({ where: { entityType_entityId_locale: { entityType: "NEWS_ARTICLE", entityId: article.id, locale: "en" } } });
+  const translatedPayload = english?.payload && typeof english.payload === "object" && !Array.isArray(english.payload) ? english.payload as Record<string, unknown> : {};
+  const languages = english?.slug && typeof translatedPayload.title === "string" && translatedPayload.title.trim()
+    ? { vi: canonical, en: absoluteUrl(`/en/news/${english.slug}`), "x-default": canonical }
+    : { vi: canonical, "x-default": canonical };
   return {
     title,
     description,
     keywords: article.tags,
     authors: article.authorName ? [{ name: article.authorName }] : undefined,
-    alternates: { canonical },
+    alternates: { canonical, languages },
     robots: { index: article.robotsIndex, follow: article.robotsFollow },
     openGraph: {
       type: "article",
@@ -51,7 +56,7 @@ export async function generateMetadata({
       publishedTime: article.publishedAt?.toISOString(),
       modifiedTime: article.updatedAt.toISOString(),
       images: image
-        ? [{ url: absoluteUrl(image), alt: article.title }]
+        ? [{ url: absoluteUrl(image), alt: article.ogImageAlt || article.imageAlt || article.title }]
         : undefined,
     },
     twitter: {
@@ -166,11 +171,10 @@ export default async function CmsArticlePage({
           <div className="article-main">
             <p className="article-lead">{article.excerpt || "Cập nhật những câu chuyện và cơ hội mới nhất từ GEDECO."}</p>
             {article.imageUrl && (
-              <img
-                className="article-cover"
-                src={article.imageUrl}
-                alt={article.title}
-              />
+              <figure>
+                <img className="article-cover" src={article.imageUrl} alt={article.imageAlt || article.title} />
+                {article.imageCaption && <figcaption>{article.imageCaption}</figcaption>}
+              </figure>
             )}
             <ArticleContent content={article.content} />
             <div className="article-tags"><strong>Từ khóa:</strong>{article.tags.map((tag) => <a key={tag} href={`/tin-tuc?tag=${encodeURIComponent(tag)}`}>#{tag}</a>)}</div>
@@ -198,7 +202,7 @@ export default async function CmsArticlePage({
             <div className="side-box">
               <h3>Bài viết liên quan</h3>
               {related.map((item) => (
-                <a className="article-related-item" key={item.id} href={`/tin-tuc/${item.slug}`}><img src={item.imageUrl || "/assets/news-1-derivative.png"} alt={item.title} /><span><b>{item.title}</b><small>{(item.publishedAt || item.scheduledAt || item.createdAt).toLocaleDateString("vi-VN")}</small></span></a>
+                <a className="article-related-item" key={item.id} href={`/tin-tuc/${item.slug}`}><img src={item.imageUrl || "/assets/news-1-derivative.png"} alt={item.imageAlt || item.title} /><span><b>{item.title}</b><small>{(item.publishedAt || item.scheduledAt || item.createdAt).toLocaleDateString("vi-VN")}</small></span></a>
               ))}
             </div>
             <div className="article-newsletter">

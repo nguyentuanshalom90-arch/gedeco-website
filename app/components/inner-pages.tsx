@@ -107,8 +107,8 @@ export function CTA({ title = 'Hãy để chúng tôi đồng hành cùng bạn'
   return <section className="inner-cta"><div className="container"><p className="eyebrow">{english ? 'CONTACT GEDECO' : 'LIÊN HỆ VỚI GEDECO'}</p><h2>{title}</h2><p>{body}</p><div className="hero-actions"><a className="button button-gold" href={english ? '/en/contact' : '/lien-he'}>{english ? 'Contact us' : 'Liên hệ ngay'} <Icon name="arrow" /></a><a className="button button-outline light" href="mailto:info@gedeco.vn">{english ? 'Send an enquiry' : 'Gửi yêu cầu tư vấn'}</a></div></div></section>;
 }
 
-export function NewsCard({ item, href = '/tin-tuc/chi-tiet', excerpt = '', readLabel = 'Đọc thêm' }: { item: string[]; href?: string; excerpt?: string; readLabel?: string }) {
+export function NewsCard({ item, href = '/tin-tuc/chi-tiet', excerpt = '', readLabel = 'Đọc thêm', imageAlt }: { item: string[]; href?: string; excerpt?: string; readLabel?: string; imageAlt?: string }) {
   const [image = '', category = '', date = '', title = ''] = item || [];
   const imageUrl = image.startsWith('/') ? image : `/assets/${image}`;
-  return <article className="inner-news-card"><img src={imageUrl} alt={title} /><small>{category} <span>{date}</span></small><h3>{title}</h3>{excerpt && <p>{excerpt}</p>}<a href={href}>{readLabel} <Icon name="arrow" /></a></article>;
+  return <article className="inner-news-card"><img src={imageUrl} alt={imageAlt || title} /><small>{category} <span>{date}</span></small><h3>{title}</h3>{excerpt && <p>{excerpt}</p>}<a href={href}>{readLabel} <Icon name="arrow" /></a></article>;
 }

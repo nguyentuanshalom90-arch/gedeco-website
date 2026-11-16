@@ -26,9 +26,15 @@ function toItem(row: CategoryRow): CategoryListItem {
     name: row.name,
     slug: row.slug,
     description: row.description ?? "",
+    nameEn: row.nameEn ?? "",
+    slugEn: row.slugEn ?? "",
+    descriptionEn: row.descriptionEn ?? "",
     metaTitle: row.metaTitle ?? "",
     metaDescription: row.metaDescription ?? "",
+    metaTitleEn: row.metaTitleEn ?? "",
+    metaDescriptionEn: row.metaDescriptionEn ?? "",
     canonicalUrl: row.canonicalUrl ?? "",
+    canonicalUrlEn: row.canonicalUrlEn ?? "",
     robotsIndex: row.robotsIndex,
     robotsFollow: row.robotsFollow,
     sortOrder: row.sortOrder,
@@ -54,17 +60,27 @@ export async function saveCategory(
   const name = input.name.trim();
   if (!name) throw new Error("Tên danh mục không được để trống.");
   const slug = slugify(input.slug || name);
+  const slugEn = input.slugEn.trim() ? slugify(input.slugEn) : null;
   const duplicate = await prisma.newsCategory.findFirst({
-    where: { slug, ...(input.id ? { NOT: { id: input.id } } : {}) },
+    where: {
+      OR: [{ slug }, ...(slugEn ? [{ slugEn }] : [])],
+      ...(input.id ? { NOT: { id: input.id } } : {}),
+    },
   });
   if (duplicate) throw new Error("Đường dẫn danh mục đã tồn tại.");
   const data = {
     name,
     slug,
     description: input.description.trim() || null,
+    nameEn: input.nameEn.trim() || null,
+    slugEn,
+    descriptionEn: input.descriptionEn.trim() || null,
     metaTitle: input.metaTitle.trim() || null,
     metaDescription: input.metaDescription.trim() || null,
+    metaTitleEn: input.metaTitleEn.trim() || null,
+    metaDescriptionEn: input.metaDescriptionEn.trim() || null,
     canonicalUrl: input.canonicalUrl.trim() || null,
+    canonicalUrlEn: input.canonicalUrlEn.trim() || null,
     robotsIndex: input.robotsIndex,
     robotsFollow: input.robotsFollow,
     sortOrder: Number.isFinite(input.sortOrder) ? input.sortOrder : 0,

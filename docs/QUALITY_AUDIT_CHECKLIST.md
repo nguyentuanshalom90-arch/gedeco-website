@@ -1,6 +1,6 @@
 # Checklist chất lượng backend, database, frontend và SEO
 
-Cập nhật: 2026-11-16. Trạng thái dùng bốn mức: `PASS`, `ĐANG LÀM`, `THIẾU`, `CHỜ LIVE`.
+Cập nhật: 2026-11-17. Trạng thái dùng bốn mức: `PASS`, `ĐANG LÀM`, `THIẾU`, `CHỜ LIVE`.
 
 ## 1. Chuỗi dữ liệu admin → database → frontend
 
@@ -12,13 +12,13 @@ Cập nhật: 2026-11-16. Trạng thái dùng bốn mức: `PASS`, `ĐANG LÀM`,
 | Media sản phẩm | Mọi vị trí có `Chọn từ thư viện` và `Tải ảnh lên`; ảnh chính/album có alt/caption | PASS local |
 | SEO sản phẩm | Title, description, canonical, robots, OG image, hreflang, Product/Breadcrumb JSON-LD | PASS local |
 | Danh mục sản phẩm | CRUD database, song ngữ, SEO, thứ tự, ẩn/hiện, route frontend | THIẾU |
-| Bài viết | CRUD, nháp/lên lịch/xuất bản, category, tag, media, SEO | ĐANG LÀM |
-| Danh mục bài viết | CRUD, SEO, liên kết bài viết, xóa an toàn | ĐANG LÀM |
-| English bài viết | Nội dung, metadata, slug và route English lấy từ TranslationEntry | THIẾU: route detail đang tái dùng renderer VI |
+| Bài viết | CRUD, nháp/lên lịch/xuất bản, category, tag, media alt/caption, SEO | PASS local; CHỜ LIVE migration |
+| Danh mục bài viết | CRUD, SEO VI/EN, slug/canonical riêng, liên kết bài viết, xóa an toàn | PASS local; CHỜ LIVE migration |
+| English bài viết | Nội dung, metadata, media alt/caption, slug và route English lấy từ TranslationEntry | PASS local |
 | Page tùy biến | CRUD section bằng form trực quan; media đầy đủ; draft/publish; SEO; song ngữ | THIẾU: editor còn nhập JSON |
 | Nội dung page hiện hữu | Mọi section frontend đọc database; không ghi file release khi production | THIẾU: một phần static còn ghi JSON |
 | Header/footer | CRUD database, media, link, alt, song ngữ, render toàn site | ĐANG LÀM |
-| Bản dịch | Có trạng thái, lỗi không ghi đè bản tốt, cho phép sửa thủ công, slug unique theo locale | ĐANG LÀM |
+| Bản dịch | Có trạng thái, lỗi không ghi đè/ẩn bản tốt, cho phép sửa thủ công, slug unique theo entity + locale | PASS product/news local; còn page audit |
 | Toàn vẹn giao dịch | Ghi entity và quan hệ media trong transaction; unique/foreign key/validation | PASS sản phẩm; cần rà các module còn lại |
 | Kiểm thử hồi quy | CRUD + render + upload lỗi MIME/EACCES/ENOENT/quota/0 byte + song ngữ | THIẾU |
 
@@ -39,11 +39,11 @@ Nguồn chuẩn:
 |---|---|---|
 | Crawl/index | HTTP 200 đúng trang; 404 thật; draft/noindex; robots không chặn tài nguyên render | ĐANG LÀM |
 | Canonical | Self-canonical tuyệt đối/không mâu thuẫn; HTTP/www về HTTPS apex | PASS cấu hình; CHỜ LIVE regression |
-| Sitemap | Chỉ URL canonical/indexable; có sản phẩm, bài, page, VI–EN và lastModified thật | PASS local |
-| Hreflang | Cặp VI/EN hai chiều và x-default; canonical cùng ngôn ngữ | PASS sản phẩm/static; thiếu news/page audit |
+| Sitemap | Chỉ URL canonical/indexable; có sản phẩm, bài, category, page, VI–EN và lastModified thật; cập nhật động sau CRUD | PASS local |
+| Hreflang | Cặp VI/EN hai chiều và x-default; canonical cùng ngôn ngữ | PASS sản phẩm/news/static; thiếu page audit toàn bộ |
 | Metadata | Title/description riêng từng URL; robots; OG/Twitter; không trùng hàng loạt | ĐANG LÀM |
-| Structured data | Organization, Breadcrumb, Article, Product hợp lệ và khớp nội dung nhìn thấy | ĐANG LÀM |
-| Hình ảnh | Ảnh chất lượng gần nội dung liên quan; alt mô tả; WebP derivative; width/height khi phù hợp | ĐANG LÀM |
+| Structured data | Organization, Breadcrumb, Article, Product hợp lệ và khớp nội dung nhìn thấy | PASS product/news local; còn audit page toàn site |
+| Hình ảnh | Ảnh chất lượng gần nội dung liên quan; alt mô tả; caption; WebP derivative; width/height khi phù hợp | PASS product/news local; còn audit page toàn site |
 | Nội dung | Hữu ích, nguyên bản, cập nhật, heading rõ; không keyword stuffing/meta keywords | ĐANG LÀM |
 | Internal links | Link crawl được, anchor mô tả, không orphan page, breadcrumb nhất quán | THIẾU audit toàn site |
 | Core Web Vitals | LCP ≤ 2,5 giây; INP < 200 ms; CLS < 0,1 ở percentile 75 | THIẾU đo field data/Search Console |
@@ -60,6 +60,13 @@ Nguồn chuẩn:
 - Không bắt người dùng chỉnh JSON/HTML thô ở các luồng nội dung thông thường.
 - Có preview URL, metadata và trạng thái bản dịch trước khi xuất bản.
 - Audit screenshot desktop, tablet và mobile trước khi đóng mỗi module frontend.
+
+### Bằng chứng audit module tin tức ngày 2026-11-17
+
+- Build production local PASS; TypeScript và Prisma validate PASS.
+- QA tạm đã chứng minh English listing/detail/category đọc đúng `TranslationEntry` và trường English của `NewsCategory`; không fallback nội dung tiếng Việt.
+- Canonical, hreflang VI/EN/x-default, Article + Breadcrumb JSON-LD, alt/caption và sitemap động đều được kiểm tra trên HTTP 200.
+- Screenshot Chrome desktop/mobile PASS cho article English và admin category. Sidebar admin mobile được thu gọn mặc định để nội dung tác vụ xuất hiện trước; dữ liệu QA đã được xóa sau kiểm tra.
 
 ## 4. Điều kiện trước production
 

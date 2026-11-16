@@ -141,6 +141,7 @@ export default async function NewsCategoryPage({
                     ).toLocaleDateString("vi-VN"),
                     article.title,
                   ]}
+                  imageAlt={article.imageAlt || article.title}
                 />
               ))
             ) : (

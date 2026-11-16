@@ -63,6 +63,7 @@ export default async function NewsPage({ searchParams }: { searchParams: Promise
     ],
     href: `/tin-tuc/${article.slug}`,
     excerpt: article.excerpt || "",
+    imageAlt: article.imageAlt || article.title,
   }));
   const fallbackItems = innerNews.concat(innerNews).map((item, index) => ({
     item: [item[0], item[1], item[2], index < innerNews.length ? item[3] : [
@@ -72,6 +73,7 @@ export default async function NewsPage({ searchParams }: { searchParams: Promise
     ][index - innerNews.length] || item[3]],
     href: "/tin-tuc/chi-tiet",
     excerpt: "Cập nhật những chuyển động mới của thị trường và các giải pháp giúp doanh nghiệp nâng cao năng lực cạnh tranh.",
+    imageAlt: item[3],
   }));
   const fallbackOnly = fallbackItems.filter(({ item }) => !cmsItemsAll.some(({ item: cmsItem }) => cmsItem[3] === item[3]));
   const allItems = cmsItemsAll.length ? [...cmsItemsAll, ...fallbackOnly] : fallbackItems;
@@ -102,8 +104,8 @@ export default async function NewsPage({ searchParams }: { searchParams: Promise
             ))}
           </nav>
           <div className="news-three-column-grid">
-            {displayItems.map(({ item, href, excerpt }, index) => (
-              <NewsCard key={`${href}-${index}`} item={item} href={href} excerpt={excerpt} />
+            {displayItems.map(({ item, href, excerpt, imageAlt }, index) => (
+              <NewsCard key={`${href}-${index}`} item={item} href={href} excerpt={excerpt} imageAlt={imageAlt} />
             ))}
           </div>
           {pageCount > 1 && <nav className="news-pagination" aria-label="Phân trang tin tức">{safePage > 1 && <a href={`/tin-tuc?trang=${safePage - 1}`}>← Trang trước</a>}<span>Trang {safePage} / {pageCount}</span>{safePage < pageCount && <a href={`/tin-tuc?trang=${safePage + 1}`}>Trang sau →</a>}</nav>}

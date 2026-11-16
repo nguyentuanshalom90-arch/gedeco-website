@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { Icon } from "@/components/vimigo-icon";
 import type { DashboardTab } from "./DashboardClient";
 
@@ -20,9 +21,10 @@ const navItems: Array<{ id: DashboardTab; label: string; icon: string }> = [
 ];
 
 export function BimiSidebar({ tab, onSelectTab, onLogout }: BimiSidebarProps) {
+  const [mobileOpen, setMobileOpen] = useState(false);
   return (
     <aside
-      className="lw-side dashboard-sidebar"
+      className={`lw-side dashboard-sidebar${mobileOpen ? " mobile-open" : ""}`}
       style={{
         width: 300,
         flex: "0 0 300px",
@@ -49,6 +51,16 @@ export function BimiSidebar({ tab, onSelectTab, onLogout }: BimiSidebarProps) {
           />
         </a>
       </div>
+      <button
+        type="button"
+        className="mobile-sidebar-toggle"
+        aria-expanded={mobileOpen}
+        aria-label={mobileOpen ? "Đóng menu quản trị" : "Mở menu quản trị"}
+        onClick={() => setMobileOpen((current) => !current)}
+      >
+        <Icon name={mobileOpen ? "close" : "grid"} size={18} />
+        {mobileOpen ? "Đóng menu" : "Menu quản trị"}
+      </button>
       <div
         className="panel brand-card"
         style={{
@@ -106,7 +118,10 @@ export function BimiSidebar({ tab, onSelectTab, onLogout }: BimiSidebarProps) {
           <button
             key={item.id}
             type="button"
-            onClick={() => onSelectTab(item.id)}
+            onClick={() => {
+              onSelectTab(item.id);
+              setMobileOpen(false);
+            }}
             className={`nav-item${tab === item.id ? " active" : ""}`}
           >
             <Icon name={item.icon} />
