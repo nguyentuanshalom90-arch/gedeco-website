@@ -1,4 +1,11 @@
-export type GedecoProductDetail = { slug: string; title: string; category: 'Sản phẩm trong nước' | 'Sản phẩm xuất khẩu'; image: string; description: string; contentHtml: string; gallery: string[]; summaryHtml: string; priceText: string; stockText: string; shipperImage: string; };
+export type ProductGalleryImage = { url: string; altText: string; caption: string };
+export type GedecoProductDetail = {
+  slug: string; title: string; category: 'Sản phẩm trong nước' | 'Sản phẩm xuất khẩu'; image: string;
+  imageAlt?: string; imageCaption?: string; description: string; contentHtml: string; gallery: string[];
+  galleryMedia?: ProductGalleryImage[]; summaryHtml: string; priceText: string; stockText: string; shipperImage: string;
+  ogImage?: string; ogImageAlt?: string; metaTitle?: string; metaDescription?: string; canonicalUrl?: string;
+  robotsIndex?: boolean; robotsFollow?: boolean;
+};
 
 export const gedecoProductDetails: GedecoProductDetail[] = [
   {

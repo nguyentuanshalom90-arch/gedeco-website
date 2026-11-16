@@ -14,7 +14,13 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
     if (!data.length) return new Response("Not found", { status: 404 });
     return new Response(new Uint8Array(data), { headers: { "Content-Type": "image/webp", "Cache-Control": "public, max-age=31536000, immutable" } });
   } catch {
-    return new Response("Not found", { status: 404 });
+    try {
+      const original = await readFile(containedMediaPath(asset.originalFile));
+      if (!original.length) return new Response("Not found", { status: 404 });
+      return new Response(new Uint8Array(original), { headers: { "Content-Type": asset.mime, "Cache-Control": "public, max-age=3600" } });
+    } catch {
+      return new Response("Not found", { status: 404 });
+    }
   }
 }
 

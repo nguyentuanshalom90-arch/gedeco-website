@@ -32,6 +32,12 @@ try {
   Push-Location $projectRoot
   & npm.cmd run build:next
   if ($LASTEXITCODE -ne 0) { throw "next build failed with exit code $LASTEXITCODE" }
+  $standaloneRoot = Join-Path $projectRoot '.next\standalone'
+  $standaloneStatic = Join-Path $standaloneRoot '.next\static'
+  $standalonePublic = Join-Path $standaloneRoot 'public'
+  New-Item -ItemType Directory -Force -Path $standaloneStatic, $standalonePublic | Out-Null
+  Copy-Item -Path (Join-Path $projectRoot '.next\static\*') -Destination $standaloneStatic -Recurse -Force
+  Copy-Item -Path (Join-Path $projectRoot 'public\*') -Destination $standalonePublic -Recurse -Force
 } finally {
   Pop-Location
   & powershell.exe -ExecutionPolicy Bypass -File (Join-Path $projectRoot 'scripts/start-local.ps1')

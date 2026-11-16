@@ -64,8 +64,27 @@ foreach ($listener in $listeners) {
 Remove-Item -LiteralPath $logPath -Force -ErrorAction SilentlyContinue
 Remove-Item -LiteralPath $errorLogPath -Force -ErrorAction SilentlyContinue
 
-Start-Process -FilePath 'npm.cmd' `
-  -ArgumentList @('run', 'start', '--', '-p', $Port) `
+$env:PORT = "$Port"
+$env:HOSTNAME = '127.0.0.1'
+$localEnvPath = Join-Path $projectRoot '.env.local'
+if (Test-Path -LiteralPath $localEnvPath) {
+  foreach ($line in Get-Content -LiteralPath $localEnvPath) {
+    if ($line -match '^([A-Z_][A-Z0-9_]*)=(.*)$') {
+      $key = $matches[1]
+      $value = $matches[2].Trim()
+      if (($value.StartsWith('"') -and $value.EndsWith('"')) -or ($value.StartsWith("'") -and $value.EndsWith("'"))) {
+        $value = $value.Substring(1, $value.Length - 2)
+      }
+      [Environment]::SetEnvironmentVariable($key, $value, 'Process')
+    }
+  }
+}
+if ([string]::IsNullOrWhiteSpace($env:MEDIA_ROOT)) {
+  $env:MEDIA_ROOT = Join-Path $projectRoot '.uploads'
+}
+$standaloneServer = Join-Path $projectRoot '.next\standalone\server.js'
+Start-Process -FilePath 'node.exe' `
+  -ArgumentList @("`"$standaloneServer`"") `
   -WorkingDirectory $projectRoot `
   -WindowStyle Hidden `
   -RedirectStandardOutput $logPath `

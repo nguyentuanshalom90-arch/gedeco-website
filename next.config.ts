@@ -14,7 +14,6 @@ const nextConfig: NextConfig = {
       { source: '/en/doi-tac', destination: '/en/partners', permanent: false },
       { source: '/en/lien-he', destination: '/en/contact', permanent: false },
       { source: '/en/san-pham', destination: '/en/products', permanent: false },
-      { source: '/en/san-pham/:slug*', destination: '/en/products/:slug*', permanent: false },
     ];
   },
 };

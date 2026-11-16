@@ -13,6 +13,12 @@ type ProductSource = {
   contentHtml: string;
   priceText: string;
   stockText: string;
+  imageAlt: string;
+  imageCaption: string;
+  ogImageAlt: string;
+  metaTitle: string | null;
+  metaDescription: string | null;
+  gallery: Array<{ id: string; altText: string; caption: string }>;
   category: "DOMESTIC" | "EXPORT";
   updatedAt: Date;
 };
@@ -146,17 +152,26 @@ async function translateHtml(html: string, config: TranslationProviderConfig) {
 
 export async function translateProduct(source: ProductSource) {
   const config = getProviderConfig();
-  const [title, description, summaryHtml, contentHtml, priceText, stockText] = await Promise.all([
+  const [title, description, summaryHtml, contentHtml, priceText, stockText, imageAlt, imageCaption, ogImageAlt, metaTitle, metaDescription] = await Promise.all([
     translateText(source.title, config),
     translateText(source.description, config),
     translateHtml(source.summaryHtml, config),
     translateHtml(source.contentHtml, config),
     translateText(source.priceText, config),
     translateText(source.stockText, config),
+    translateText(source.imageAlt, config),
+    translateText(source.imageCaption, config),
+    translateText(source.ogImageAlt, config),
+    translateText(source.metaTitle || source.title, config),
+    translateText(source.metaDescription || source.description, config),
   ]);
+  const galleryPairs = await Promise.all(source.gallery.flatMap((item) => [
+    translateText(item.altText, config).then((value) => [`galleryAlt_${item.id}`, value] as const),
+    translateText(item.caption, config).then((value) => [`galleryCaption_${item.id}`, value] as const),
+  ]));
   return {
     provider: config.provider,
-    payload: { title, description, summaryHtml, contentHtml, priceText, stockText, category: source.category === "EXPORT" ? "Export products" : "Domestic products" },
+    payload: { title, description, summaryHtml, contentHtml, priceText, stockText, imageAlt, imageCaption, ogImageAlt, metaTitle, metaDescription, ...Object.fromEntries(galleryPairs), category: source.category === "EXPORT" ? "Export products" : "Domestic products" },
     slug: slugify(title),
   };
 }
@@ -220,7 +235,7 @@ export function syncSiteChromeTranslation(source: SimpleContentSource) {
 }
 
 export async function syncProductTranslation(source: ProductSource) {
-  const sourceHash = hashSource({ title: source.title, description: source.description, summaryHtml: source.summaryHtml, contentHtml: source.contentHtml, priceText: source.priceText, stockText: source.stockText, category: source.category });
+  const sourceHash = hashSource({ title: source.title, description: source.description, summaryHtml: source.summaryHtml, contentHtml: source.contentHtml, priceText: source.priceText, stockText: source.stockText, imageAlt: source.imageAlt, imageCaption: source.imageCaption, ogImageAlt: source.ogImageAlt, metaTitle: source.metaTitle, metaDescription: source.metaDescription, gallery: source.gallery.map((item) => ({ id: item.id, altText: item.altText, caption: item.caption })), category: source.category });
   const current = await prisma.translationEntry.findUnique({ where: { entityType_entityId_locale: { entityType: "PRODUCT", entityId: source.id, locale: "en" } } });
   if (current?.sourceHash === sourceHash && current.status === "TRANSLATED") return current;
   if (current?.manualOverride) return prisma.translationEntry.update({ where: { id: current.id }, data: { sourceUpdatedAt: source.updatedAt, sourceHash, status: "NEEDS_REVIEW", errorMessage: null } });

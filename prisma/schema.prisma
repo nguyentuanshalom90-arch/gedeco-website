@@ -117,7 +117,16 @@ model Product {
   priceText       String        @default("Liên hệ")
   stockText       String        @default("Còn hàng")
   imageUrl        String        @default("")
+  imageAlt        String        @default("")
+  imageCaption    String        @default("")
   shipperImageUrl String        @default("")
+  ogImageUrl      String        @default("")
+  ogImageAlt      String        @default("")
+  metaTitle       String?
+  metaDescription String?
+  canonicalUrl    String?
+  robotsIndex     Boolean       @default(true)
+  robotsFollow    Boolean       @default(true)
   isPublished     Boolean       @default(true)
   sortOrder       Int           @default(0)
   createdAt       DateTime      @default(now())
@@ -170,6 +179,7 @@ model ProductMedia {
   productId String
   url       String
   altText   String  @default("")
+  caption   String  @default("")
   sortOrder Int     @default(0)
   isPrimary Boolean @default(false)
 

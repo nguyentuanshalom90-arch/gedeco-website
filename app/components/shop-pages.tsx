@@ -86,10 +86,12 @@ export function ShopProductCard({ product, className = '', language = 'vi', onMo
   return <article className={`shop-product-card ${className}`.trim()} onMouseEnter={onMouseEnter} onFocus={onFocus}><Link href={href} className="shop-product-image"><img src={product.image} alt={title} /></Link><div className="shop-product-body" style={{ display: 'flex', flexDirection: 'column', flex: 1 }}><h3 style={{ height: '42.5px', minHeight: '42.5px', display: '-webkit-box', WebkitBoxOrient: 'vertical', WebkitLineClamp: 2, overflow: 'hidden' }}><Link href={href}>{title}</Link></h3><Link className="shop-product-cta" style={{ alignSelf: 'flex-start', marginTop: 'auto' }} href={href}>{english ? 'View details' : 'Xem chi tiết'} <Icon name="arrow" /></Link></div></article>;
 }
 
-export function ProductDetailGallery({ gallery, title, language = 'vi' }: { gallery: string[]; title: string; language?: ShopLanguage }) {
-  const [selectedImage, setSelectedImage] = useState(gallery[0] || '');
+export function ProductDetailGallery({ gallery, title, language = 'vi' }: { gallery: Array<string | { url: string; altText?: string; caption?: string }>; title: string; language?: ShopLanguage }) {
+  const images = gallery.map((item, index) => typeof item === 'string' ? { url: item, altText: `${title} ${index + 1}`, caption: '' } : { url: item.url, altText: item.altText || `${title} ${index + 1}`, caption: item.caption || '' });
+  const [selectedImage, setSelectedImage] = useState(images[0]?.url || '');
+  const selected = images.find((item) => item.url === selectedImage) || images[0];
   const english = language === 'en';
-  return <div className="shop-detail-gallery"><div className="shop-detail-main-image"><img src={selectedImage} alt={title} /></div><div className="shop-detail-thumbs" role="list" aria-label={english ? 'Product image gallery' : 'Album ảnh sản phẩm'}>{gallery.map((image, index) => <button type="button" key={image} className={selectedImage === image ? 'active' : ''} onClick={() => setSelectedImage(image)} aria-label={`${english ? 'View image' : 'Xem ảnh'} ${index + 1}`}><img src={image} alt={`${title} ${index + 1}`} /></button>)}</div></div>;
+  return <div className="shop-detail-gallery"><div className="shop-detail-main-image"><img src={selectedImage} alt={selected?.altText || title} />{selected?.caption ? <p className="shop-image-caption">{selected.caption}</p> : null}</div><div className="shop-detail-thumbs" role="list" aria-label={english ? 'Product image gallery' : 'Album ảnh sản phẩm'}>{images.map((image, index) => <button type="button" key={`${image.url}-${index}`} className={selectedImage === image.url ? 'active' : ''} onClick={() => setSelectedImage(image.url)} aria-label={`${english ? 'View image' : 'Xem ảnh'} ${index + 1}: ${image.altText}`}><img src={image.url} alt={image.altText} /></button>)}</div></div>;
 }
 
 export function ShopGuarantee({ language = 'vi' }: { language?: ShopLanguage }) {
