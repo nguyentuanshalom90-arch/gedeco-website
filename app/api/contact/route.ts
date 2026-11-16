@@ -34,24 +34,25 @@ export async function POST(request: Request) {
     let emailDelivered = false;
     const smtp = getSmtpTransport();
     const receiver = process.env.CONTACT_EMAIL?.trim() || process.env.SMTP_USER?.trim();
-    if (smtp && receiver) {
-      const subject = `Yêu cầu liên hệ mới từ ${name}`;
-      const leadText = `Họ tên: ${name}\nEmail: ${email}\nĐiện thoại: ${phone}\n\n${storedMessage}`;
-      await smtp.sendMail({
-        from: process.env.MAIL_FROM?.trim() || process.env.SMTP_USER?.trim(),
-        to: receiver,
-        replyTo: email,
-        subject,
-        text: leadText,
-      });
-      await smtp.sendMail({
-        from: process.env.MAIL_FROM?.trim() || process.env.SMTP_USER?.trim(),
-        to: email,
-        subject: 'GEDECO đã nhận được yêu cầu liên hệ của bạn',
-        text: `Kính gửi ${name},\n\nGEDECO đã nhận được thông tin liên hệ của quý khách. Cảm ơn quý khách đã quan tâm và gửi yêu cầu cho chúng tôi. Đội ngũ GEDECO sẽ xem xét nội dung và liên hệ lại trong thời gian sớm nhất.\n\nTrân trọng,\nGEDECO\nHotline: 0914 94 3653\nEmail: ${receiver}`,
-      });
-      emailDelivered = true;
+    if (!smtp || !receiver) {
+      return Response.json({ error: 'Hệ thống email chưa được cấu hình, vui lòng thử lại sau.' }, { status: 503 });
     }
+    const subject = `Yêu cầu liên hệ mới từ ${name}`;
+    const leadText = `Họ tên: ${name}\nEmail: ${email}\nĐiện thoại: ${phone}\n\n${storedMessage}`;
+    await smtp.sendMail({
+      from: process.env.MAIL_FROM?.trim() || process.env.SMTP_USER?.trim(),
+      to: receiver,
+      replyTo: email,
+      subject,
+      text: leadText,
+    });
+    await smtp.sendMail({
+      from: process.env.MAIL_FROM?.trim() || process.env.SMTP_USER?.trim(),
+      to: email,
+      subject: 'GEDECO đã nhận được yêu cầu liên hệ của bạn',
+      text: `Kính gửi ${name},\n\nGEDECO đã nhận được thông tin liên hệ của quý khách. Cảm ơn quý khách đã quan tâm và gửi yêu cầu cho chúng tôi. Đội ngũ GEDECO sẽ xem xét nội dung và liên hệ lại trong thời gian sớm nhất.\n\nTrân trọng,\nGEDECO\nHotline: 0914 94 3653\nEmail: ${receiver}`,
+    });
+    emailDelivered = true;
     return Response.json({ ok: true, emailDelivered });
   } catch {
     return Response.json({ error: 'Không thể tiếp nhận yêu cầu lúc này.' }, { status: 500 });

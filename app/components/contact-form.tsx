@@ -37,7 +37,7 @@ export function ContactForm({ english = false }: { english?: boolean }) {
     try {
       const response = await fetch('/api/contact', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
       const result = await response.json();
-      if (!response.ok) throw new Error(result.error || (english ? 'Unable to submit your request.' : 'Không thể gửi yêu cầu.'));
+      if (!response.ok || !result.ok || result.emailDelivered === false) throw new Error(result.error || (english ? 'Unable to send your request by email.' : 'Chưa thể gửi email yêu cầu, vui lòng thử lại sau.'));
       form.reset();
       setNotice({ type: 'success', message: english ? 'Your request has been received. GEDECO will contact you soon.' : 'Yêu cầu đã được ghi nhận thành công. GEDECO sẽ liên hệ lại quý khách sớm nhất.' });
     } catch (error) {
