@@ -6,6 +6,6 @@ const sourceOrder = ['bot-matcha-huu-co', 'ca-phe-arabica', 'ca-phe-robusta', 'c
 export default async function ProductsPage({ searchParams }: { searchParams: Promise<{ category?: string }> }) {
   const products = [...await listProducts()].sort((a, b) => (sourceOrder.indexOf(a.slug) === -1 ? 99 : sourceOrder.indexOf(a.slug)) - (sourceOrder.indexOf(b.slug) === -1 ? 99 : sourceOrder.indexOf(b.slug)));
   const category = (await searchParams).category;
-  const initialCategory = category === 'domestic' || category === 'trong-nuoc' ? 'domestic' : category === 'export' || category === 'xuat-khau' ? 'export' : 'all';
+  const initialCategory = category || 'all';
   return <ShopShell current="Sản phẩm"><div className="shop-width shop-page-layout"><div className="shop-main"><ShopBreadcrumb current="Sản phẩm" /><ProductCatalog items={products} initialCategory={initialCategory} /></div><ShopSidebar /></div></ShopShell>;
 }

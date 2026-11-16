@@ -107,6 +107,6 @@ for (const product of products) {
     contentHtml, gallery: localImages, ...commerce, shipperImage: '/assets/products/shipper.jpg'
   });
 }
-const out = `export type GedecoProductDetail = { slug: string; title: string; category: 'Sản phẩm trong nước' | 'Sản phẩm xuất khẩu'; image: string; description: string; contentHtml: string; gallery: string[]; summaryHtml: string; priceText: string; stockText: string; shipperImage: string; };\n\nexport const gedecoProductDetails: GedecoProductDetail[] = ${JSON.stringify(imported, null, 2)};\n`;
+const out = `export type GedecoProductDetail = { slug: string; title: string; category: string; categorySlug?: string; categorySlugEn?: string; image: string; description: string; contentHtml: string; gallery: string[]; summaryHtml: string; priceText: string; stockText: string; shipperImage: string; };\n\nexport const gedecoProductDetails: GedecoProductDetail[] = ${JSON.stringify(imported, null, 2)};\n`;
 await fs.writeFile(path.join(root, 'app', 'data', 'product-details.ts'), out, 'utf8');
 console.log(`Imported ${imported.length} products and ${imported.reduce((sum, item) => sum + item.gallery.length, 0)} local gallery images.`);

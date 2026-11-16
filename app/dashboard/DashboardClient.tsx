@@ -7,7 +7,7 @@ import { ContentManager } from "./ContentManager";
 import { SiteContentManager } from "./SiteContentManager";
 import { SiteChromeManager } from "./SiteChromeManager";
 import { IntegrationManager } from "./IntegrationManager";
-import { ProductManager } from "./ProductManager";
+import { ProductContentManager } from "./ProductContentManager";
 import { listPosts } from "@/lib/dashboard/post-actions";
 import { listIntegrations } from "@/lib/dashboard/integration-actions";
 import { SitePageManager } from "./SitePageManager";
@@ -156,7 +156,7 @@ export function DashboardClient({
             <ContentManager />
           </section>
         )}
-        {tab === "products" && <section className={styles.content}><ProductManager /></section>}
+        {tab === "products" && <section className={styles.content}><ProductContentManager /></section>}
         {tab === "pages" && <section className={styles.content}><SitePageManager /></section>}
         {tab === "content" && (
           <section className={styles.content}>

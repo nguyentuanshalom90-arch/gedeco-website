@@ -365,3 +365,6 @@ body{overflow-x:clip}
   .footer-info-columns>div:first-child>a .icon-svg{margin-top:10px;justify-self:start}
   .footer-info-columns>div:first-child>a:nth-of-type(3) .icon-svg{transform:translateX(-1px)}
 }
+
+.product-category-caption{margin:-16px 0 24px;color:#68727d;font-size:13px;font-style:italic;line-height:1.6}
+.shop-product-image-placeholder{width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:9px;background:#f5f8fb;color:#6d7f92;text-align:center}.shop-product-image-placeholder .icon-svg{width:32px;height:32px}.shop-product-image-placeholder small{font-size:12px;font-weight:700}

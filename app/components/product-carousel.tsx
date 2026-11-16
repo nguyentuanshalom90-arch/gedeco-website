@@ -15,7 +15,7 @@ function chunkProducts(items: GedecoProduct[]) {
 
 export function ProductCarousel({ items = gedecoProducts, compact = false, language = 'vi' }: { items?: GedecoProduct[]; compact?: boolean; language?: 'vi' | 'en' }) {
   const [databaseItems, setDatabaseItems] = useState<GedecoProduct[] | null>(null);
-  useEffect(() => { fetch('/api/products?category=all').then((response) => response.ok ? response.json() : null).then((payload) => { if (payload?.items) setDatabaseItems(payload.items); }).catch(() => undefined); }, []);
+  useEffect(() => { fetch(`/api/products?category=all&language=${language}`).then((response) => response.ok ? response.json() : null).then((payload) => { if (payload?.items) setDatabaseItems(payload.items); }).catch(() => undefined); }, [language]);
   const displayItems = databaseItems?.length ? databaseItems : items;
   const pages = useMemo(() => chunkProducts(displayItems), [displayItems]);
   const [page, setPage] = useState(0);
@@ -34,7 +34,7 @@ export function ProductCarousel({ items = gedecoProducts, compact = false, langu
   const goTo = (nextPage: number) => setPage((nextPage + pages.length) % pages.length);
   const renderCard = (product: GedecoProduct, cardIndex: number, key: string) => {
     const slug = product.slug || gedecoProductDetails.find((detail) => detail.title === product.title)?.slug;
-    return <ShopProductCard key={key} className={hoveredCard === cardIndex ? 'is-hovered' : ''} language={language} product={{ slug: slug || '', title: product.title, category: product.category, image: product.image }} onMouseEnter={() => setHoveredCard(cardIndex)} onFocus={() => setHoveredCard(cardIndex)} />;
+    return <ShopProductCard key={key} className={hoveredCard === cardIndex ? 'is-hovered' : ''} language={language} product={{ slug: slug || '', title: product.title, category: product.category, categorySlug: product.categorySlug, categorySlugEn: product.categorySlugEn, image: product.image }} onMouseEnter={() => setHoveredCard(cardIndex)} onFocus={() => setHoveredCard(cardIndex)} />;
   };
 
   if (compact) return <div className={`product-carousel product-carousel-compact${hoveredCard !== null ? ' has-hover' : ''}`} onMouseEnter={pause} onMouseLeave={resume}>

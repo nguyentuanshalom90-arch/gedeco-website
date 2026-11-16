@@ -17,16 +17,17 @@ export function ShopHeader({ active = 'SẢN PHẨM', language = 'vi' }: { activ
   return language === 'en' ? <EnglishHeader active="Products" /> : <InnerHeader active={active === 'SẢN PHẨM' ? 'Sản phẩm' : active} />;
 }
 
-export function ShopHero({ title = 'Sản phẩm', language = 'vi' }: { title?: string; language?: ShopLanguage }) {
+export function ShopHero({ title = 'Sản phẩm', language = 'vi', image = '/assets/banner-1.jpg', subtitle }: { title?: string; language?: ShopLanguage; image?: string; subtitle?: string }) {
   const isProductsLanding = title === 'Sản phẩm' || title === 'Products';
   const english = language === 'en';
-  return <InnerHero eyebrow="GEDECO PRODUCTS" title={isProductsLanding ? (english ? 'Domestic and export products' : 'Sản phẩm trong nước và xuất khẩu') : title} subtitle={isProductsLanding ? (english ? 'Explore GEDECO products, from Vietnamese sources to products connecting with international markets.' : 'Khám phá danh mục sản phẩm GEDECO, từ nguồn hàng Việt Nam đến các sản phẩm kết nối thị trường quốc tế.') : (english ? 'Product information and cooperation solutions from GEDECO.' : 'Thông tin sản phẩm và giải pháp hợp tác từ GEDECO.')} image="/assets/banner-1.jpg" />;
+  return <InnerHero eyebrow="GEDECO PRODUCTS" title={isProductsLanding ? (english ? 'Domestic and export products' : 'Sản phẩm trong nước và xuất khẩu') : title} subtitle={subtitle || (isProductsLanding ? (english ? 'Explore GEDECO products, from Vietnamese sources to products connecting with international markets.' : 'Khám phá danh mục sản phẩm GEDECO, từ nguồn hàng Việt Nam đến các sản phẩm kết nối thị trường quốc tế.') : (english ? 'Product information and cooperation solutions from GEDECO.' : 'Thông tin sản phẩm và giải pháp hợp tác từ GEDECO.'))} image={image} />;
 }
 
-export function ShopBreadcrumb({ current, category, language = 'vi' }: { current: string; category?: string; language?: ShopLanguage }) {
+export function ShopBreadcrumb({ current, category, categorySlug, language = 'vi' }: { current: string; category?: string; categorySlug?: string; language?: ShopLanguage }) {
   const english = language === 'en';
   const categoryIsExport = category === 'Sản phẩm xuất khẩu' || category === 'Export products';
-  const categoryHref = english ? `/en/products?category=${categoryIsExport ? 'export' : 'domestic'}` : `/san-pham?category=${categoryIsExport ? 'xuat-khau' : 'trong-nuoc'}`;
+  const fallbackSlug = english ? (categoryIsExport ? 'export' : 'domestic') : (categoryIsExport ? 'xuat-khau' : 'trong-nuoc');
+  const categoryHref = `${english ? '/en/products' : '/san-pham'}?category=${categorySlug || fallbackSlug}`;
   const homeHref = english ? '/en' : '/';
   const homeLabel = english ? 'Home' : 'Trang chủ';
   return <nav className="shop-breadcrumb" aria-label={english ? 'Breadcrumb' : 'Đường dẫn trang'}><Link href={homeHref}>{homeLabel}</Link><span>/</span>{category && <><Link href={categoryHref}>{category}</Link><span>/</span></>}<strong>{current}</strong></nav>;
@@ -39,12 +40,12 @@ export function ShopSidebar({ language = 'vi' }: { language?: ShopLanguage }) {
   return <aside className="shop-sidebar"><section className="shop-support"><h2>{english ? 'CUSTOMER SUPPORT' : 'HỖ TRỢ KHÁCH HÀNG'}</h2><img src="/assets/shop-support.jpg" alt="GEDECO" /><strong>{english ? 'MY LINH' : 'MỸ LINH'}</strong><span>{english ? 'Phone: +(84) 914943653' : 'SĐT: +(84) 914943653'}</span></section><section className="shop-news"><h2>{english ? 'FEATURED NEWS' : 'TIN TỨC NỔI BẬT'}</h2>{news.map((item, index) => <Link href={english ? '/en/news' : '/tin-tuc'} key={item}><b>{item}</b><small>{dates[index]}</small></Link>)}</section></aside>;
 }
 
-export function ShopShell({ children, hero = true, current = 'Sản phẩm', language = 'vi' }: { children: React.ReactNode; hero?: boolean; current?: string; language?: ShopLanguage }) {
+export function ShopShell({ children, hero = true, current = 'Sản phẩm', language = 'vi', heroImage, heroSubtitle }: { children: React.ReactNode; hero?: boolean; current?: string; language?: ShopLanguage; heroImage?: string; heroSubtitle?: string }) {
   useEffect(() => { document.documentElement.lang = language; return () => { document.documentElement.lang = 'vi'; }; }, [language]);
-  return <div className={`shop-site${hero ? '' : ' shop-site-no-hero'}${language === 'en' ? ' shop-site-en' : ''}`}><ShopHeader language={language} />{hero && <ShopHero title={current} language={language} />}<main>{children}</main><InnerFooter language={language} /><ContactActions english={language === 'en'} /></div>;
+  return <div className={`shop-site${hero ? '' : ' shop-site-no-hero'}${language === 'en' ? ' shop-site-en' : ''}`}><ShopHeader language={language} />{hero && <ShopHero title={current} language={language} image={heroImage} subtitle={heroSubtitle} />}<main>{children}</main><InnerFooter language={language} /><ContactActions english={language === 'en'} /></div>;
 }
 
-type ProductCardItem = Pick<GedecoProductDetail, 'slug' | 'title' | 'image'> & { category: string };
+type ProductCardItem = Pick<GedecoProductDetail, 'slug' | 'title' | 'image' | 'categorySlug' | 'categorySlugEn'> & { category: string };
 
 export function localizeShopProductTitle(title: string, language: ShopLanguage = 'vi') {
   if (language === 'en') {
@@ -81,9 +82,10 @@ export function ShopProductCard({ product, className = '', language = 'vi', onMo
   const englishTitleBySlug: Record<string, string> = { 'tra-dinh-thuong-hang-uop-sen': 'SUPERIOR DINH TEA MARINATED WITH LOTUS', 'tieu-den': 'BLACK PEPPER', 'ca-phe-robusta': 'ROBUSTA COFFEE', 'ca-phe-arabica': 'ARABICA COFFEE', 'ruou-dong-trung-ha-thao': 'CORDYCEPS LIQUOR', 'dong-trung-ha-thao-nguyen-con': 'WHOLE CORDYCEPS', 'bot-matcha-huu-co': 'ORGANIC MATCHA POWDER', 'tra-dinh-uop-gao-sen': 'DING TEA WITH LOTUS RICE', 'dia-spithera-xoa-sach-nep-nhan': 'DIA SPITHERA WRINKLE CARE', 'tra-dinh-thuong-hang-uop-hoa-buoi': 'PREMIUM DINH TEA WITH POMELO BLOSSOM', 'tra-hoa-vang-rung': 'WILD TAM DAO GOLDEN FLOWER TEA', 'tra-uop-hoa-soi': 'WOLF FLOWER SCENTED TEA', 'nhat-pham-tra-nhai-tra-dinh-uop-hoa-nhai': 'PREMIUM DINH TEA, TRADITIONAL FLAVOR', 'tra-dinh-uop-hoa-nhai': 'PREMIUM DINH TEA WITH JASMINE', 'tra-dinh-uop-bong-sen': 'PREMIUM LOTUS TEA BOX 10', durian: 'DURIAN', 'thuc-pham-bao-ve-suc-khoe-carositol': "CAROSITOL — KOREA'S NO. 1 HEALTH SUPPLEMENT FOR DIABETES PREVENTION", 'canned-pineapple': 'CANNED PINEAPPLE', 'ca-tra-dau': 'FRESH GINGER, DRIED SLICED GINGER' };
   const title = english ? englishTitleBySlug[product.slug] || localizeShopProductTitle(product.title, language) : localizeShopProductTitle(product.title, language);
   const englishSlugMap: Record<string, string> = { 'tra-dinh-thuong-hang-uop-sen': 'premium-ding-tea-with-lotus', 'tieu-den': 'black-pepper', 'ca-phe-robusta': 'robusta-coffee', 'ca-phe-arabica': 'arabica-coffee', 'ruou-dong-trung-ha-thao': 'cordyceps-liquor', 'dong-trung-ha-thao-nguyen-con': 'whole-cordyceps', 'bot-matcha-huu-co': 'organic-matcha-powder', 'tra-dinh-uop-gao-sen': 'ding-tea-with-lotus-rice', 'dia-spithera-xoa-sach-nep-nhan': 'dia-spithera-wrinkle-care', 'tra-dinh-thuong-hang-uop-hoa-buoi': 'premium-ding-tea-with-pomelo-blossom', 'tra-hoa-vang-rung': 'wild-tam-dao-golden-flower-tea', 'tra-uop-hoa-soi': 'wolf-flower-scented-tea', 'nhat-pham-tra-nhai-tra-dinh-uop-hoa-nhai': 'premium-ding-tea-traditional-flavor', 'tra-dinh-uop-hoa-nhai': 'premium-ding-tea-with-jasmine', 'tra-dinh-uop-bong-sen': 'premium-lotus-tea-box-10', durian: 'durian', 'thuc-pham-bao-ve-suc-khoe-carositol': 'carositol-korean-health-supplement', 'canned-pineapple': 'canned-pineapple', 'ca-tra-dau': 'fresh-ginger-dried-sliced-ginger' };
-  const englishCategory = product.category === 'Sản phẩm xuất khẩu' ? 'export' : 'domestic';
-  const href = english ? `/en/products/${englishCategory}/${englishSlugMap[product.slug] || product.slug}` : `/san-pham/${englishCategory === 'export' ? 'xuat-khau' : 'trong-nuoc'}/${product.slug}`;
-  return <article className={`shop-product-card ${className}`.trim()} onMouseEnter={onMouseEnter} onFocus={onFocus}><Link href={href} className="shop-product-image"><img src={product.image} alt={title} /></Link><div className="shop-product-body" style={{ display: 'flex', flexDirection: 'column', flex: 1 }}><h3 style={{ height: '42.5px', minHeight: '42.5px', display: '-webkit-box', WebkitBoxOrient: 'vertical', WebkitLineClamp: 2, overflow: 'hidden' }}><Link href={href}>{title}</Link></h3><Link className="shop-product-cta" style={{ alignSelf: 'flex-start', marginTop: 'auto' }} href={href}>{english ? 'View details' : 'Xem chi tiết'} <Icon name="arrow" /></Link></div></article>;
+  const categorySlug = english ? (product.categorySlugEn || (product.category === 'Export products' || product.category === 'Sản phẩm xuất khẩu' ? 'export' : 'domestic')) : (product.categorySlug || (product.category === 'Sản phẩm xuất khẩu' ? 'xuat-khau' : 'trong-nuoc'));
+  const productSlug = english ? englishSlugMap[product.slug] || product.slug : product.slug;
+  const href = english ? `/en/products/${categorySlug}/${productSlug}` : `/san-pham/${categorySlug}/${productSlug}`;
+  return <article className={`shop-product-card ${className}`.trim()} onMouseEnter={onMouseEnter} onFocus={onFocus}><Link href={href} className="shop-product-image">{product.image ? <img src={product.image} alt={title} /> : <span className="shop-product-image-placeholder" aria-label={english ? 'Image is being updated' : 'Hình ảnh đang được cập nhật'}><Icon name="box" /><small>{english ? 'Image coming soon' : 'Hình ảnh đang cập nhật'}</small></span>}</Link><div className="shop-product-body" style={{ display: 'flex', flexDirection: 'column', flex: 1 }}><h3 style={{ height: '42.5px', minHeight: '42.5px', display: '-webkit-box', WebkitBoxOrient: 'vertical', WebkitLineClamp: 2, overflow: 'hidden' }}><Link href={href}>{title}</Link></h3><Link className="shop-product-cta" style={{ alignSelf: 'flex-start', marginTop: 'auto' }} href={href}>{english ? 'View details' : 'Xem chi tiết'} <Icon name="arrow" /></Link></div></article>;
 }
 
 export function ProductDetailGallery({ gallery, title, language = 'vi' }: { gallery: Array<string | { url: string; altText?: string; caption?: string }>; title: string; language?: ShopLanguage }) {
@@ -99,17 +101,16 @@ export function ShopGuarantee({ language = 'vi' }: { language?: ShopLanguage }) 
   return <div className="shop-guarantee"><h2>{english ? 'PURCHASE GUARANTEE' : 'CAM KẾT KHI MUA HÀNG'}</h2><ul><li><Icon name="check" /><span>{english ? '100% genuine, quality products' : 'Cam kết 100% hàng chính hãng chất lượng'}</span></li><li><Icon name="check" /><span>{english ? 'Best market pricing' : 'Giá cả tối ưu nhất thị trường'}</span></li><li><Icon name="check" /><span>{english ? 'Thoughtful after-sales service' : 'Dịch vụ hậu mãi chu đáo'}</span></li><li><Icon name="check" /><span>{english ? <>For bulk orders, call <a href="tel:0946548996">0946548996</a> for the best price.</> : <>Mua số lượng lớn. Vui lòng liên hệ <a href="tel:0946548996">0946548996</a> để được hỗ trợ giá tốt nhất.</>}</span></li></ul></div>;
 }
 
-export function ProductCatalog({ items, initialCategory, language = 'vi' }: { items: ShopProduct[]; initialCategory?: 'all' | 'domestic' | 'export'; language?: ShopLanguage }) {
+export function ProductCatalog({ items, initialCategory, language = 'vi' }: { items: ShopProduct[]; initialCategory?: string; language?: ShopLanguage }) {
   const english = language === 'en';
   const router = useRouter();
   const pathname = usePathname();
   const [query, setQuery] = useState('');
-  const readCategory = (): 'all' | 'domestic' | 'export' => {
+  const readCategory = () => {
     if (typeof window === 'undefined') return 'all';
-    const value = new URLSearchParams(window.location.search).get('category');
-    return value === 'domestic' || value === 'trong-nuoc' ? 'domestic' : value === 'export' || value === 'xuat-khau' ? 'export' : 'all';
+    return new URLSearchParams(window.location.search).get('category') || 'all';
   };
-  const [category, setCategory] = useState<'all' | 'domestic' | 'export'>(() => initialCategory || readCategory());
+  const [category, setCategory] = useState(() => initialCategory || readCategory());
   const [sort, setSort] = useState('default');
   const [page, setPage] = useState(1);
   const [remoteItems, setRemoteItems] = useState<ProductCardItem[] | null>(null);
@@ -117,23 +118,23 @@ export function ProductCatalog({ items, initialCategory, language = 'vi' }: { it
 
   useEffect(() => {
     setRemoteItems(null);
-    const timer = window.setTimeout(() => window.dispatchEvent(new CustomEvent('gedeco:product-category', { detail: { category: category === 'domestic' ? 'trong-nuoc' : category === 'export' ? 'xuat-khau' : '' } })), 0);
+    const timer = window.setTimeout(() => window.dispatchEvent(new CustomEvent('gedeco:product-category', { detail: { category: category === 'all' ? '' : category } })), 0);
     return () => window.clearTimeout(timer);
   }, [category]);
 
-  const updateCategory = (next: 'all' | 'domestic' | 'export') => {
+  const updateCategory = (next: string) => {
     setCategory(next);
     setRemoteItems(null);
     const params = new URLSearchParams(window.location.search);
     if (next === 'all') params.delete('category');
-    else params.set('category', next === 'domestic' ? 'trong-nuoc' : 'xuat-khau');
+    else params.set('category', next);
     router.replace(`${pathname}${params.toString() ? `?${params.toString()}` : ''}`, { scroll: false });
   };
 
   const localItems = useMemo(() => {
     const normalizedQuery = query.trim().toLocaleLowerCase('vi-VN');
     const filtered = items.filter((item) => {
-      const matchesCategory = category === 'all' || (category === 'domestic' ? ['Sản phẩm trong nước', 'Domestic products'].includes(item.category) : ['Sản phẩm xuất khẩu', 'Export products'].includes(item.category));
+      const matchesCategory = category === 'all' || (english ? item.categorySlugEn : item.categorySlug) === category;
       const matchesQuery = !normalizedQuery || `${item.title} ${item.description}`.toLocaleLowerCase('vi-VN').includes(normalizedQuery);
       return matchesCategory && matchesQuery;
     });
@@ -145,7 +146,7 @@ export function ProductCatalog({ items, initialCategory, language = 'vi' }: { it
     const timer = window.setTimeout(async () => {
       setLoading(true);
       try {
-        const params = new URLSearchParams({ search: query, category, sort });
+        const params = new URLSearchParams({ search: query, category, sort, language });
         const response = await fetch(`/api/products?${params.toString()}`, { signal: controller.signal });
         if (response.ok) {
           const payload = await response.json() as { items?: ProductCardItem[] };
@@ -158,7 +159,7 @@ export function ProductCatalog({ items, initialCategory, language = 'vi' }: { it
       }
     }, 140);
     return () => { controller.abort(); window.clearTimeout(timer); };
-  }, [category, query, sort]);
+  }, [category, language, query, sort]);
 
   const visibleItems = remoteItems ?? localItems;
   const pageSize = 12;
@@ -171,10 +172,11 @@ export function ProductCatalog({ items, initialCategory, language = 'vi' }: { it
     setPage((current) => Math.min(current, pageCount));
   }, [pageCount]);
   const clearFilters = () => { setQuery(''); setSort('default'); updateCategory('all'); };
+  const categoryOptions = Array.from(new Map(items.map((item) => [english ? item.categorySlugEn : item.categorySlug, item.category] as const).filter(([slug]) => Boolean(slug))).entries()) as Array<[string, string]>;
 
   const labels = english ? { all: 'All', domestic: 'Domestic', export: 'Export', sort: 'Sort by', default: 'Default', az: 'Name A–Z', za: 'Name Z–A', search: 'Search products...', clear: 'Reset', searching: 'Searching...', count: 'products', prev: 'Previous page', next: 'Next page', empty: 'No matching products found', emptyHint: 'Try another keyword or reset the filters.', showAll: 'View all products' } : { all: 'Tất cả', domestic: 'Trong nước', export: 'Xuất khẩu', sort: 'Sắp xếp', default: 'Mặc định', az: 'Tên A–Z', za: 'Tên Z–A', search: 'Tìm sản phẩm...', clear: 'Đặt lại', searching: 'Đang tìm...', count: 'sản phẩm', prev: 'Trang trước', next: 'Trang sau', empty: 'Không tìm thấy sản phẩm phù hợp', emptyHint: 'Thử từ khóa khác hoặc đặt lại bộ lọc.', showAll: 'Xem tất cả sản phẩm' };
   return <section className={styles.catalog} aria-label={english ? 'Product filters' : 'Bộ lọc sản phẩm'}>
-    <div className={styles.filterRow}><div className={styles.chips} role="tablist" aria-label={english ? 'Product groups' : 'Nhóm sản phẩm'}><button type="button" className={category === 'all' ? styles.activeChip : ''} onClick={() => updateCategory('all')}>{labels.all} <b>{items.length}</b></button><button type="button" className={category === 'domestic' ? styles.activeChip : ''} onClick={() => updateCategory('domestic')}>{labels.domestic}</button><button type="button" className={category === 'export' ? styles.activeChip : ''} onClick={() => updateCategory('export')}>{labels.export}</button></div><div className={styles.viewAndCount}><div className={styles.sortWrap}><span>{labels.sort}</span><select value={sort} onChange={(event) => { setSort(event.target.value); setRemoteItems(null); }} aria-label={labels.sort}><option value="default">{labels.default}</option><option value="name">{labels.az}</option><option value="latest">{labels.za}</option></select></div><div className={styles.inlineSearchWrap}><Icon name="search" /><input value={query} onChange={(event) => { setQuery(event.target.value); setRemoteItems(null); }} placeholder={labels.search} aria-label={labels.search} />{query && <button type="button" onClick={() => { setQuery(''); setRemoteItems(null); }} aria-label={english ? 'Clear search' : 'Xóa tìm kiếm'}>×</button>}</div><span>{loading ? labels.searching : `${visibleItems.length} ${labels.count}`}</span>{(query || category !== 'all' || sort !== 'default') && <button type="button" className={styles.clear} onClick={clearFilters}>{labels.clear}</button>}</div></div>
+    <div className={styles.filterRow}><div className={styles.chips} role="tablist" aria-label={english ? 'Product groups' : 'Nhóm sản phẩm'}><button type="button" className={category === 'all' ? styles.activeChip : ''} onClick={() => updateCategory('all')}>{labels.all} <b>{items.length}</b></button>{categoryOptions.map(([slug, label]) => <button key={slug} type="button" className={category === slug ? styles.activeChip : ''} onClick={() => updateCategory(slug)}>{label}</button>)}</div><div className={styles.viewAndCount}><div className={styles.sortWrap}><span>{labels.sort}</span><select value={sort} onChange={(event) => { setSort(event.target.value); setRemoteItems(null); }} aria-label={labels.sort}><option value="default">{labels.default}</option><option value="name">{labels.az}</option><option value="latest">{labels.za}</option></select></div><div className={styles.inlineSearchWrap}><Icon name="search" /><input value={query} onChange={(event) => { setQuery(event.target.value); setRemoteItems(null); }} placeholder={labels.search} aria-label={labels.search} />{query && <button type="button" onClick={() => { setQuery(''); setRemoteItems(null); }} aria-label={english ? 'Clear search' : 'Xóa tìm kiếm'}>×</button>}</div><span>{loading ? labels.searching : `${visibleItems.length} ${labels.count}`}</span>{(query || category !== 'all' || sort !== 'default') && <button type="button" className={styles.clear} onClick={clearFilters}>{labels.clear}</button>}</div></div>
     <div className="shop-products-grid">{pagedItems.map((product) => <ShopProductCard key={product.slug} product={product} language={language} />)}</div>
     {visibleItems.length > pageSize && <nav className={styles.pagination} aria-label={english ? 'Product pagination' : 'Phân trang sản phẩm'}>
       <button type="button" disabled={page === 1} onClick={() => setPage((current) => current - 1)} aria-label={labels.prev}>←</button>

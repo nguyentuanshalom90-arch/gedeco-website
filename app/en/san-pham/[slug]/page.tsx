@@ -7,6 +7,6 @@ export default async function LegacyEnglishProductPage({ params }: { params: Pro
   const { slug } = await params;
   const product = await getEnglishProductBySlug(slug);
   if (!product) notFound();
-  const category = product.view.category === "Export products" ? "export" : "domestic";
+  const category = product.view.categorySlugEn || "domestic";
   permanentRedirect(`/en/products/${category}/${product.canonicalSlug}`);
 }

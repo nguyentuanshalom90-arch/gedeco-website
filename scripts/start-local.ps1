@@ -4,8 +4,8 @@ param(
 
 $ErrorActionPreference = 'Stop'
 $projectRoot = Split-Path -Parent $PSScriptRoot
-$logPath = Join-Path $projectRoot '.codex-preview.log'
-$errorLogPath = Join-Path $projectRoot '.codex-preview.error.log'
+$logPath = Join-Path $projectRoot '.local-preview.log'
+$errorLogPath = Join-Path $projectRoot '.local-preview.error.log'
 $url = "http://127.0.0.1:$Port/lien-he"
 $projectPattern = [regex]::Escape($projectRoot)
 

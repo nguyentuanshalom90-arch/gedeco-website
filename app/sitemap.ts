@@ -5,7 +5,7 @@ import { absoluteUrl } from "@/lib/site-config";
 export const dynamic = "force-dynamic";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const [articles, categories, products, pages, translations] = await Promise.all([
+  const [articles, categories, products, productCategories, pages, translations] = await Promise.all([
     prisma.newsArticle.findMany({
       where: {
         robotsIndex: true,
@@ -20,7 +20,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       where: { robotsIndex: true },
       select: { slug: true, slugEn: true, updatedAt: true },
     }),
-    prisma.product.findMany({ where: { isPublished: true, robotsIndex: true }, select: { id: true, slug: true, category: true, updatedAt: true } }),
+    prisma.product.findMany({ where: { isPublished: true, robotsIndex: true, category: { isPublished: true } }, select: { id: true, slug: true, category: { select: { slug: true, slugEn: true } }, updatedAt: true } }),
+    prisma.productCategory.findMany({ where: { isPublished: true, robotsIndex: true }, select: { slug: true, slugEn: true, updatedAt: true } }),
     prisma.sitePage.findMany({ where: { status: "PUBLISHED", robotsIndex: true }, select: { id: true, slug: true, updatedAt: true } }),
     prisma.translationEntry.findMany({ where: { locale: "en", status: { in: ["TRANSLATED", "NEEDS_REVIEW", "FAILED"] }, slug: { not: null }, entityType: { in: ["PRODUCT", "NEWS_ARTICLE", "SITE_PAGE"] } }, select: { entityType: true, entityId: true, slug: true } }),
   ]);
@@ -55,9 +56,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       const alternates = { languages: { vi, en, "x-default": vi } };
       return [{ url: vi, lastModified: item.updatedAt, changeFrequency: "monthly" as const, priority: 0.75, alternates }, { url: en, lastModified: item.updatedAt, changeFrequency: "monthly" as const, priority: 0.75, alternates }];
     }),
+    ...productCategories.flatMap((item) => {
+      const vi = absoluteUrl(`/san-pham/${item.slug}`);
+      const en = absoluteUrl(`/en/products/${item.slugEn}`);
+      const alternates = { languages: { vi, en, "x-default": vi } };
+      return [{ url: vi, lastModified: item.updatedAt, changeFrequency: "weekly" as const, priority: 0.8, alternates }, { url: en, lastModified: item.updatedAt, changeFrequency: "weekly" as const, priority: 0.8, alternates }];
+    }),
     ...products.flatMap((item) => {
-      const category = item.category === "EXPORT" ? "xuat-khau" : "trong-nuoc";
-      const enCategory = item.category === "EXPORT" ? "export" : "domestic";
+      const category = item.category.slug;
+      const enCategory = item.category.slugEn;
       const enSlug = translatedSlug.get(`PRODUCT:${item.id}`) || item.slug;
       const vi = absoluteUrl(`/san-pham/${category}/${item.slug}`); const en = absoluteUrl(`/en/products/${enCategory}/${enSlug}`);
       return [

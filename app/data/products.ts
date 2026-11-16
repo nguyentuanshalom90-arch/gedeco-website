@@ -2,7 +2,9 @@ export type GedecoProduct = {
   slug?: string;
   image: string;
   title: string;
-  category: 'Sản phẩm trong nước' | 'Sản phẩm xuất khẩu';
+  category: string;
+  categorySlug?: string;
+  categorySlugEn?: string;
   description: string;
 };
 

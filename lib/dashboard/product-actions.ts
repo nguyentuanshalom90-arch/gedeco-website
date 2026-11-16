@@ -29,7 +29,11 @@ function toItem(row: any): ProductListItem {
     id: row.id,
     slug: row.slug,
     title: row.title,
-    category: row.category,
+    categoryId: row.categoryId,
+    categoryName: row.category.name,
+    categorySlug: row.category.slug,
+    categoryNameEn: row.category.nameEn,
+    categorySlugEn: row.category.slugEn,
     description: row.description,
     contentHtml: row.contentHtml,
     summaryHtml: row.summaryHtml,
@@ -55,7 +59,7 @@ function toItem(row: any): ProductListItem {
 
 export async function listDashboardProducts() {
   await requireDashboardSession();
-  const rows = await prisma.product.findMany({ include: { gallery: { orderBy: { sortOrder: "asc" } } }, orderBy: [{ sortOrder: "asc" }, { title: "asc" }] });
+  const rows = await prisma.product.findMany({ include: { category: true, gallery: { orderBy: { sortOrder: "asc" } } }, orderBy: [{ sortOrder: "asc" }, { title: "asc" }] });
   return rows.map(toItem);
 }
 
@@ -68,6 +72,8 @@ export async function saveProduct(input: ProductInput) {
   if (input.imageUrl.trim() && !input.imageAlt.trim()) throw new Error("Ảnh chính phải có alt text.");
   if (input.metaTitle.trim().length > 65) throw new Error("SEO title không vượt quá 65 ký tự.");
   if (input.metaDescription.trim().length > 160) throw new Error("Meta description không vượt quá 160 ký tự.");
+  const category = await prisma.productCategory.findUnique({ where: { id: input.categoryId } });
+  if (!category) throw new Error("Danh mục sản phẩm không tồn tại.");
   const gallery = input.gallery.filter((item) => item.url.trim()).map((item, index) => ({
     url: item.url.trim(),
     altText: item.altText.trim() || title,
@@ -80,7 +86,7 @@ export async function saveProduct(input: ProductInput) {
   const data = {
     slug,
     title,
-    category: input.category,
+    categoryId: category.id,
     description: input.description.trim(),
     contentHtml: input.contentHtml,
     summaryHtml: input.summaryHtml,
@@ -106,9 +112,9 @@ export async function saveProduct(input: ProductInput) {
       : await tx.product.create({ data });
     await tx.productMedia.deleteMany({ where: { productId: row.id } });
     if (gallery.length) await tx.productMedia.createMany({ data: gallery.map((item) => ({ productId: row.id, ...item })) });
-    return tx.product.findUniqueOrThrow({ where: { id: row.id }, include: { gallery: { orderBy: { sortOrder: "asc" } } } });
+    return tx.product.findUniqueOrThrow({ where: { id: row.id }, include: { category: true, gallery: { orderBy: { sortOrder: "asc" } } } });
   });
-  const translation = await syncProductTranslation(fresh);
+  const translation = await syncProductTranslation({ ...fresh, categoryName: fresh.category.name, categoryNameEn: fresh.category.nameEn });
   return { ok: true as const, product: toItem(fresh), translation: { status: translation.status, errorMessage: translation.errorMessage } };
 }
 

@@ -116,7 +116,7 @@ model Product {
   id              String        @id @default(cuid())
   slug            String        @unique
   title           String
-  category        ProductCategory
+  categoryId      String
   description     String        @default("")
   contentHtml     String        @default("") @db.Text
   summaryHtml     String        @default("") @db.Text
@@ -139,8 +139,38 @@ model Product {
   updatedAt       DateTime      @updatedAt
 
   gallery         ProductMedia[]
+  category        ProductCategory @relation(fields: [categoryId], references: [id], onDelete: Restrict)
 
-  @@index([category, isPublished, sortOrder])
+  @@index([categoryId, isPublished, sortOrder])
+}
+
+model ProductCategory {
+  id                String   @id @default(cuid())
+  name              String
+  slug              String   @unique
+  description       String   @default("")
+  nameEn            String
+  slugEn            String   @unique
+  descriptionEn     String   @default("")
+  imageUrl          String   @default("")
+  imageAlt          String   @default("")
+  imageCaption      String   @default("")
+  imageAltEn        String   @default("")
+  imageCaptionEn    String   @default("")
+  metaTitle         String?
+  metaDescription   String?
+  metaTitleEn       String?
+  metaDescriptionEn String?
+  canonicalUrl      String?
+  canonicalUrlEn    String?
+  robotsIndex       Boolean  @default(true)
+  robotsFollow      Boolean  @default(true)
+  isPublished       Boolean  @default(true)
+  sortOrder         Int      @default(0)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  products Product[]
 }
 
 model TranslationEntry {
@@ -192,11 +222,6 @@ model ProductMedia {
   product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
 
   @@index([productId, sortOrder])
-}
-
-enum ProductCategory {
-  DOMESTIC
-  EXPORT
 }
 
 model SitePage {

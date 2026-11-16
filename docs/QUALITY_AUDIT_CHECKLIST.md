@@ -8,10 +8,10 @@ Cập nhật: 2026-11-17. Trạng thái dùng bốn mức: `PASS`, `ĐANG LÀM`,
 |---|---|---|
 | Xác thực dashboard | Phiên ký ở server, cookie HttpOnly, route/API/server action đều kiểm tra quyền | PASS local |
 | Media library | Giữ file gốc, WebP derivative, MIME thật, tên ngẫu nhiên, storage persistent, alt/caption | PASS local; CHỜ LIVE migration |
-| Sản phẩm | Create/read/update/delete; nháp không lộ; nội dung và trạng thái ra frontend ngay | ĐANG LÀM |
+| Sản phẩm | Create/read/update/delete; nháp không lộ; nội dung và trạng thái ra frontend ngay | PASS local |
 | Media sản phẩm | Mọi vị trí có `Chọn từ thư viện` và `Tải ảnh lên`; ảnh chính/album có alt/caption | PASS local |
 | SEO sản phẩm | Title, description, canonical, robots, OG image, hreflang, Product/Breadcrumb JSON-LD | PASS local |
-| Danh mục sản phẩm | CRUD database, song ngữ, SEO, thứ tự, ẩn/hiện, route frontend | THIẾU |
+| Danh mục sản phẩm | CRUD database, song ngữ, SEO, thứ tự, ẩn/hiện, route frontend | PASS local; CHỜ LIVE migration |
 | Bài viết | CRUD, nháp/lên lịch/xuất bản, category, tag, media alt/caption, SEO | PASS local; CHỜ LIVE migration |
 | Danh mục bài viết | CRUD, SEO VI/EN, slug/canonical riêng, liên kết bài viết, xóa an toàn | PASS local; CHỜ LIVE migration |
 | English bài viết | Nội dung, metadata, media alt/caption, slug và route English lấy từ TranslationEntry | PASS local |
@@ -67,6 +67,13 @@ Nguồn chuẩn:
 - QA tạm đã chứng minh English listing/detail/category đọc đúng `TranslationEntry` và trường English của `NewsCategory`; không fallback nội dung tiếng Việt.
 - Canonical, hreflang VI/EN/x-default, Article + Breadcrumb JSON-LD, alt/caption và sitemap động đều được kiểm tra trên HTTP 200.
 - Screenshot Chrome desktop/mobile PASS cho article English và admin category. Sidebar admin mobile được thu gọn mặc định để nội dung tác vụ xuất hiện trước; dữ liệu QA đã được xóa sau kiểm tra.
+
+### Bằng chứng audit danh mục sản phẩm ngày 2026-11-17
+
+- Đã thay enum danh mục cố định bằng bảng `ProductCategory` có quan hệ khóa ngoại, slug VI/EN unique, nội dung, media alt/caption VI/EN, metadata, canonical, robots, trạng thái và thứ tự.
+- Luồng QA thật từ dashboard đã tạo danh mục song ngữ, tạo sản phẩm gắn danh mục, đọc lại qua API/database và hiển thị landing page VI/EN; dữ liệu QA được xóa sau kiểm tra.
+- Canonical tuyệt đối, hreflang `vi/en/x-default`, CollectionPage + Breadcrumb JSON-LD và sitemap động đã được kiểm tra. Trang sản phẩm English trả 404 khi dịch thất bại, không lộ nội dung Việt.
+- Build production local, TypeScript, Prisma validate và `git diff --check` PASS. Screenshot Chrome desktop/mobile PASS; sản phẩm thiếu ảnh dùng placeholder có nhãn thay vì ảnh hỏng.
 
 ## 4. Điều kiện trước production
 
