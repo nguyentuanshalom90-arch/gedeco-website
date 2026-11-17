@@ -1,16 +1,17 @@
-import { readFile } from "node:fs/promises";
-import path from "node:path";
 import { prisma } from "@/lib/prisma";
 import { dynamicSeed } from "@/lib/dashboard/site-content-seed";
+import { ensureSiteContentSeeded } from "@/lib/site-content-seeding";
 
 export async function getPublicSiteContent(pageKey: string, locale: "vi" | "en" = "vi") {
-  const [page, dynamicRows, staticText] = await Promise.all([
+  await ensureSiteContentSeeded();
+  const [page, rows] = await Promise.all([
     prisma.siteContentPage.findUnique({ where: { pageKey } }),
-    prisma.siteDynamicContent.findMany({ where: { pageKey, isVisible: true }, orderBy: { sortOrder: "asc" } }),
-    readFile(path.join(process.cwd(), "data", "site-static-content.json"), "utf8").then((value) => JSON.parse(value) as Array<{ id: string; pageKey: string; sectionKey: string; fieldKey: string; value: string; isVisible: boolean }>),
+    prisma.siteDynamicContent.findMany({ where: { pageKey, isVisible: true }, orderBy: [{ kind: "asc" }, { sortOrder: "asc" }] }),
   ]);
-  const staticRows = staticText.filter((row) => row.pageKey === pageKey && row.isVisible);
+  const dynamicRows = rows.filter((row) => row.kind === "DYNAMIC");
+  const staticRows = rows.filter((row) => row.kind === "STATIC");
   const values = Object.fromEntries(dynamicRows.map((row) => [`${row.sectionKey}.${row.fieldKey}`, row.value]));
+  const media = Object.fromEntries(rows.filter((row) => row.imageUrl).map((row) => [`${row.kind === "STATIC" ? "static." : ""}${row.sectionKey}.${row.fieldKey}`, { url: row.imageUrl || "", altText: row.altText || "", caption: row.imageCaption || "" }]));
   for (const [seedPage, sectionKey, fieldKey, , value] of dynamicSeed) {
     if (seedPage === pageKey && values[`${sectionKey}.${fieldKey}`] === undefined) values[`${sectionKey}.${fieldKey}`] = value;
   }
@@ -22,6 +23,7 @@ export async function getPublicSiteContent(pageKey: string, locale: "vi" | "en" 
     for (const row of dynamicRows) {
       const payload = byId.get(row.id)?.payload;
       if (payload && typeof payload === "object" && typeof (payload as Record<string, unknown>).value === "string") { values[`${row.sectionKey}.${row.fieldKey}`] = (payload as Record<string, string>).value; translatedKeys.push(`${row.sectionKey}.${row.fieldKey}`); }
+      if (payload && typeof payload === "object" && media[`${row.sectionKey}.${row.fieldKey}`]) media[`${row.sectionKey}.${row.fieldKey}`] = { ...media[`${row.sectionKey}.${row.fieldKey}`], altText: typeof (payload as Record<string, unknown>).altText === "string" ? (payload as Record<string, string>).altText : media[`${row.sectionKey}.${row.fieldKey}`].altText, caption: typeof (payload as Record<string, unknown>).imageCaption === "string" ? (payload as Record<string, string>).imageCaption : media[`${row.sectionKey}.${row.fieldKey}`].caption };
     }
     const staticValues = Object.fromEntries(staticRows.map((row) => {
       const payload = byId.get(row.id)?.payload;
@@ -29,12 +31,18 @@ export async function getPublicSiteContent(pageKey: string, locale: "vi" | "en" 
     }));
     const firstPayload = entries.find((entry) => entry.payload && typeof entry.payload === "object")?.payload as Record<string, unknown> | undefined;
     for (const row of staticRows) if (byId.get(row.id)) translatedKeys.push(`${row.sectionKey}.${row.fieldKey}`);
-    return { page: page ? { ...page, h1: typeof firstPayload?.h1 === "string" && firstPayload.h1 ? firstPayload.h1 : page.h1, metaTitle: typeof firstPayload?.metaTitle === "string" && firstPayload.metaTitle ? firstPayload.metaTitle : page.metaTitle, metaDescription: typeof firstPayload?.metaDescription === "string" && firstPayload.metaDescription ? firstPayload.metaDescription : page.metaDescription } : page, values, staticValues, translatedKeys };
+    for (const row of staticRows) {
+      const payload = byId.get(row.id)?.payload;
+      const key = `static.${row.sectionKey}.${row.fieldKey}`;
+      if (payload && typeof payload === "object" && media[key]) media[key] = { ...media[key], altText: typeof (payload as Record<string, unknown>).altText === "string" ? (payload as Record<string, string>).altText : media[key].altText, caption: typeof (payload as Record<string, unknown>).imageCaption === "string" ? (payload as Record<string, string>).imageCaption : media[key].caption };
+    }
+    return { page: page ? { ...page, h1: typeof firstPayload?.h1 === "string" && firstPayload.h1 ? firstPayload.h1 : page.h1, metaTitle: typeof firstPayload?.metaTitle === "string" && firstPayload.metaTitle ? firstPayload.metaTitle : page.metaTitle, metaDescription: typeof firstPayload?.metaDescription === "string" && firstPayload.metaDescription ? firstPayload.metaDescription : page.metaDescription } : page, values, staticValues, media, translatedKeys };
   }
   return {
     page,
     values,
     staticValues: Object.fromEntries(staticRows.map((row) => [`${row.sectionKey}.${row.fieldKey}`, row.value])),
+    media,
     translatedKeys: [],
   };
 }

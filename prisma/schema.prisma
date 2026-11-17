@@ -264,6 +264,7 @@ model SiteContentPage {
 
 model SiteDynamicContent {
   id          String   @id @default(cuid())
+  kind        SiteContentKind @default(DYNAMIC)
   pageKey     String
   sectionKey  String
   fieldKey    String
@@ -273,6 +274,7 @@ model SiteDynamicContent {
   headingLevel String?
   imageUrl    String?
   altText     String?
+  imageCaption String?
   isVisible   Boolean  @default(true)
   sortOrder   Int      @default(0)
   createdAt   DateTime @default(now())
@@ -280,8 +282,13 @@ model SiteDynamicContent {
 
   page        SiteContentPage @relation(fields: [pageKey], references: [pageKey], onDelete: Cascade)
 
-  @@unique([pageKey, sectionKey, fieldKey])
-  @@index([pageKey, sortOrder])
+  @@unique([kind, pageKey, sectionKey, fieldKey])
+  @@index([kind, pageKey, sortOrder])
+}
+
+enum SiteContentKind {
+  DYNAMIC
+  STATIC
 }
 
 enum SiteChromeArea {

@@ -40,3 +40,18 @@ export const dynamicSeed = [
   ["tin-tuc", "subscribe", "title", "Tiêu đề đăng ký bản tin", "Đăng ký nhận bản tin", "H2", 10],
 ] as const;
 
+export const staticSeed = [
+  ["static-home-navigation-home", "home", "navigation", "home", "Trang chủ", "Trang chủ", "TEXT", "", "", "", true, 1],
+  ["static-home-navigation-about", "home", "navigation", "about", "Giới thiệu", "Giới thiệu", "TEXT", "", "", "", true, 2],
+  ["static-home-navigation-services", "home", "navigation", "services", "Dịch vụ", "Dịch vụ", "TEXT", "", "", "", true, 3],
+  ["static-home-navigation-partners", "home", "navigation", "partners", "Đối tác", "Đối tác", "TEXT", "", "", "", true, 4],
+  ["static-home-navigation-news", "home", "navigation", "news", "Tin tức", "Tin tức", "TEXT", "", "", "", true, 5],
+  ["static-home-navigation-contact", "home", "navigation", "contact", "Liên hệ", "Liên hệ", "TEXT", "", "", "", true, 6],
+  ["static-about-hero-eyebrow", "gioi-thieu", "hero", "eyebrow", "GEDECO", "GEDECO", "TEXT", "", "", "", true, 1],
+  ["static-about-values-heading", "gioi-thieu", "values", "heading", "Giá trị tạo nên khác biệt", "Giá trị tạo nên khác biệt", "TEXT", "H2", "", "", true, 10],
+  ["static-partner-hero-eyebrow", "doi-tac", "hero", "eyebrow", "GEDECO", "GEDECO", "TEXT", "", "", "", true, 1],
+  ["static-project-hero-eyebrow", "du-an", "hero", "eyebrow", "GEDECO", "GEDECO", "TEXT", "", "", "", true, 1],
+  ["static-news-hero-eyebrow", "tin-tuc", "hero", "eyebrow", "TIN TỨC & CHIA SẺ", "TIN TỨC & CHIA SẺ", "TEXT", "", "", "", true, 1],
+  ["static-contact-hero-eyebrow", "lien-he", "hero", "eyebrow", "LIÊN HỆ VỚI GEDECO", "LIÊN HỆ VỚI GEDECO", "TEXT", "", "", "", true, 1],
+] as const;
+

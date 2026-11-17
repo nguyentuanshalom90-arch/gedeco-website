@@ -16,7 +16,7 @@ Cập nhật: 2026-11-17. Trạng thái dùng bốn mức: `PASS`, `ĐANG LÀM`,
 | Danh mục bài viết | CRUD, SEO VI/EN, slug/canonical riêng, liên kết bài viết, xóa an toàn | PASS local; CHỜ LIVE migration |
 | English bài viết | Nội dung, metadata, media alt/caption, slug và route English lấy từ TranslationEntry | PASS local |
 | Page tùy biến | CRUD section bằng form trực quan; media đầy đủ; draft/publish; SEO; song ngữ | PASS local; CHỜ provider/live migration |
-| Nội dung page hiện hữu | Mọi section frontend đọc database; không ghi file release khi production | THIẾU: một phần static còn ghi JSON |
+| Nội dung page hiện hữu | Mọi section frontend đọc database; không ghi file release khi production | ĐANG LÀM: storage đã DB-only; còn nối toàn bộ section hardcode |
 | Header/footer | CRUD database, media, link, alt, song ngữ, render toàn site | ĐANG LÀM |
 | Bản dịch | Có trạng thái, lỗi không ghi đè/ẩn bản tốt, cho phép sửa thủ công, slug unique theo entity + locale | PASS product/news local; còn page audit |
 | Toàn vẹn giao dịch | Ghi entity và quan hệ media trong transaction; unique/foreign key/validation | PASS sản phẩm; cần rà các module còn lại |
@@ -81,6 +81,13 @@ Nguồn chuẩn:
 - Hero media có đủ `Chọn từ thư viện` và `Tải ảnh lên`, alt/caption; page có tìm kiếm, sửa, xóa kèm translation, preview SEO, canonical, robots và draft/publish.
 - QA thật đã tạo page qua dashboard, ghi PostgreSQL, render frontend rồi xóa sạch. English lỗi trả 404 và không xuất hiện sitemap; VI có canonical, hreflang phù hợp, WebPage + Breadcrumb JSON-LD.
 - Renderer public được hoàn thiện responsive; screenshot admin, frontend desktop/mobile PASS. Build production local, TypeScript, Prisma validate và `git diff --check` PASS.
+
+### Bằng chứng audit content storage database-only ngày 2026-11-17
+
+- Đã hợp nhất nội dung `DYNAMIC/STATIC` vào PostgreSQL bằng enum và unique key có loại; xóa hoàn toàn cơ chế đọc/ghi `data/site-static-content.json` trong runtime.
+- Seed idempotent giữ nguyên 12 ID static cũ để bảo toàn quan hệ translation; 30 bản ghi dynamic hiện hữu được giữ nguyên. Frontend/API chỉ đọc database.
+- Media content dùng picker chung với đủ thư viện/tải lên, alt/caption; caption được đưa vào payload dịch. Xóa content xóa translation liên quan trong transaction.
+- QA qua giao diện thật đã tạo content nền, API đọc đúng từ PostgreSQL rồi dữ liệu/translation QA được xóa. Screenshot admin PASS; TypeScript, Prisma, build và `git diff --check` PASS.
 
 ## 4. Điều kiện trước production
 

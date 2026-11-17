@@ -1,39 +1,12 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
-import { readFile, writeFile } from "node:fs/promises";
-import path from "node:path";
-import { contentPages, dynamicSeed } from "./site-content-seed";
 import type { SiteContentInput, SiteContentItem, SiteContentKind } from "./site-content-types";
 import { syncSiteContentTranslation } from "@/lib/translation-service";
 import { requireDashboardSession } from "./auth";
+import { ensureSiteContentSeeded } from "@/lib/site-content-seeding";
 
-async function ensureSeeded() {
-  for (const page of contentPages) {
-    await prisma.siteContentPage.upsert({
-      where: { pageKey: page.pageKey },
-      update: {},
-      create: { ...page },
-    });
-  }
-  for (const [pageKey, sectionKey, fieldKey, label, value, headingLevel, sortOrder] of dynamicSeed) {
-    await prisma.siteDynamicContent.upsert({
-      where: { pageKey_sectionKey_fieldKey: { pageKey, sectionKey, fieldKey } },
-      update: {},
-      create: { pageKey, sectionKey, fieldKey, label, value, headingLevel: headingLevel || null, sortOrder },
-    });
-  }
-}
-
-const staticContentPath = path.join(process.cwd(), "data", "site-static-content.json");
-
-async function readStaticContent(): Promise<any[]> {
-  return JSON.parse(await readFile(staticContentPath, "utf8")) as any[];
-}
-
-async function writeStaticContent(rows: any[]) {
-  await writeFile(staticContentPath, `${JSON.stringify(rows, null, 2)}\n`, "utf8");
-}
+const dbKind = (kind: SiteContentKind) => kind === "static" ? "STATIC" as const : "DYNAMIC" as const;
 
 function toItem(row: any): SiteContentItem {
   return {
@@ -55,6 +28,7 @@ function toItem(row: any): SiteContentItem {
     headingLevel: row.headingLevel ?? "",
     imageUrl: row.imageUrl ?? "",
     altText: row.altText ?? "",
+    imageCaption: row.imageCaption ?? "",
     isVisible: row.isVisible,
     sortOrder: row.sortOrder,
     updatedAt: row.updatedAt instanceof Date ? row.updatedAt.toISOString() : String(row.updatedAt),
@@ -63,14 +37,8 @@ function toItem(row: any): SiteContentItem {
 
 export async function listSiteContent(kind: SiteContentKind): Promise<SiteContentItem[]> {
   await requireDashboardSession();
-  await ensureSeeded();
-  const rows = kind === "dynamic"
-    ? await prisma.siteDynamicContent.findMany({ include: { page: true }, orderBy: [{ pageKey: "asc" }, { sortOrder: "asc" }] })
-    : (await readStaticContent()).sort((a, b) => a.pageKey.localeCompare(b.pageKey) || a.sortOrder - b.sortOrder).map((row) => ({ ...row, page: null }));
-  if (kind === "static") {
-    const pages = await prisma.siteContentPage.findMany();
-    return rows.map((row) => toItem({ ...row, page: pages.find((page) => page.pageKey === row.pageKey) }));
-  }
+  await ensureSiteContentSeeded();
+  const rows = await prisma.siteDynamicContent.findMany({ where: { kind: dbKind(kind) }, include: { page: true }, orderBy: [{ pageKey: "asc" }, { sortOrder: "asc" }] });
   return rows.map(toItem);
 }
 
@@ -84,14 +52,11 @@ export async function saveSiteContent(kind: SiteContentKind, input: SiteContentI
   if (!input.metaTitle.trim() || input.metaTitle.trim().length > 60) throw new Error("SEO title bắt buộc và không vượt quá 60 ký tự.");
   if (!input.metaDescription.trim() || input.metaDescription.trim().length > 160) throw new Error("Meta description bắt buộc và không vượt quá 160 ký tự.");
   if (!input.canonicalUrl.trim()) throw new Error("Canonical URL là bắt buộc cho mỗi page.");
+  if (!input.canonicalUrl.startsWith("/") && !/^https:\/\/(www\.)?gedeco\.vn(?:\/|$)/i.test(input.canonicalUrl)) throw new Error("Canonical phải là đường dẫn nội bộ hoặc URL HTTPS của gedeco.vn.");
+  if (input.imageUrl.trim() && !input.altText.trim()) throw new Error("Ảnh nội dung phải có alt text.");
   if (input.headingLevel === "H1") {
-    if (kind === "dynamic") {
-      const duplicate = await prisma.siteDynamicContent.findFirst({ where: { pageKey, headingLevel: "H1", ...(input.id ? { NOT: { id: input.id } } : {}) } });
-      if (duplicate) throw new Error("Mỗi page chỉ được có một heading H1.");
-    } else {
-      const rows = await readStaticContent();
-      if (rows.some((row) => row.pageKey === pageKey && row.headingLevel === "H1" && row.id !== input.id)) throw new Error("Mỗi page chỉ được có một heading H1.");
-    }
+    const duplicate = await prisma.siteDynamicContent.findFirst({ where: { kind: dbKind(kind), pageKey, headingLevel: "H1", ...(input.id ? { NOT: { id: input.id } } : {}) } });
+    if (duplicate) throw new Error("Mỗi page chỉ được có một heading H1.");
   }
   const page = await prisma.siteContentPage.upsert({
     where: { pageKey },
@@ -118,6 +83,7 @@ export async function saveSiteContent(kind: SiteContentKind, input: SiteContentI
     },
   });
   const data = {
+    kind: dbKind(kind),
     pageKey,
     sectionKey,
     fieldKey,
@@ -127,30 +93,23 @@ export async function saveSiteContent(kind: SiteContentKind, input: SiteContentI
     headingLevel: input.headingLevel || null,
     imageUrl: input.imageUrl.trim() || null,
     altText: input.altText.trim() || null,
+    imageCaption: input.imageCaption.trim() || null,
     isVisible: input.isVisible,
     sortOrder: Number.isFinite(input.sortOrder) ? input.sortOrder : 0,
   };
-  if (kind === "static") {
-    const rows = await readStaticContent();
-    const index = input.id ? rows.findIndex((row) => row.id === input.id) : rows.findIndex((row) => row.pageKey === pageKey && row.sectionKey === sectionKey && row.fieldKey === fieldKey);
-    const staticRow = { id: input.id || `static-${pageKey}-${sectionKey}-${fieldKey}-${Date.now()}`, ...data, updatedAt: new Date().toISOString() };
-    if (index >= 0) rows[index] = staticRow;
-    else rows.push(staticRow);
-    await writeStaticContent(rows);
-    const pageRecord = await prisma.siteContentPage.findUnique({ where: { pageKey } });
-    const item = toItem({ ...staticRow, page: pageRecord });
-    const translation = await syncSiteContentTranslation({ id: item.id, label: item.label, value: item.value, altText: item.altText, h1: item.h1, metaTitle: item.metaTitle, metaDescription: item.metaDescription, updatedAt: new Date(item.updatedAt) });
-    return { ok: true, item, translation: { status: translation.status, errorMessage: translation.errorMessage } };
-  }
-  const row = await prisma.siteDynamicContent.upsert({ where: { pageKey_sectionKey_fieldKey: { pageKey, sectionKey, fieldKey } }, update: data, create: data, include: { page: true } });
+  const row = await prisma.siteDynamicContent.upsert({ where: { kind_pageKey_sectionKey_fieldKey: { kind: dbKind(kind), pageKey, sectionKey, fieldKey } }, update: data, create: data, include: { page: true } });
   const item = toItem({ ...row, page: page || row.page });
-  const translation = await syncSiteContentTranslation({ id: item.id, label: item.label, value: item.value, altText: item.altText, h1: item.h1, metaTitle: item.metaTitle, metaDescription: item.metaDescription, updatedAt: new Date(item.updatedAt) });
+  const translation = await syncSiteContentTranslation({ id: item.id, label: item.label, value: item.value, altText: item.altText, imageCaption: item.imageCaption, h1: item.h1, metaTitle: item.metaTitle, metaDescription: item.metaDescription, updatedAt: new Date(item.updatedAt) });
   return { ok: true, item, translation: { status: translation.status, errorMessage: translation.errorMessage } };
 }
 
 export async function deleteSiteContent(kind: SiteContentKind, id: string): Promise<{ ok: true }> {
   await requireDashboardSession();
-  if (kind === "dynamic") await prisma.siteDynamicContent.delete({ where: { id } });
-  else await writeStaticContent((await readStaticContent()).filter((row) => row.id !== id));
+  const row = await prisma.siteDynamicContent.findUnique({ where: { id }, select: { kind: true } });
+  if (!row || row.kind !== dbKind(kind)) return { ok: true };
+  await prisma.$transaction([
+    prisma.translationEntry.deleteMany({ where: { entityType: "SITE_CONTENT", entityId: id } }),
+    prisma.siteDynamicContent.delete({ where: { id } }),
+  ]);
   return { ok: true };
 }

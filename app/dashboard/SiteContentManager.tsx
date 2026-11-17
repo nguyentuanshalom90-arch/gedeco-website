@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Icon } from "@/components/vimigo-icon";
 import { deleteSiteContent, listSiteContent, saveSiteContent } from "@/lib/dashboard/site-content-actions";
 import type { SiteContentInput, SiteContentItem, SiteContentKind } from "@/lib/dashboard/site-content-types";
+import { MediaPicker } from "./MediaPicker";
 
 const pageTabs = [
   { pageKey: "home", pageName: "Trang chủ", route: "/" },
@@ -34,9 +35,15 @@ function emptyItem(pageKey = "home"): SiteContentInput {
     headingLevel: "H2",
     imageUrl: "",
     altText: "",
+    imageCaption: "",
     isVisible: true,
     sortOrder: 0,
   };
+}
+
+function withPageMetadata(input: SiteContentInput, items: SiteContentItem[]): SiteContentInput {
+  const source = items.find((item) => item.pageKey === input.pageKey);
+  return source ? { ...input, pageName: source.pageName, route: source.route, h1: source.h1, metaTitle: source.metaTitle, metaDescription: source.metaDescription, canonicalUrl: source.canonicalUrl, robotsIndex: source.robotsIndex, robotsFollow: source.robotsFollow } : input;
 }
 
 export function SiteContentManager() {
@@ -51,7 +58,9 @@ export function SiteContentManager() {
   async function load(nextKind = kind) {
     setBusy(true);
     try {
-      setItems(await listSiteContent(nextKind));
+      const rows = await listSiteContent(nextKind);
+      setItems(rows);
+      setEditing((current) => current.id ? current : withPageMetadata(emptyItem(current.pageKey), rows));
       setNotice("");
     } catch (error) {
       setNotice(error instanceof Error ? error.message : "Không thể tải nội dung.");
@@ -77,13 +86,13 @@ export function SiteContentManager() {
   }
 
   function createNew() {
-    setEditing(emptyItem(selectedPage));
+    setEditing(withPageMetadata(emptyItem(selectedPage), items));
     setNotice("");
   }
 
   function selectPage(pageKey: string) {
     setSelectedPage(pageKey);
-    setEditing(emptyItem(pageKey));
+    setEditing(withPageMetadata(emptyItem(pageKey), items));
     setSearch("");
     setNotice("");
   }
@@ -127,7 +136,7 @@ export function SiteContentManager() {
         <div>
           <p className="eyebrow">CMS TOÀN WEBSITE</p>
           <h1 className="disp">Quản lý body</h1>
-          <p>Quản lý nội dung body theo từng page, gồm nội dung động, nội dung tĩnh và metadata SEO.</p>
+          <p>Quản lý toàn bộ nội dung body theo từng page từ database, gồm nội dung theo section, media và metadata SEO.</p>
         </div>
         <button type="button" className="btn btn-primary" onClick={createNew}><Icon name="plus" size={16} /> Thêm nội dung</button>
       </div>
@@ -137,13 +146,13 @@ export function SiteContentManager() {
       </div>
 
       <div className="site-content-tabs panel" role="tablist" aria-label={`Loại nội dung page ${pageTabs.find((page) => page.pageKey === selectedPage)?.pageName || ""}`}>
-        <button type="button" role="tab" aria-selected={kind === "dynamic"} className={kind === "dynamic" ? "active" : ""} onClick={() => { setKind("dynamic"); setEditing(emptyItem(selectedPage)); }}>
+        <button type="button" role="tab" aria-selected={kind === "dynamic"} className={kind === "dynamic" ? "active" : ""} onClick={() => { setKind("dynamic"); setEditing(withPageMetadata(emptyItem(selectedPage), items)); }}>
           <Icon name="database" size={17} />
-          <span><strong>Nội dung động</strong><small>Hiển thị theo dữ liệu database</small></span>
+          <span><strong>Nội dung theo section</strong><small>Dữ liệu thay đổi thường xuyên trong database</small></span>
         </button>
-        <button type="button" role="tab" aria-selected={kind === "static"} className={kind === "static" ? "active" : ""} onClick={() => { setKind("static"); setEditing(emptyItem(selectedPage)); }}>
+        <button type="button" role="tab" aria-selected={kind === "static"} className={kind === "static" ? "active" : ""} onClick={() => { setKind("static"); setEditing(withPageMetadata(emptyItem(selectedPage), items)); }}>
           <Icon name="code" size={17} />
-          <span><strong>Nội dung tĩnh</strong><small>Hiển thị cố định trên frontend</small></span>
+          <span><strong>Nội dung nền</strong><small>Nhãn và thành phần giao diện trong database</small></span>
         </button>
       </div>
 
@@ -179,8 +188,9 @@ export function SiteContentManager() {
             <label>Kiểu dữ liệu<select value={editing.contentType} onChange={(event) => setField("contentType", event.target.value)}><option value="TEXT">Text</option><option value="RICH_TEXT">Rich text</option><option value="IMAGE">Ảnh</option><option value="LINK">Liên kết</option><option value="NUMBER">Số</option><option value="BOOLEAN">Boolean</option></select></label>
             <label>Heading level<select value={editing.headingLevel} onChange={(event) => setField("headingLevel", event.target.value)}><option value="">Không phải heading</option><option value="H1">H1 — duy nhất mỗi page</option><option value="H2">H2 — section chính</option><option value="H3">H3 — nhóm nội dung</option><option value="H4">H4 — chi tiết</option></select></label>
             <label className="site-content-full">Giá trị nội dung<textarea rows={5} value={editing.value} onChange={(event) => setField("value", event.target.value)} /></label>
-            <label>Ảnh / URL media<input value={editing.imageUrl} onChange={(event) => setField("imageUrl", event.target.value)} placeholder="/assets/..." /></label>
+            <div className="site-content-full"><MediaPicker label="Ảnh nội dung" value={editing.imageUrl} altText={editing.altText} caption={editing.imageCaption} onSelect={(asset) => setEditing((current) => ({ ...current, imageUrl: asset.url, altText: asset.altText || current.altText, imageCaption: asset.caption || current.imageCaption }))} onClear={() => setEditing((current) => ({ ...current, imageUrl: "", altText: "", imageCaption: "" }))} /></div>
             <label>Alt text ảnh<input value={editing.altText} onChange={(event) => setField("altText", event.target.value)} /></label>
+            <label>Caption ảnh<input value={editing.imageCaption} onChange={(event) => setField("imageCaption", event.target.value)} /></label>
             <label>Thứ tự hiển thị<input type="number" value={editing.sortOrder} onChange={(event) => setField("sortOrder", Number(event.target.value))} /></label>
           </div>
 

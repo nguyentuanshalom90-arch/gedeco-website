@@ -46,6 +46,7 @@ type SimpleContentSource = {
   label: string;
   value: string;
   altText?: string;
+  imageCaption?: string;
   h1?: string;
   metaTitle?: string;
   metaDescription?: string;
@@ -210,24 +211,25 @@ async function saveFailure(entityType: TranslationEntityType, entityId: string, 
 }
 
 async function syncSimpleContentTranslation(entityType: "SITE_CONTENT" | "SITE_CHROME", source: SimpleContentSource) {
-  const sourceHash = hashSource({ label: source.label, value: source.value, altText: source.altText || "", h1: source.h1 || "", metaTitle: source.metaTitle || "", metaDescription: source.metaDescription || "" });
+  const sourceHash = hashSource({ label: source.label, value: source.value, altText: source.altText || "", imageCaption: source.imageCaption || "", h1: source.h1 || "", metaTitle: source.metaTitle || "", metaDescription: source.metaDescription || "" });
   const current = await prisma.translationEntry.findUnique({ where: { entityType_entityId_locale: { entityType, entityId: source.id, locale: "en" } } });
   if (current?.sourceHash === sourceHash && current.status === "TRANSLATED") return current;
   if (current?.manualOverride) return prisma.translationEntry.update({ where: { id: current.id }, data: { sourceUpdatedAt: source.updatedAt, sourceHash, status: "NEEDS_REVIEW", errorMessage: null } });
   try {
     const config = getProviderConfig();
-    const [label, value, altText, h1, metaTitle, metaDescription] = await Promise.all([
+    const [label, value, altText, imageCaption, h1, metaTitle, metaDescription] = await Promise.all([
       translateText(source.label, config),
       translateHtml(source.value, config),
       translateText(source.altText || "", config),
+      translateText(source.imageCaption || "", config),
       translateText(source.h1 || "", config),
       translateText(source.metaTitle || "", config),
       translateText(source.metaDescription || "", config),
     ]);
     return prisma.translationEntry.upsert({
       where: { entityType_entityId_locale: { entityType, entityId: source.id, locale: "en" } },
-      create: { entityType, entityId: source.id, locale: "en", payload: { label, value, altText, h1, metaTitle, metaDescription }, sourceUpdatedAt: source.updatedAt, sourceHash, status: "TRANSLATED", provider: config.provider, translatedAt: new Date() },
-      update: { payload: { label, value, altText, h1, metaTitle, metaDescription }, sourceUpdatedAt: source.updatedAt, sourceHash, status: "TRANSLATED", provider: config.provider, errorMessage: null, translatedAt: new Date() },
+      create: { entityType, entityId: source.id, locale: "en", payload: { label, value, altText, imageCaption, h1, metaTitle, metaDescription }, sourceUpdatedAt: source.updatedAt, sourceHash, status: "TRANSLATED", provider: config.provider, translatedAt: new Date() },
+      update: { payload: { label, value, altText, imageCaption, h1, metaTitle, metaDescription }, sourceUpdatedAt: source.updatedAt, sourceHash, status: "TRANSLATED", provider: config.provider, errorMessage: null, translatedAt: new Date() },
     });
   } catch (error) {
     return saveFailure(entityType, source.id, source.updatedAt, sourceHash, error instanceof Error ? error.message : "Unknown translation error.");
