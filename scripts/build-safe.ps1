@@ -4,6 +4,9 @@ $projectRoot = Split-Path -Parent $PSScriptRoot
 $devProcesses = @()
 $listeners = @(Get-NetTCPConnection -LocalPort 3000 -State Listen -ErrorAction SilentlyContinue)
 foreach ($listener in $listeners) {
+  # Windows can briefly expose a duplicate/closing TCP row with owner PID 0.
+  # It is not a real process and must not block the verified project listener.
+  if ($listener.OwningProcess -eq 0) { continue }
   $owner = Get-CimInstance Win32_Process -Filter "ProcessId=$($listener.OwningProcess)" -ErrorAction SilentlyContinue
   if (-not $owner) { continue }
   if (-not $owner.CommandLine -or $owner.CommandLine -notmatch [regex]::Escape($projectRoot)) {

@@ -13,7 +13,8 @@ export async function generateMetadata(): Promise<Metadata> {
   const canonical = absoluteUrl('/en/about');
   const vi = absoluteUrl('/gioi-thieu');
   const image = media['intro.image'];
-  return { title, description, alternates: { canonical, languages: { vi, en: canonical, 'x-default': vi } }, robots: { index: page?.robotsIndex ?? true, follow: page?.robotsFollow ?? true }, openGraph: { type: 'website', locale: 'en_US', siteName: siteConfig.brand, url: canonical, title, description, images: image ? [{ url: absoluteUrl(image.url), alt: image.altText || 'GEDECO activities' }] : undefined } };
+  const imageAlt = translatedKeys.includes('intro.image') ? image?.altText || 'GEDECO activities' : 'GEDECO activities';
+  return { title, description, alternates: { canonical, languages: { vi, en: canonical, 'x-default': vi } }, robots: { index: page?.robotsIndex ?? true, follow: page?.robotsFollow ?? true }, openGraph: { type: 'website', locale: 'en_US', siteName: siteConfig.brand, url: canonical, title, description, images: image ? [{ url: absoluteUrl(image.url), alt: imageAlt }] : undefined } };
 }
 
 export default function AboutPageEnglish() {

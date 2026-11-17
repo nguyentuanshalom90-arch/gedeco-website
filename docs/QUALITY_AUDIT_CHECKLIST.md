@@ -16,7 +16,7 @@ Cập nhật: 2026-11-17. Trạng thái dùng bốn mức: `PASS`, `ĐANG LÀM`,
 | Danh mục bài viết | CRUD, SEO VI/EN, slug/canonical riêng, liên kết bài viết, xóa an toàn | PASS local; CHỜ LIVE migration |
 | English bài viết | Nội dung, metadata, media alt/caption, slug và route English lấy từ TranslationEntry | PASS local |
 | Page tùy biến | CRUD section bằng form trực quan; media đầy đủ; draft/publish; SEO; song ngữ | PASS local; CHỜ provider/live migration |
-| Nội dung page hiện hữu | Mọi section frontend đọc database; không ghi file release khi production | ĐANG LÀM: storage đã DB-only; trang Giới thiệu VI/EN đã nối đầy đủ |
+| Nội dung page hiện hữu | Mọi section frontend đọc database; không ghi file release khi production | ĐANG LÀM: Giới thiệu và Liên hệ VI/EN đã nối đầy đủ; còn Trang chủ |
 | Header/footer | CRUD database, media, link, alt, song ngữ, render toàn site | ĐANG LÀM |
 | Bản dịch | Có trạng thái, lỗi không ghi đè/ẩn bản tốt, cho phép sửa thủ công, slug unique theo entity + locale | PASS product/news local; còn page audit |
 | Toàn vẹn giao dịch | Ghi entity và quan hệ media trong transaction; unique/foreign key/validation | PASS sản phẩm; cần rà các module còn lại |
@@ -104,6 +104,14 @@ Nguồn chuẩn:
 - Đã loại liên kết homepage tới các route vừa xóa để không phát sinh broken link. Khối dự án nổi bật trên homepage vẫn là một section nội dung, không còn dẫn tới page riêng.
 - API header/footer đã hỗ trợ `lang=en`, chỉ trả nội dung English khi có `TranslationEntry` hợp lệ và không fallback tiếng Việt. QA translation tạm PASS rồi được xóa.
 - Build route manifest giảm từ 35 xuống 29 static pages; sitemap/header API không còn Đối tác/Dự án. Screenshot homepage English mobile 390px PASS, không tràn ngang.
+
+### Bằng chứng audit trang Liên hệ database-backed ngày 2026-11-17
+
+- Trang Liên hệ có 67 trường CMS database-backed, gồm hero, giới thiệu, ba thẻ liên hệ, toàn bộ nhãn form, bản đồ, liên hệ nhanh, FAQ và CTA; bốn vị trí media có URL, alt và caption.
+- `/en/contact` dùng wrapper English đúng thay vì vô tình render component Việt; `/en/lien-he` chuyển hướng về canonical. English fallback không lộ nội dung Việt khi chưa có bản dịch.
+- QA database → frontend PASS cho nội dung Việt và `TranslationEntry` English; dữ liệu QA đã được khôi phục/xóa sạch. URL hotline/Zalo/Messenger được giới hạn ở `tel:` hợp lệ hoặc HTTPS không có userinfo.
+- Metadata VI/EN có canonical, hreflang `vi/en/x-default`, robots, Open Graph alt đúng locale, ContactPage + Breadcrumb JSON-LD.
+- Admin body hiển thị 67 bản ghi và bổ sung bộ lọc section để thao tác nhanh; media row hiện URL ảnh thay vì báo trống. Screenshot admin desktop, frontend VI desktop và EN mobile PASS; mobile 390px không tràn ngang.
 
 ## 4. Điều kiện trước production
 

@@ -50,6 +50,7 @@ export function SiteContentManager() {
   const [selectedPage, setSelectedPage] = useState("home");
   const [editing, setEditing] = useState<SiteContentInput>(emptyItem("home"));
   const [search, setSearch] = useState("");
+  const [sectionFilter, setSectionFilter] = useState("all");
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState("");
 
@@ -69,14 +70,17 @@ export function SiteContentManager() {
 
   useEffect(() => { void load(kind); }, [kind]);
 
+  const sections = useMemo(() => [...new Set(items.filter((item) => item.pageKey === selectedPage).map((item) => item.sectionKey))].sort((a, b) => a.localeCompare(b)), [items, selectedPage]);
+
   const visibleItems = useMemo(() => {
     const query = search.trim().toLowerCase();
     return items.filter((item) => {
       const matchesPage = item.pageKey === selectedPage;
       const haystack = `${item.pageName} ${item.sectionKey} ${item.fieldKey} ${item.label} ${item.value}`.toLowerCase();
-      return matchesPage && (!query || haystack.includes(query));
+      const matchesSection = sectionFilter === "all" || item.sectionKey === sectionFilter;
+      return matchesPage && matchesSection && (!query || haystack.includes(query));
     });
-  }, [items, search, selectedPage]);
+  }, [items, search, sectionFilter, selectedPage]);
 
   function edit(item: SiteContentItem) {
     setEditing({ ...item });
@@ -92,6 +96,7 @@ export function SiteContentManager() {
     setSelectedPage(pageKey);
     setEditing(withPageMetadata(emptyItem(pageKey), items));
     setSearch("");
+    setSectionFilter("all");
     setNotice("");
   }
 
@@ -144,11 +149,11 @@ export function SiteContentManager() {
       </div>
 
       <div className="site-content-tabs panel" role="tablist" aria-label={`Loại nội dung page ${pageTabs.find((page) => page.pageKey === selectedPage)?.pageName || ""}`}>
-        <button type="button" role="tab" aria-selected={kind === "dynamic"} className={kind === "dynamic" ? "active" : ""} onClick={() => { setKind("dynamic"); setEditing(withPageMetadata(emptyItem(selectedPage), items)); }}>
+        <button type="button" role="tab" aria-selected={kind === "dynamic"} className={kind === "dynamic" ? "active" : ""} onClick={() => { setKind("dynamic"); setSectionFilter("all"); setEditing(withPageMetadata(emptyItem(selectedPage), items)); }}>
           <Icon name="database" size={17} />
           <span><strong>Nội dung theo section</strong><small>Dữ liệu thay đổi thường xuyên trong database</small></span>
         </button>
-        <button type="button" role="tab" aria-selected={kind === "static"} className={kind === "static" ? "active" : ""} onClick={() => { setKind("static"); setEditing(withPageMetadata(emptyItem(selectedPage), items)); }}>
+        <button type="button" role="tab" aria-selected={kind === "static"} className={kind === "static" ? "active" : ""} onClick={() => { setKind("static"); setSectionFilter("all"); setEditing(withPageMetadata(emptyItem(selectedPage), items)); }}>
           <Icon name="code" size={17} />
           <span><strong>Nội dung nền</strong><small>Nhãn và thành phần giao diện trong database</small></span>
         </button>
@@ -160,12 +165,12 @@ export function SiteContentManager() {
             <div><strong>{visibleItems.length} nội dung</strong><small>{pageTabs.find((page) => page.pageKey === selectedPage)?.pageName} · {kind === "dynamic" ? "Nội dung động" : "Nội dung tĩnh"}</small></div>
             <button type="button" className="btn btn-secondary" onClick={() => void load()} disabled={busy}><Icon name="history" size={15} /> Làm mới</button>
           </div>
-          <input className="site-content-search" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Tìm section, nội dung..." aria-label="Tìm nội dung" />
+          <div className="site-content-filters"><input className="site-content-search" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Tìm nhãn hoặc nội dung..." aria-label="Tìm nội dung" /><select value={sectionFilter} onChange={(event) => setSectionFilter(event.target.value)} aria-label="Lọc theo section"><option value="all">Tất cả section ({sections.length})</option>{sections.map((section) => <option value={section} key={section}>{section}</option>)}</select></div>
           <div className="site-content-list-items">
             {visibleItems.map((item) => <button type="button" key={item.id} className={`site-content-row${editing.id === item.id ? " active" : ""}`} onClick={() => edit(item)}>
               <span className="site-content-row-top"><strong>{item.label}</strong><small>{item.isVisible ? "Đang hiển thị" : "Đang ẩn"}</small></span>
               <span className="site-content-row-meta">{item.pageName} · {item.sectionKey}.{item.fieldKey}</span>
-              <span className="site-content-row-value">{item.value.replace(/\n/g, " ") || "Chưa có giá trị"}</span>
+              <span className="site-content-row-value">{item.value.replace(/\n/g, " ") || (item.imageUrl ? `Ảnh: ${item.imageUrl}` : "Chưa có giá trị")}</span>
             </button>)}
             {!visibleItems.length && <p className="site-content-empty">Chưa có nội dung phù hợp.</p>}
           </div>
