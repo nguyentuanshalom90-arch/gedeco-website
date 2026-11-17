@@ -1,5 +1,5 @@
 export type ProductMediaInput = {
-  id?: string; url: string; altText: string; caption: string; sortOrder: number; isPrimary: boolean;
+  id?: string; url: string; altText: string; caption: string; altTextEn?: string; captionEn?: string; sortOrder: number; isPrimary: boolean;
 };
 export type ProductInput = {
   id?: string | null; slug: string; title: string; categoryId: string;
@@ -8,6 +8,10 @@ export type ProductInput = {
   shipperImageUrl: string; ogImageUrl: string; ogImageAlt: string; gallery: ProductMediaInput[];
   metaTitle: string; metaDescription: string; canonicalUrl: string;
   robotsIndex: boolean; robotsFollow: boolean; isPublished: boolean; sortOrder: number;
+  translationMode: "AUTO" | "MANUAL"; translationStatus?: string; translationError?: string;
+  slugEn: string; titleEn: string; descriptionEn: string; contentHtmlEn: string; summaryHtmlEn: string;
+  priceTextEn: string; stockTextEn: string; imageAltEn: string; imageCaptionEn: string;
+  ogImageAltEn: string; metaTitleEn: string; metaDescriptionEn: string; canonicalUrlEn: string;
 };
 export type ProductListItem = ProductInput & {
   id: string; updatedAt: string; categoryName: string; categorySlug: string; categoryNameEn: string; categorySlugEn: string;

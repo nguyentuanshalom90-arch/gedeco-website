@@ -1,22 +1,14 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
+import { recordPermanentRedirect } from "@/lib/url-redirects";
+import { revalidatePath } from "next/cache";
 import { requireDashboardSession } from "./auth";
+import { validateOfficialCanonical } from "./canonical-url";
 import type { ProductCategoryInput, ProductCategoryListItem } from "./product-category-types";
 
 function slugify(value: string) {
   return value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/đ/g, "d").replace(/Đ/g, "D").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 120);
-}
-
-function canonical(value: string, language: "vi" | "en") {
-  const input = value.trim();
-  if (!input) return null;
-  if (input.startsWith("/")) return input;
-  try {
-    const url = new URL(input);
-    if (url.protocol === "https:" && ["gedeco.vn", "www.gedeco.vn"].includes(url.hostname.toLowerCase())) return input;
-  } catch {}
-  throw new Error(`Canonical ${language.toUpperCase()} phải là đường dẫn nội bộ hoặc URL HTTPS của gedeco.vn.`);
 }
 
 function toItem(row: any): ProductCategoryListItem {
@@ -72,13 +64,30 @@ export async function saveProductCategory(input: ProductCategoryInput) {
     imageUrl: input.imageUrl.trim(), imageAlt: input.imageAlt.trim(), imageCaption: input.imageCaption.trim(), imageAltEn: input.imageAltEn.trim(), imageCaptionEn: input.imageCaptionEn.trim(),
     metaTitle: input.metaTitle.trim() || null, metaDescription: input.metaDescription.trim() || null,
     metaTitleEn: input.metaTitleEn.trim() || null, metaDescriptionEn: input.metaDescriptionEn.trim() || null,
-    canonicalUrl: canonical(input.canonicalUrl, "vi"), canonicalUrlEn: canonical(input.canonicalUrlEn, "en"),
+    canonicalUrl: validateOfficialCanonical(input.canonicalUrl, { fieldLabel: "Canonical VI", pathPrefix: "/san-pham/" }),
+    canonicalUrlEn: validateOfficialCanonical(input.canonicalUrlEn, { fieldLabel: "Canonical EN", pathPrefix: "/en/products/" }),
     robotsIndex: input.robotsIndex, robotsFollow: input.robotsFollow, isPublished: input.isPublished,
     sortOrder: Number.isFinite(input.sortOrder) ? input.sortOrder : 0,
   };
-  const row = input.id
-    ? await prisma.productCategory.update({ where: { id: input.id }, data, include: { _count: { select: { products: true } } } })
-    : await prisma.productCategory.create({ data, include: { _count: { select: { products: true } } } });
+  const row = await prisma.$transaction(async (tx) => {
+    const previous = input.id ? await tx.productCategory.findUnique({ where: { id: input.id }, include: { products: { select: { id: true, slug: true } } } }) : null;
+    const saved = input.id
+      ? await tx.productCategory.update({ where: { id: input.id }, data, include: { _count: { select: { products: true } } } })
+      : await tx.productCategory.create({ data, include: { _count: { select: { products: true } } } });
+    if (previous && (previous.slug !== saved.slug || previous.slugEn !== saved.slugEn)) {
+      await recordPermanentRedirect(tx, `/san-pham/${previous.slug}`, `/san-pham/${saved.slug}`);
+      await recordPermanentRedirect(tx, `/en/products/${previous.slugEn}`, `/en/products/${saved.slugEn}`);
+      const translations = await tx.translationEntry.findMany({ where: { entityType: "PRODUCT", locale: "en", status: "TRANSLATED", entityId: { in: previous.products.map((product) => product.id) } }, select: { entityId: true, slug: true } });
+      const englishById = new Map(translations.map((entry) => [entry.entityId, entry.slug]));
+      for (const product of previous.products) {
+        await recordPermanentRedirect(tx, `/san-pham/${previous.slug}/${product.slug}`, `/san-pham/${saved.slug}/${product.slug}`);
+        const englishSlug = englishById.get(product.id);
+        if (englishSlug) await recordPermanentRedirect(tx, `/en/products/${previous.slugEn}/${englishSlug}`, `/en/products/${saved.slugEn}/${englishSlug}`);
+      }
+    }
+    return saved;
+  });
+  for (const path of ["/san-pham", "/en/products", `/san-pham/${row.slug}`, `/en/products/${row.slugEn}`, "/sitemap.xml"]) revalidatePath(path);
   return { ok: true as const, category: toItem(row) };
 }
 
@@ -87,6 +96,12 @@ export async function deleteProductCategory(id: string) {
   const category = await prisma.productCategory.findUnique({ where: { id }, include: { _count: { select: { products: true } } } });
   if (!category) return { ok: true as const };
   if (category._count.products > 0) throw new Error(`Không thể xóa: danh mục còn ${category._count.products} sản phẩm. Hãy chuyển sản phẩm sang danh mục khác trước.`);
-  await prisma.productCategory.delete({ where: { id } });
+  await prisma.$transaction(async (tx) => {
+    const vi = `/san-pham/${category.slug}`;
+    const en = `/en/products/${category.slugEn}`;
+    await tx.urlRedirect.deleteMany({ where: { OR: [{ sourcePath: vi }, { destinationPath: vi }, { sourcePath: en }, { destinationPath: en }] } });
+    await tx.productCategory.delete({ where: { id } });
+  });
+  for (const path of ["/san-pham", "/en/products", `/san-pham/${category.slug}`, `/en/products/${category.slugEn}`, "/sitemap.xml"]) revalidatePath(path);
   return { ok: true as const };
 }

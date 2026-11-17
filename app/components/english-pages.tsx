@@ -6,8 +6,8 @@ import { InnerHeader, InnerFooter } from './inner-pages';
 
 const nav = [['Home', '/en'], ['About', '/en/about'], ['News', '/en/news'], ['Contact', '/en/contact']];
 
-export function EnglishHeader({ active = '' }: { active?: string }) {
-  return <InnerHeader active={active} language="en" />;
+export function EnglishHeader({ active = '', alternateVietnamesePath }: { active?: string; alternateVietnamesePath?: string | null }) {
+  return <InnerHeader active={active} language="en" alternateVietnamesePath={alternateVietnamesePath} />;
 }
 
 export function EnglishFooter() {

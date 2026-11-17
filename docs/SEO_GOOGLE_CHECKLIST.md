@@ -29,6 +29,7 @@ Cập nhật: 17/11/2026. Checklist này dùng làm tiêu chuẩn nghiệm thu c
 - [x] Canonical của bản English trỏ tới URL English, không trỏ chéo sang bản Việt. `PASS local`.
 - [x] Chỉ xuất URL English khi bản dịch entity hợp lệ; bản dịch lỗi/chưa duyệt không vào sitemap và public listing. `PASS source`.
 - [x] Language switcher bài viết/danh mục dùng slug bản dịch thực tế; khi bản dịch FAILED/chưa có thì English bị vô hiệu hóa, không tạo link 404. `PASS local regression`.
+- [x] Language switcher và hreflang sản phẩm dùng slug English thực tế từ database; bản FAILED/chưa duyệt không tạo alternate hoặc public URL. `PASS local regression`.
 - [x] Canonical do admin lưu dạng relative được chuẩn hóa thành HTTPS absolute URL trước metadata, Open Graph, JSON-LD và link chia sẻ. `PASS source/local`.
 - [x] `<html lang="vi">` và `<html lang="en">` đúng route. `PASS local`.
 - [ ] Quét toàn sitemap production để xác nhận mọi alternate trả 200, reciprocal và không có URL demo/localhost. `PENDING DEPLOY AUDIT`.
@@ -74,7 +75,8 @@ Cập nhật: 17/11/2026. Checklist này dùng làm tiêu chuẩn nghiệm thu c
 - [x] Header/footer chỉ liên kết canonical; route/page ngoài menu đã bị loại theo phạm vi dự án. `PASS source`.
 - [x] Category, product và article detail có breadcrumb/internal link trở lại listing. `PASS source`.
 - [x] Slug danh mục tin tức legacy đã được chuẩn hóa bằng migration giữ nguyên ID/quan hệ; 6 URL lỗi cũ redirect 308 sang URL chuẩn và sitemap dùng slug mới. `PASS local regression`.
-- [ ] Với các lần đổi slug mới, phải tiếp tục tạo permanent redirect có kiểm soát và cập nhật sitemap/internal link. `EDITORIAL/DEV GATE`.
+- [x] Đổi slug bài viết, sản phẩm hoặc danh mục sản phẩm tạo redirect 308; đổi slug danh mục cập nhật cả URL chi tiết sản phẩm trong danh mục. `PASS source/local regression`.
+- [x] HTML sản phẩm VI/EN được làm sạch theo allowlist khi ghi và khi render; chặn script, event handler, URL JavaScript và ảnh ngoài media/domain chính thức. `PASS npm run test:products`.
 - [ ] Định kỳ rà bài lỗi thời, orphan page, broken link, soft 404 và redirect chain. `PENDING AUTOMATED AUDIT`.
 
 ## 8. Search Console và vận hành production

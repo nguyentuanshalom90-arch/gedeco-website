@@ -12,7 +12,8 @@
     "prisma:generate": "prisma generate",
     "prisma:validate": "prisma validate",
     "test:media": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/test-media-regression.mjs",
-    "test:news": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/test-news-seo-regression.mjs"
+    "test:news": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/test-news-seo-regression.mjs",
+    "test:products": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/test-products-regression.mjs"
   },
   "dependencies": {
     "@prisma/client": "^6.7.0",
@@ -20,6 +21,7 @@
     "nodemailer": "^10.6.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
+    "sanitize-html": "^2.18.2",
     "sharp": "^0.35.5"
   },
   "devDependencies": {
@@ -27,6 +29,7 @@
     "@types/nodemailer": "^8.0.2",
     "@types/react": "^19.1.0",
     "@types/react-dom": "^19.1.0",
+    "@types/sanitize-html": "^2.16.2",
     "prisma": "^6.7.0",
     "typescript": "^5.8.0"
   }
