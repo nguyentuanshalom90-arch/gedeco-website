@@ -54,13 +54,17 @@ try {
   assert(translatedResponse.status === 200, `Bản English đã duyệt trả ${translatedResponse.status}.`);
   assert(translatedHtml.includes("Approved English product") && translatedHtml.includes("Approved detail"), "Bản English đã duyệt không hiển thị.");
   assert(!translatedHtml.includes("onmouseover=\"alert(1)\"") && !translatedHtml.includes("<script>alert(2)</script>"), "HTML English nguy hiểm chưa bị loại.");
+  assert(translatedHtml.includes(`hrefLang="vi" href="https://gedeco.vn${viPath}"`) && translatedHtml.includes(`href="${viPath}"`), "Hreflang hoặc language switcher English không trỏ về URL VI thực tế.");
+  const viTranslatedResponse = await fetch(`${baseUrl}${viPath}`);
+  const viTranslatedHtml = await viTranslatedResponse.text();
+  assert(viTranslatedHtml.includes(`hrefLang="en" href="https://gedeco.vn${enPath}"`) && viTranslatedHtml.includes(`href="${enPath}"`), "Hreflang hoặc language switcher VI không trỏ tới slug English thực tế.");
 
   const oldPath = `/san-pham/${category.slug}/${oldSlug}`;
   await prisma.urlRedirect.create({ data: { sourcePath: oldPath, destinationPath: viPath } });
   const redirectResponse = await fetch(`${baseUrl}${oldPath}`, { redirect: "manual" });
   assert(redirectResponse.status === 308 && redirectResponse.headers.get("location") === viPath, `Redirect sản phẩm không đúng: ${redirectResponse.status} ${redirectResponse.headers.get("location")}`);
 
-  console.log("PRODUCT_REGRESSION_PASS sanitation failed-translation manual-translation redirect");
+  console.log("PRODUCT_REGRESSION_PASS sanitation failed-translation manual-translation hreflang switcher redirect");
 } finally {
   if (productId) {
     await prisma.$transaction([
