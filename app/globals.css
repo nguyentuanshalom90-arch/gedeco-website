@@ -399,3 +399,33 @@ body{overflow-x:clip}
   .home-project-grid{grid-template-columns:minmax(0,1fr)}
   .home-project-grid article,.home-project-grid article>div{min-width:0}
 }
+.cms-inline-media-panel {
+  margin: 10px 0 14px;
+  padding: 16px;
+  border: 1px solid #dce5ef;
+  border-radius: 14px;
+  background: #f8fbfe;
+}
+
+.article-inline-media {
+  margin: 24px 0;
+}
+
+.article-inline-media img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 12px;
+}
+
+.article-inline-media figcaption {
+  margin-top: 8px;
+  color: #667085;
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+.language-option.unavailable {
+  opacity: 0.45;
+  cursor: not-allowed;
+}

@@ -1,4 +1,5 @@
 export type PostStatus = "DRAFT" | "SCHEDULED" | "PUBLISHED";
+export type TranslationMode = "AUTO" | "MANUAL";
 
 export type PostInput = {
   id: string | null;
@@ -24,6 +25,19 @@ export type PostInput = {
   robotsIndex: boolean;
   robotsFollow: boolean;
   isFeatured: boolean;
+  translationMode: TranslationMode;
+  translationStatus: string;
+  titleEn: string;
+  slugEn: string;
+  shortDescEn: string;
+  contentEn: string;
+  coverImageAltEn: string;
+  coverImageCaptionEn: string;
+  ogImageAltEn: string;
+  metaTitleEn: string;
+  metaDescriptionEn: string;
+  focusKeywordEn: string;
+  tagsEn: string[];
 };
 
 export type PostListItem = PostInput & {
@@ -31,14 +45,4 @@ export type PostListItem = PostInput & {
   createdAt: string;
   updatedAt: string;
   publishedAt: string | null;
-};
-
-export type MediaAssetItem = {
-  id: string;
-  name: string;
-  url: string;
-  width: number;
-  height: number;
-  altText: string;
-  caption: string;
 };

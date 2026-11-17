@@ -12,8 +12,8 @@ export async function generateMetadata({ params }: { params: Promise<{ path?: st
   if (path.length === 1) {
     const category = await getProductCategoryBySlug(path[0], "en");
     if (category) {
-      const canonical = category.canonicalUrlEn || absoluteUrl(`/en/products/${category.slugEn}`);
-      const vi = category.canonicalUrl || absoluteUrl(`/san-pham/${category.slug}`);
+      const canonical = absoluteUrl(category.canonicalUrlEn || `/en/products/${category.slugEn}`);
+      const vi = absoluteUrl(category.canonicalUrl || `/san-pham/${category.slug}`);
       const title = category.metaTitleEn || category.nameEn;
       const description = category.metaDescriptionEn || category.descriptionEn || `Explore ${category.nameEn.toLowerCase()} from GEDECO.`;
       return { title, description, alternates: { canonical, languages: { vi, en: canonical, "x-default": vi } }, robots: { index: category.robotsIndex, follow: category.robotsFollow }, openGraph: { type: "website", locale: "en_US", siteName: siteConfig.brand, url: canonical, title, description, images: category.imageUrl ? [{ url: absoluteUrl(category.imageUrl), alt: category.imageAltEn || category.nameEn }] : undefined } };
@@ -38,7 +38,7 @@ export default async function EnglishProductOrCategoryPage({ params }: { params:
     const category = await getProductCategoryBySlug(path[0], "en");
     if (category) {
       const products = await listEnglishProducts();
-      const canonical = category.canonicalUrlEn || absoluteUrl(`/en/products/${category.slugEn}`);
+      const canonical = absoluteUrl(category.canonicalUrlEn || `/en/products/${category.slugEn}`);
       const jsonLd = [{ "@context": "https://schema.org", "@type": "CollectionPage", name: category.nameEn, description: category.metaDescriptionEn || category.descriptionEn || undefined, url: canonical, inLanguage: "en" }, { "@context": "https://schema.org", "@type": "BreadcrumbList", itemListElement: [{ "@type": "ListItem", position: 1, name: "Home", item: absoluteUrl("/en") }, { "@type": "ListItem", position: 2, name: "Products", item: absoluteUrl("/en/products") }, { "@type": "ListItem", position: 3, name: category.nameEn, item: canonical }] }];
       return <ShopShell language="en" current={category.nameEn} heroImage={category.imageUrl || undefined} heroSubtitle={category.descriptionEn || undefined}><div className="shop-width shop-page-layout"><div className="shop-main"><ShopBreadcrumb language="en" current={category.nameEn} />{category.imageCaptionEn && <p className="product-category-caption">{category.imageCaptionEn}</p>}<ProductCatalog items={products} initialCategory={category.slugEn} language="en" /></div><ShopSidebar language="en" /></div><script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }} /></ShopShell>;
     }

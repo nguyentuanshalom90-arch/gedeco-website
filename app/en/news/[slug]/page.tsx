@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import { Icon, InnerPage } from "../../../components/inner-pages";
 import { getEnglishArticleBySlug, listEnglishArticles } from "@/lib/public-news";
 import { absoluteUrl, siteConfig } from "@/lib/site-config";
+import { ArticleContent } from "@/app/components/article-content";
+import { redirectDestination } from "@/lib/url-redirects";
 
 export const dynamic = "force-dynamic";
 
@@ -25,30 +27,21 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   };
 }
 
-function ArticleContent({ content }: { content: string }) {
-  if (!content) return <p>This article is being updated.</p>;
-  return <>{content.split(/\r?\n/).map((line, index) => {
-    const key = `${index}-${line.slice(0, 20)}`;
-    if (!line.trim()) return <br key={key} />;
-    if (line.startsWith("### ")) return <h3 key={key}>{line.slice(4)}</h3>;
-    if (line.startsWith("## ")) return <h2 key={key}>{line.slice(3)}</h2>;
-    if (line.startsWith("> ")) return <blockquote key={key}>{line.slice(2)}</blockquote>;
-    if (line.startsWith("- ")) return <p key={key}>• {line.slice(2)}</p>;
-    return <p key={key}>{line}</p>;
-  })}</>;
-}
-
 export default async function EnglishArticlePage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const article = await getEnglishArticleBySlug(slug);
-  if (!article) notFound();
+  if (!article) {
+    const destination = await redirectDestination(`/en/news/${slug}`);
+    if (destination) permanentRedirect(destination);
+    notFound();
+  }
   const related = (await listEnglishArticles()).filter((item) => item.source.id !== article.source.id).slice(0, 3);
   const published = article.source.publishedAt || article.source.scheduledAt || article.source.createdAt;
   const canonical = absoluteUrl(`/en/news/${article.slug}`);
   const vi = absoluteUrl(`/tin-tuc/${article.source.slug}`);
   const image = article.source.ogImageUrl || article.source.imageUrl;
   const jsonLd = [{ "@context": "https://schema.org", "@type": "Article", headline: article.title, description: article.metaDescription || article.excerpt || undefined, image: image ? [absoluteUrl(image)] : undefined, datePublished: published.toISOString(), dateModified: article.source.updatedAt.toISOString(), inLanguage: "en", author: { "@type": "Organization", name: article.source.authorName || siteConfig.brand }, publisher: { "@type": "Organization", name: siteConfig.brand, logo: { "@type": "ImageObject", url: absoluteUrl(siteConfig.logo) } }, mainEntityOfPage: canonical, keywords: article.tags.join(", ") }, { "@context": "https://schema.org", "@type": "BreadcrumbList", itemListElement: [{ "@type": "ListItem", position: 1, name: "Home", item: absoluteUrl("/en") }, { "@type": "ListItem", position: 2, name: "News", item: absoluteUrl("/en/news") }, { "@type": "ListItem", position: 3, name: article.title, item: canonical }] }];
-  return <InnerPage active="News" language="en" pageClass="article-design">
+  return <InnerPage active="News" language="en" pageClass="article-design" alternateVietnamesePath={`/tin-tuc/${article.source.slug}`}>
     <section className="article-hero" style={{ backgroundImage: `linear-gradient(90deg,rgba(3,25,54,.88),rgba(3,25,54,.28)),url('${article.source.imageUrl || "/assets/banner-1.jpg"}')` }}><div className="container">
       <nav className="article-breadcrumb" aria-label="Breadcrumb"><a href="/en">Home</a><span>›</span><a href="/en/news">News</a><span>›</span><span>{article.category}</span></nav>
       <p className="eyebrow">{article.category.toLocaleUpperCase("en")}</p><h1>{article.title}</h1>
@@ -57,7 +50,7 @@ export default async function EnglishArticlePage({ params }: { params: Promise<{
     <article className="article-layout"><div className="container article-grid"><div className="article-main">
       {article.excerpt && <p className="article-lead">{article.excerpt}</p>}
       {article.source.imageUrl && <figure><img className="article-cover" src={article.source.imageUrl} alt={article.imageAlt} />{article.imageCaption && <figcaption>{article.imageCaption}</figcaption>}</figure>}
-      <ArticleContent content={article.content} />
+      <ArticleContent content={article.content} emptyText="This article is being updated." />
       {article.tags.length > 0 && <div className="article-tags"><strong>Keywords:</strong>{article.tags.map((tag) => <a key={tag} href={`/en/news?tag=${encodeURIComponent(tag)}`}>#{tag}</a>)}</div>}
     </div><aside className="article-side"><div className="side-box"><h3>Related articles</h3>{related.map((item) => <a className="article-related-item" key={item.source.id} href={`/en/news/${item.slug}`}><img src={item.source.imageUrl || "/assets/news-1-derivative.png"} alt={item.imageAlt} /><span><b>{item.title}</b><small>{(item.source.publishedAt || item.source.scheduledAt || item.source.createdAt).toLocaleDateString("en-GB")}</small></span></a>)}</div></aside></div>
       <div className="container article-nav"><a href="/en/news">← <span>News</span><b>Back to all articles</b></a><a href={vi}><span>Vietnamese version</span><b>Đọc bản tiếng Việt</b> →</a></div>

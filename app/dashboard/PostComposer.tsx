@@ -3,11 +3,11 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Icon } from "@/components/vimigo-icon";
+import { MediaPicker, type MediaSelection } from "./MediaPicker";
 import { deletePost, listPosts, savePost } from "@/lib/dashboard/post-actions";
 import { listCategories } from "@/lib/dashboard/category-actions";
 import type { CategoryListItem } from "@/lib/dashboard/category-types";
 import type {
-  MediaAssetItem,
   PostInput,
   PostListItem,
   PostStatus,
@@ -37,16 +37,20 @@ const EMPTY_POST: PostInput = {
   robotsIndex: true,
   robotsFollow: true,
   isFeatured: false,
+  translationMode: "AUTO",
+  translationStatus: "PENDING",
+  titleEn: "",
+  slugEn: "",
+  shortDescEn: "",
+  contentEn: "",
+  coverImageAltEn: "",
+  coverImageCaptionEn: "",
+  ogImageAltEn: "",
+  metaTitleEn: "",
+  metaDescriptionEn: "",
+  focusKeywordEn: "",
+  tagsEn: [],
 };
-
-async function uploadImage(file: File): Promise<MediaAssetItem> {
-  const body = new FormData();
-  body.append("file", file);
-  const response = await fetch("/api/media", { method: "POST", body });
-  const payload = await response.json().catch(() => ({}));
-  if (!response.ok) throw new Error(payload.error || "Tải ảnh thất bại.");
-  return payload as MediaAssetItem;
-}
 
 function seoAudit(post: PostInput) {
   const keyword = post.focusKeyword.trim().toLocaleLowerCase("vi");
@@ -139,121 +143,62 @@ function ChipInput({
   );
 }
 
-function ImagePicker({
-  value,
-  onChange,
-  onSelect,
-  label,
-}: {
-  value: string | null;
-  onChange: (url: string | null) => void;
-  onSelect?: (asset: MediaAssetItem) => void;
-  label: string;
-}) {
-  const inputRef = useRef<HTMLInputElement>(null);
-  const [busy, setBusy] = useState(false);
-  const [open, setOpen] = useState(false);
-  const [assets, setAssets] = useState<MediaAssetItem[]>([]);
-  async function library() {
-    setOpen(true);
-    setBusy(true);
-    try {
-      const response = await fetch("/api/media");
-      const payload = await response.json();
-      if (!response.ok) throw new Error(payload.error);
-      setAssets(payload.assets || []);
-    } finally {
-      setBusy(false);
-    }
+function MarkdownEditor({ value, onChange, placeholder, mediaLabel, onError }: { value: string; onChange: (value: string) => void; placeholder: string; mediaLabel: string; onError: (message: string) => void }) {
+  const areaRef = useRef<HTMLTextAreaElement>(null);
+  const [mediaOpen, setMediaOpen] = useState(false);
+  const [mediaAlt, setMediaAlt] = useState("");
+  const [mediaCaption, setMediaCaption] = useState("");
+  const words = value.trim() ? value.trim().split(/\s+/).length : 0;
+  function insert(before: string, after = before) {
+    const area = areaRef.current;
+    if (!area) return;
+    const start = area.selectionStart;
+    const end = area.selectionEnd;
+    onChange(`${value.slice(0, start)}${before}${value.slice(start, end)}${after}${value.slice(end)}`);
+    requestAnimationFrame(() => {
+      area.focus();
+      area.setSelectionRange(start + before.length, end + before.length);
+    });
   }
-  async function upload(event: React.ChangeEvent<HTMLInputElement>) {
-    const file = event.target.files?.[0];
-    if (!file) return;
-    setBusy(true);
-    try {
-      const asset = await uploadImage(file);
-      onChange(asset.url);
-      onSelect?.(asset);
-    } finally {
-      setBusy(false);
-      event.target.value = "";
+  function insertMedia(asset: MediaSelection) {
+    const area = areaRef.current;
+    const alt = (mediaAlt || asset.altText || asset.name).trim().replace(/[\[\]]/g, "");
+    const caption = (mediaCaption || asset.caption).trim().replace(/"/g, "'");
+    if (!area || !alt) {
+      onError("Ảnh trong nội dung phải có alt text mô tả.");
+      return;
     }
+    const start = area.selectionStart;
+    const end = area.selectionEnd;
+    const before = value.slice(0, start);
+    const after = value.slice(end);
+    const syntax = `![${alt}](${asset.url}${caption ? ` "${caption}"` : ""})`;
+    const prefix = before && !before.endsWith("\n") ? "\n" : "";
+    const suffix = after && !after.startsWith("\n") ? "\n" : "";
+    onChange(`${before}${prefix}${syntax}${suffix}${after}`);
+    setMediaOpen(false);
+    setMediaAlt("");
+    setMediaCaption("");
   }
-  return (
-    <div className="cms-image-picker">
-      <input
-        ref={inputRef}
-        hidden
-        type="file"
-        accept="image/png,image/jpeg,image/webp"
-        onChange={upload}
-      />
-      {value ? (
-        <div className="cms-image-preview">
-          <img src={value} alt={label} />
-          <button
-            type="button"
-            onClick={() => onChange(null)}
-            aria-label={`Xóa ${label}`}
-          >
-            <Icon name="trash" size={15} />
-          </button>
-        </div>
-      ) : (
-        <div className="cms-image-actions">
-          <button type="button" className="drop" onClick={() => void library()}>
-            <Icon name="image" size={22} />
-            <strong>Chọn từ thư viện</strong>
-          </button>
-          <button
-            type="button"
-            className="drop"
-            onClick={() => inputRef.current?.click()}
-            disabled={busy}
-          >
-            <Icon name="upload" size={22} />
-            <strong>{busy ? "Đang tải…" : "Tải ảnh lên"}</strong>
-          </button>
-        </div>
-      )}
-      {open && (
-        <div className="post-media-library">
-          <div className="post-media-library-head">
-            <strong>Thư viện ảnh</strong>
-            <button
-              type="button"
-              className="btn"
-              onClick={() => setOpen(false)}
-            >
-              Đóng
-            </button>
-          </div>
-          {busy ? (
-            <p>Đang tải ảnh…</p>
-          ) : assets.length ? (
-            <div className="post-media-grid">
-              {assets.map((asset) => (
-                <button
-                  type="button"
-                  key={asset.id}
-                  onClick={() => {
-                    onChange(asset.url);
-                    onSelect?.(asset);
-                    setOpen(false);
-                  }}
-                >
-                  <img src={asset.url} alt={asset.name} />
-                  <span>{asset.name}</span>
-                </button>
-              ))}
-            </div>
-          ) : (
-            <p>Chưa có ảnh trong thư viện.</p>
-          )}
-        </div>
-      )}
+  return <div className="field">
+    <div className="cms-editor-toolbar">
+      <button type="button" onClick={() => insert("## ", "")} title="Tiêu đề"><Icon name="type" /></button>
+      <button type="button" onClick={() => insert("**")} title="In đậm"><strong>B</strong></button>
+      <button type="button" onClick={() => insert("[", "](https://)")} title="Liên kết"><Icon name="link" /></button>
+      <button type="button" onClick={() => setMediaOpen((current) => !current)} title="Ảnh"><Icon name="image" /></button>
+      <button type="button" onClick={() => insert("`", "`")} title="Mã"><Icon name="code" /></button>
+      <button type="button" onClick={() => insert("> ", "")} title="Trích dẫn">❝</button>
     </div>
-  );
+    {mediaOpen ? <div className="cms-inline-media-panel">
+      <div className="site-content-form-grid">
+        <label>Alt text ảnh<input value={mediaAlt} onChange={(event) => setMediaAlt(event.target.value)} placeholder="Mô tả nội dung ảnh" /></label>
+        <label>Caption ảnh<input value={mediaCaption} onChange={(event) => setMediaCaption(event.target.value)} placeholder="Chú thích hiển thị dưới ảnh" /></label>
+      </div>
+      <MediaPicker label={mediaLabel} value="" altText={mediaAlt} caption={mediaCaption} onSelect={insertMedia} />
+    </div> : null}
+    <textarea ref={areaRef} className="input cms-content-area" value={value} onChange={(event) => onChange(event.target.value)} placeholder={placeholder} />
+    <small className="cms-help">Hỗ trợ Markdown · {words} từ</small>
+  </div>;
 }
 
 export function PostComposer() {
@@ -267,7 +212,6 @@ export function PostComposer() {
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
-  const contentRef = useRef<HTMLTextAreaElement>(null);
   const seo = useMemo(() => seoAudit(post), [post]);
   const set = <K extends keyof PostInput>(key: K, value: PostInput[K]) => {
     setPost((current) => ({ ...current, [key]: value }));
@@ -310,21 +254,6 @@ export function PostComposer() {
     setMessage("");
     setError("");
   }
-  function insert(before: string, after = before) {
-    const area = contentRef.current;
-    if (!area) return;
-    const start = area.selectionStart,
-      end = area.selectionEnd;
-    const selected = post.content.slice(start, end);
-    set(
-      "content",
-      `${post.content.slice(0, start)}${before}${selected}${after}${post.content.slice(end)}`,
-    );
-    requestAnimationFrame(() => {
-      area.focus();
-      area.setSelectionRange(start + before.length, end + before.length);
-    });
-  }
   async function persist() {
     setSaving(true);
     setError("");
@@ -339,7 +268,7 @@ export function PostComposer() {
         result.post,
         ...current.filter((item) => item.id !== result.post.id),
       ]);
-      setMessage(`Đã lưu bài viết · English: ${result.translation.status === "TRANSLATED" ? "đã sinh" : result.translation.status === "FAILED" ? "dịch lỗi — bản cũ được giữ nguyên" : "cần rà soát"}.`);
+      setMessage(`Đã lưu bài viết · English: ${result.translation.status === "TRANSLATED" ? "đã sẵn sàng" : result.translation.status === "FAILED" ? "dịch lỗi — chưa công khai" : "cần rà soát"}.`);
     } catch (reason) {
       setError(
         reason instanceof Error ? reason.message : "Lưu bài viết thất bại.",
@@ -351,7 +280,11 @@ export function PostComposer() {
   async function remove(item: PostListItem) {
     if (!window.confirm(`Xóa bài viết “${item.title}”?`)) return;
     try {
-      await deletePost(item.id);
+      const result = await deletePost(item.id);
+      if (!result.ok) {
+        setError(result.error);
+        return;
+      }
       setPosts((current) =>
         current.filter((postItem) => postItem.id !== item.id),
       );
@@ -540,63 +473,7 @@ export function PostComposer() {
                 placeholder="Tóm tắt nội dung bài viết…"
               />
             </label>
-            <div className="field">
-              <span>Nội dung chi tiết</span>
-              <div className="cms-editor-toolbar">
-                <button
-                  type="button"
-                  onClick={() => insert("## ", "")}
-                  title="Tiêu đề"
-                >
-                  <Icon name="type" />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => insert("**")}
-                  title="In đậm"
-                >
-                  <strong>B</strong>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => insert("[", "](https://)")}
-                  title="Liên kết"
-                >
-                  <Icon name="link" />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => insert("![Mô tả ảnh](/", ")")}
-                  title="Ảnh"
-                >
-                  <Icon name="image" />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => insert("`", "`")}
-                  title="Mã"
-                >
-                  <Icon name="code" />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => insert("> ", "")}
-                  title="Trích dẫn"
-                >
-                  ❝
-                </button>
-              </div>
-              <textarea
-                ref={contentRef}
-                className="input cms-content-area"
-                value={post.content}
-                onChange={(event) => set("content", event.target.value)}
-                placeholder="Soạn nội dung bằng Markdown…"
-              />
-              <small className="cms-help">
-                Hỗ trợ Markdown · {wordCount} từ
-              </small>
-            </div>
+            <div><span>Nội dung chi tiết</span><MarkdownEditor value={post.content} onChange={(value) => set("content", value)} placeholder="Soạn nội dung bằng Markdown…" mediaLabel="Ảnh trong nội dung" onError={setError} /></div>
           </section>
           <section className="panel cms-card">
             <div className="cms-section-head">
@@ -626,7 +503,7 @@ export function PostComposer() {
                 </span>
                 <input
                   className="input"
-                  maxLength={70}
+                  maxLength={65}
                   value={post.metaTitle}
                   onChange={(event) => set("metaTitle", event.target.value)}
                   placeholder={post.title || "Tiêu đề hiển thị trên Google"}
@@ -638,7 +515,7 @@ export function PostComposer() {
                 </span>
                 <textarea
                   className="input"
-                  maxLength={170}
+                  maxLength={160}
                   value={post.metaDescription}
                   onChange={(event) =>
                     set("metaDescription", event.target.value)
@@ -677,6 +554,29 @@ export function PostComposer() {
                 </span>
               ))}
             </div>
+          </section>
+          <section className="panel cms-card cms-english-editor">
+            <div className="cms-section-head">
+              <div><p className="eyebrow">NỘI DUNG SONG NGỮ</p><h2>English version</h2><p>Trạng thái hiện tại: <strong>{post.translationStatus}</strong></p></div>
+              <label className="field"><span>Chế độ English</span><select className="input" value={post.translationMode} onChange={(event) => set("translationMode", event.target.value as "AUTO" | "MANUAL")}><option value="AUTO">Dịch tự động</option><option value="MANUAL">Tự nhập và duyệt</option></select></label>
+            </div>
+            {post.translationMode === "AUTO" ? <p className="cms-help">Hệ thống sẽ dịch sau khi lưu. Nếu dịch lỗi, URL English sẽ không được công khai; chọn “Tự nhập và duyệt” để biên tập thủ công.</p> : <div className="cms-english-fields">
+              <div className="cms-seo-grid">
+                <label className="field"><span>English title</span><input className="input" value={post.titleEn} onChange={(event) => set("titleEn", event.target.value)} /></label>
+                <label className="field"><span>English slug</span><input className="input" value={post.slugEn} onChange={(event) => set("slugEn", event.target.value)} placeholder="generated-from-title" /></label>
+                <label className="field cms-span-2"><span>English excerpt <small>{post.shortDescEn.length}/160</small></span><textarea className="input" maxLength={160} value={post.shortDescEn} onChange={(event) => set("shortDescEn", event.target.value)} /></label>
+              </div>
+              <div><span>English content</span><MarkdownEditor value={post.contentEn} onChange={(value) => set("contentEn", value)} placeholder="Write English content in Markdown…" mediaLabel="English content image" onError={setError} /></div>
+              <div className="cms-seo-grid">
+                <label className="field"><span>English tags</span><ChipInput items={post.tagsEn} onChange={(value) => set("tagsEn", value)} /></label>
+                <label className="field"><span>English focus keyword</span><input className="input" value={post.focusKeywordEn} onChange={(event) => set("focusKeywordEn", event.target.value)} /></label>
+                <label className="field"><span>Cover image alt (EN)</span><input className="input" value={post.coverImageAltEn} onChange={(event) => set("coverImageAltEn", event.target.value)} /></label>
+                <label className="field"><span>Cover image caption (EN)</span><input className="input" value={post.coverImageCaptionEn} onChange={(event) => set("coverImageCaptionEn", event.target.value)} /></label>
+                <label className="field"><span>Open Graph image alt (EN)</span><input className="input" value={post.ogImageAltEn} onChange={(event) => set("ogImageAltEn", event.target.value)} /></label>
+                <label className="field"><span>English SEO title <small>{post.metaTitleEn.length}/65</small></span><input className="input" maxLength={65} value={post.metaTitleEn} onChange={(event) => set("metaTitleEn", event.target.value)} /></label>
+                <label className="field cms-span-2"><span>English meta description <small>{post.metaDescriptionEn.length}/160</small></span><textarea className="input" maxLength={160} value={post.metaDescriptionEn} onChange={(event) => set("metaDescriptionEn", event.target.value)} /></label>
+              </div>
+            </div>}
           </section>
         </main>
         <aside className="cms-editor-aside">
@@ -784,10 +684,12 @@ export function PostComposer() {
           </section>
           <section className="panel cms-card">
             <h3>Ảnh bìa</h3>
-            <ImagePicker
-              value={post.coverImage}
-              onChange={(value) => set("coverImage", value)}
-              onSelect={(asset) => setPost((current) => ({ ...current, coverImage: asset.url, coverImageAlt: asset.altText, coverImageCaption: asset.caption }))}
+            <MediaPicker
+              value={post.coverImage || ""}
+              altText={post.coverImageAlt}
+              caption={post.coverImageCaption}
+              onClear={() => setPost((current) => ({ ...current, coverImage: null, coverImageAlt: "", coverImageCaption: "" }))}
+              onSelect={(asset) => setPost((current) => ({ ...current, coverImage: asset.url, coverImageAlt: asset.altText || current.coverImageAlt || current.title, coverImageCaption: asset.caption || current.coverImageCaption }))}
               label="Ảnh bìa"
             />
             <label>Alt ảnh bìa<input value={post.coverImageAlt} onChange={(event) => set("coverImageAlt", event.target.value)} placeholder="Mô tả ngắn, đúng nội dung ảnh" /></label>
@@ -796,10 +698,11 @@ export function PostComposer() {
           </section>
           <section className="panel cms-card">
             <h3>Ảnh chia sẻ mạng xã hội</h3>
-            <ImagePicker
-              value={post.ogImage}
-              onChange={(value) => set("ogImage", value)}
-              onSelect={(asset) => setPost((current) => ({ ...current, ogImage: asset.url, ogImageAlt: asset.altText }))}
+            <MediaPicker
+              value={post.ogImage || ""}
+              altText={post.ogImageAlt}
+              onClear={() => setPost((current) => ({ ...current, ogImage: null, ogImageAlt: "" }))}
+              onSelect={(asset) => setPost((current) => ({ ...current, ogImage: asset.url, ogImageAlt: asset.altText || current.ogImageAlt || current.title }))}
               label="Ảnh mạng xã hội"
             />
             <label>Alt ảnh chia sẻ<input value={post.ogImageAlt} onChange={(event) => set("ogImageAlt", event.target.value)} /></label>

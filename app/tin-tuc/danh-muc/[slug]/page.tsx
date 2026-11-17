@@ -28,10 +28,9 @@ export async function generateMetadata({
     category.metaDescription ||
     category.description ||
     `Các bài viết mới nhất thuộc danh mục ${category.name} từ GEDECO.`;
-  const canonical =
-    category.canonicalUrl || absoluteUrl(`/tin-tuc/danh-muc/${category.slug}`);
+  const canonical = absoluteUrl(category.canonicalUrl || `/tin-tuc/danh-muc/${category.slug}`);
   const englishCanonical = category.slugEn && category.nameEn
-    ? category.canonicalUrlEn || absoluteUrl(`/en/news/category/${category.slugEn}`)
+    ? absoluteUrl(category.canonicalUrlEn || `/en/news/category/${category.slugEn}`)
     : null;
   return {
     title,
@@ -71,8 +70,7 @@ export default async function NewsCategoryPage({
       { createdAt: "desc" },
     ],
   });
-  const canonical =
-    category.canonicalUrl || absoluteUrl(`/tin-tuc/danh-muc/${category.slug}`);
+  const canonical = absoluteUrl(category.canonicalUrl || `/tin-tuc/danh-muc/${category.slug}`);
   const jsonLd = [
     {
       "@context": "https://schema.org",
@@ -114,7 +112,7 @@ export default async function NewsCategoryPage({
     },
   ];
   return (
-    <InnerPage active="Tin tức">
+    <InnerPage active="Tin tức" alternateEnglishPath={category.slugEn ? `/en/news/category/${category.slugEn}` : null}>
       <InnerHero
         eyebrow="DANH MỤC BÀI VIẾT"
         title={category.name}

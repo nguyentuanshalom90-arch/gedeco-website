@@ -61,7 +61,7 @@ function normalizeLanguagePath(path: string, routeMap: Record<string, string>) {
   return `${entry[0]}${base.slice(source.length)}`;
 }
 
-export function LanguageSwitcher({ english = false }: { english?: boolean }) {
+export function LanguageSwitcher({ english = false, alternateEnglishPath, alternateVietnamesePath }: { english?: boolean; alternateEnglishPath?: string | null; alternateVietnamesePath?: string | null }) {
   const pathname = usePathname() || '/';
   const [queryString, setQueryString] = useState('');
   const scrollStorageKey = 'gedeco:language-scroll-position';
@@ -114,7 +114,8 @@ export function LanguageSwitcher({ english = false }: { english?: boolean }) {
   const translatedVietnameseProductPath = translateProductPath(basePath, false);
   const englishTarget = translatedProductPath || translatePath(basePath, true);
   const vietnameseTarget = translatedVietnameseProductPath || vietnamesePath;
-  const englishPath = `/en${englishTarget === '/' ? '' : englishTarget}`;
+  const englishPath = alternateEnglishPath === undefined ? `/en${englishTarget === '/' ? '' : englishTarget}` : alternateEnglishPath;
+  const resolvedVietnamesePath = alternateVietnamesePath === undefined ? vietnameseTarget : alternateVietnamesePath;
   const searchParams = new URLSearchParams(queryString);
   const category = searchParams.get('category');
   const translatedCategory = english
@@ -124,7 +125,7 @@ export function LanguageSwitcher({ english = false }: { english?: boolean }) {
   if (translatedCategory) query.set('category', translatedCategory); else query.delete('category');
   const querySuffix = query.toString() ? `?${query.toString()}` : '';
   return <div className="language-switcher" aria-label="Language switcher">
-    {english ? <Link scroll={false} onPointerDown={rememberScrollPosition} onClick={rememberScrollPosition} className="language-option language-option-vietnamese" href={`${vietnameseTarget}${querySuffix}`} aria-label="Tiếng Việt"><VietnamFlag /><span>VI</span></Link> : <span className="language-option language-option-vietnamese current" aria-label="Tiếng Việt"><VietnamFlag /><span>VI</span></span>}
-    {english ? <span className="language-option language-option-english current" aria-label="English"><UnitedKingdomFlag /><span>EN</span></span> : <Link scroll={false} onPointerDown={rememberScrollPosition} onClick={rememberScrollPosition} className="language-option language-option-english" href={`${englishPath}${querySuffix}`} aria-label="English"><UnitedKingdomFlag /><span>EN</span></Link>}
+    {english ? (resolvedVietnamesePath ? <Link scroll={false} onPointerDown={rememberScrollPosition} onClick={rememberScrollPosition} className="language-option language-option-vietnamese" href={`${resolvedVietnamesePath}${querySuffix}`} aria-label="Tiếng Việt"><VietnamFlag /><span>VI</span></Link> : <span className="language-option language-option-vietnamese unavailable" aria-label="Chưa có bản tiếng Việt" aria-disabled="true"><VietnamFlag /><span>VI</span></span>) : <span className="language-option language-option-vietnamese current" aria-label="Tiếng Việt"><VietnamFlag /><span>VI</span></span>}
+    {english ? <span className="language-option language-option-english current" aria-label="English"><UnitedKingdomFlag /><span>EN</span></span> : (englishPath ? <Link scroll={false} onPointerDown={rememberScrollPosition} onClick={rememberScrollPosition} className="language-option language-option-english" href={`${englishPath}${querySuffix}`} aria-label="English"><UnitedKingdomFlag /><span>EN</span></Link> : <span className="language-option language-option-english unavailable" aria-label="English chưa có bản dịch" aria-disabled="true"><UnitedKingdomFlag /><span>EN</span></span>)}
   </div>;
 }

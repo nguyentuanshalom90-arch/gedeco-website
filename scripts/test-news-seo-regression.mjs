@@ -45,6 +45,7 @@ const prisma = new PrismaClient();
 const suffix = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 let categoryId = "";
 let articleId = "";
+let qaRedirectSource = "";
 
 const expectedCategories = [
   ["Tin tức", "tin-tuc", "News", "news"],
@@ -108,7 +109,7 @@ try {
       category: category.name,
       categoryId: category.id,
       excerpt: "QA excerpt for SEO regression.",
-      content: "QA regression content.",
+      content: "## QA regression content\nContent with **strong emphasis**.\n![QA inline image](/assets/news-1-derivative.png \"QA inline caption\")\n- First QA item\n- Second QA item\n[Contact](/lien-he)",
       imageUrl: "/assets/news-1-derivative.png",
       imageAlt: "QA news image",
       imageCaption: "QA VI image caption",
@@ -133,7 +134,7 @@ try {
         title: "QA SEO Article EN",
         category: "QA SEO News",
         excerpt: "QA English excerpt.",
-        content: "QA English content.",
+        content: "## QA English content\nContent with **strong emphasis**.\n![QA English inline image](/assets/news-1-derivative.png \"QA English inline caption\")\n- First English item\n- Second English item\n[Contact](/en/contact)",
         imageAlt: "QA English image",
         imageCaption: "QA EN image caption",
         metaTitle: "QA SEO Article EN",
@@ -152,6 +153,7 @@ try {
   const failedViHtml = await failedVi.text();
   assert.equal(failedVi.status, 200);
   assert(!failedViHtml.includes(`/en/news/${enSlug}`), "Bản dịch FAILED không được xuất hiện trong hreflang bài VI.");
+  assert(failedViHtml.includes("English chưa có bản dịch"), "Switcher phải vô hiệu hóa English khi translation FAILED.");
   const failedEn = await fetch(`${baseUrl}/en/news/${enSlug}`, { cache: "no-store" });
   assert.equal(failedEn.status, 404, "Bản dịch FAILED phải trả 404 ở route English.");
 
@@ -159,30 +161,40 @@ try {
     where: { entityType_entityId_locale: { entityType: "NEWS_ARTICLE", entityId: article.id, locale: "en" } },
     data: { status: "TRANSLATED", errorMessage: null, translatedAt: new Date() },
   });
+  qaRedirectSource = `/tin-tuc/qa-old-${suffix}`;
+  await prisma.urlRedirect.create({ data: { sourcePath: qaRedirectSource, destinationPath: `/tin-tuc/${article.slug}` } });
 
-  const [viArticle, enArticle, viCategory, enCategory, sitemap] = await Promise.all([
+  const [viArticle, enArticle, viCategory, enCategory, sitemap, legacyArticle] = await Promise.all([
     fetch(`${baseUrl}/tin-tuc/${article.slug}`, { cache: "no-store" }),
     fetch(`${baseUrl}/en/news/${enSlug}`, { cache: "no-store" }),
     fetch(`${baseUrl}/tin-tuc/danh-muc/${category.slug}`, { cache: "no-store" }),
     fetch(`${baseUrl}/en/news/category/${category.slugEn}`, { cache: "no-store" }),
     fetch(`${baseUrl}/sitemap.xml`, { cache: "no-store" }),
+    fetch(`${baseUrl}${qaRedirectSource}`, { redirect: "manual" }),
   ]);
   assert.equal(viArticle.status, 200);
   assert.equal(enArticle.status, 200);
   assert.equal(viCategory.status, 200);
   assert.equal(enCategory.status, 200);
   assert.equal(sitemap.status, 200);
+  assert.equal(legacyArticle.status, 308, "Slug bài viết cũ phải redirect 308.");
+  assert((legacyArticle.headers.get("location") || "").endsWith(`/tin-tuc/${article.slug}`), "Redirect bài viết sai đích.");
   const [viArticleHtml, enArticleHtml, viCategoryHtml, enCategoryHtml, sitemapXml] = await Promise.all([
     viArticle.text(), enArticle.text(), viCategory.text(), enCategory.text(), sitemap.text(),
   ]);
   assert(viArticleHtml.includes(`/en/news/${enSlug}`), "Bài VI thiếu hreflang English khi translation đã TRANSLATED.");
+  assert(viArticleHtml.includes("<strong>strong emphasis</strong>"), "Renderer VI thiếu strong Markdown.");
+  assert(viArticleHtml.includes("QA inline caption"), "Renderer VI thiếu caption ảnh inline.");
+  assert(viArticleHtml.includes('href="/lien-he"'), "Renderer VI thiếu liên kết nội bộ.");
   assert(enArticleHtml.includes("QA EN image caption"), "Trang bài English thiếu caption đã dịch.");
+  assert(enArticleHtml.includes("QA English inline caption"), "Renderer English thiếu caption ảnh inline.");
   assert(viCategoryHtml.includes(`/en/news/category/${category.slugEn}`), "Danh mục VI thiếu hreflang English.");
   assert(viCategoryHtml.includes("QA VI image caption"), "Danh mục VI thiếu caption ảnh bài viết.");
   assert(enCategoryHtml.includes("QA EN image caption"), "Danh mục English thiếu caption ảnh bài viết.");
   for (const expected of [category.slug, category.slugEn, article.slug, enSlug]) assert(sitemapXml.includes(expected), `Sitemap thiếu ${expected}.`);
-  console.log("NEWS_SEO_REGRESSION_PASS canonical categories legacy-redirects hreflang translation-status captions sitemap");
+  console.log("NEWS_SEO_REGRESSION_PASS canonical categories legacy-redirects article-redirect markdown manual-translation hreflang captions sitemap");
 } finally {
+  if (qaRedirectSource) await prisma.urlRedirect.deleteMany({ where: { sourcePath: qaRedirectSource } });
   if (articleId) await prisma.translationEntry.deleteMany({ where: { entityType: "NEWS_ARTICLE", entityId: articleId } });
   if (articleId) await prisma.newsArticle.deleteMany({ where: { id: articleId } });
   if (categoryId) await prisma.newsCategory.deleteMany({ where: { id: categoryId } });

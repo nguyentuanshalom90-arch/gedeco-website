@@ -28,6 +28,8 @@ Cập nhật: 17/11/2026. Checklist này dùng làm tiêu chuẩn nghiệm thu c
 - [x] Cặp VI/EN khai báo `hreflang` cho chính nó, bản còn lại và `x-default` về bản Việt. `PASS các route chính local`.
 - [x] Canonical của bản English trỏ tới URL English, không trỏ chéo sang bản Việt. `PASS local`.
 - [x] Chỉ xuất URL English khi bản dịch entity hợp lệ; bản dịch lỗi/chưa duyệt không vào sitemap và public listing. `PASS source`.
+- [x] Language switcher bài viết/danh mục dùng slug bản dịch thực tế; khi bản dịch FAILED/chưa có thì English bị vô hiệu hóa, không tạo link 404. `PASS local regression`.
+- [x] Canonical do admin lưu dạng relative được chuẩn hóa thành HTTPS absolute URL trước metadata, Open Graph, JSON-LD và link chia sẻ. `PASS source/local`.
 - [x] `<html lang="vi">` và `<html lang="en">` đúng route. `PASS local`.
 - [ ] Quét toàn sitemap production để xác nhận mọi alternate trả 200, reciprocal và không có URL demo/localhost. `PENDING DEPLOY AUDIT`.
 

@@ -1,11 +1,13 @@
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import {
   Icon,
   InnerPage,
 } from "../../components/inner-pages";
 import { prisma } from "@/lib/prisma";
 import { absoluteUrl, siteConfig } from "@/lib/site-config";
+import { ArticleContent } from "@/app/components/article-content";
+import { redirectDestination } from "@/lib/url-redirects";
 
 export const dynamic = "force-dynamic";
 
@@ -31,8 +33,7 @@ export async function generateMetadata({
   const title = article.metaTitle || article.title;
   const description =
     article.metaDescription || article.excerpt || siteConfig.defaultDescription;
-  const canonical =
-    article.canonicalUrl || absoluteUrl(`/tin-tuc/${article.slug}`);
+  const canonical = absoluteUrl(article.canonicalUrl || `/tin-tuc/${article.slug}`);
   const image = article.ogImageUrl || article.imageUrl;
   const english = await prisma.translationEntry.findFirst({ where: { entityType: "NEWS_ARTICLE", entityId: article.id, locale: "en", status: "TRANSLATED" } });
   const translatedPayload = english?.payload && typeof english.payload === "object" && !Array.isArray(english.payload) ? english.payload as Record<string, unknown> : {};
@@ -68,24 +69,6 @@ export async function generateMetadata({
   };
 }
 
-function ArticleContent({ content }: { content: string | null }) {
-  if (!content) return <p>Nội dung bài viết đang được cập nhật.</p>;
-  return (
-    <>
-      {content.split(/\r?\n/).map((line, index) => {
-        const key = `${index}-${line.slice(0, 20)}`;
-        if (!line.trim()) return <br key={key} />;
-        if (line.startsWith("### ")) return <h3 key={key}>{line.slice(4)}</h3>;
-        if (line.startsWith("## ")) return <h2 key={key}>{line.slice(3)}</h2>;
-        if (line.startsWith("> "))
-          return <blockquote key={key}>{line.slice(2)}</blockquote>;
-        if (line.startsWith("- ")) return <p key={key}>• {line.slice(2)}</p>;
-        return <p key={key}>{line}</p>;
-      })}
-    </>
-  );
-}
-
 export default async function CmsArticlePage({
   params,
 }: {
@@ -93,7 +76,11 @@ export default async function CmsArticlePage({
 }) {
   const { slug } = await params;
   const article = await articleBySlug(slug);
-  if (!article) notFound();
+  if (!article) {
+    const destination = await redirectDestination(`/tin-tuc/${slug}`);
+    if (destination) permanentRedirect(destination);
+    notFound();
+  }
   const related = await prisma.newsArticle.findMany({
     where: {
       id: { not: article.id },
@@ -107,8 +94,9 @@ export default async function CmsArticlePage({
   });
   const published =
     article.publishedAt || article.scheduledAt || article.createdAt;
-  const canonical =
-    article.canonicalUrl || absoluteUrl(`/tin-tuc/${article.slug}`);
+  const englishTranslation = await prisma.translationEntry.findFirst({ where: { entityType: "NEWS_ARTICLE", entityId: article.id, locale: "en", status: "TRANSLATED", slug: { not: null } } });
+  const alternateEnglishPath = englishTranslation?.slug ? `/en/news/${englishTranslation.slug}` : null;
+  const canonical = absoluteUrl(article.canonicalUrl || `/tin-tuc/${article.slug}`);
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Article",
@@ -157,7 +145,7 @@ export default async function CmsArticlePage({
     ],
   };
   return (
-    <InnerPage active="Tin tức" pageClass="article-design">
+    <InnerPage active="Tin tức" pageClass="article-design" alternateEnglishPath={alternateEnglishPath}>
       <section className="article-hero" style={{ backgroundImage: `linear-gradient(90deg,rgba(3,25,54,.88),rgba(3,25,54,.28)),url('${article.imageUrl || "/assets/banner-1.jpg"}')` }}>
         <div className="container">
           <nav className="article-breadcrumb" aria-label="Breadcrumb"><a href="/">Trang chủ</a><span>›</span><a href="/tin-tuc">Tin tức</a><span>›</span><span>{article.category}</span></nav>
@@ -176,7 +164,7 @@ export default async function CmsArticlePage({
                 {article.imageCaption && <figcaption>{article.imageCaption}</figcaption>}
               </figure>
             )}
-            <ArticleContent content={article.content} />
+            <ArticleContent content={article.content} emptyText="Nội dung bài viết đang được cập nhật." />
             <div className="article-tags"><strong>Từ khóa:</strong>{article.tags.map((tag) => <a key={tag} href={`/tin-tuc?tag=${encodeURIComponent(tag)}`}>#{tag}</a>)}</div>
             <div className="article-share">
               <span>Chia sẻ bài viết</span>

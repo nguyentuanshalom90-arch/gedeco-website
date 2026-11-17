@@ -17,6 +17,16 @@ model ContactRequest {
   createdAt DateTime @default(now())
 }
 
+model UrlRedirect {
+  id              String   @id @default(cuid())
+  sourcePath      String   @unique
+  destinationPath String
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([destinationPath])
+}
+
 model NewsArticle {
   id              String        @id @default(cuid())
   slug            String        @unique

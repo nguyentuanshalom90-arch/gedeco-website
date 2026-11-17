@@ -35,7 +35,7 @@ export function Icon({ name, className = '' }: { name: InnerIcon; className?: st
 
 const nav = [['Trang chủ', '/'], ['Giới thiệu', '/gioi-thieu'], ['Tin tức', '/tin-tuc'], ['Sản phẩm', '/san-pham'], ['Liên hệ', '/lien-he']];
 
-export function InnerHeader({ active = '', language = 'vi' }: { active?: string; language?: 'vi' | 'en' }) {
+export function InnerHeader({ active = '', language = 'vi', alternateEnglishPath, alternateVietnamesePath }: { active?: string; language?: 'vi' | 'en'; alternateEnglishPath?: string | null; alternateVietnamesePath?: string | null }) {
   const english = language === 'en';
   const [open, setOpen] = useState(false);
   const pathname = usePathname() || (english ? '/en' : '/');
@@ -67,7 +67,7 @@ export function InnerHeader({ active = '', language = 'vi' }: { active?: string;
     <a className="brand" href={urls.home} aria-label={english ? 'GEDECO home' : 'GEDECO trang chủ'}><img src={chrome['brand.logo']?.imageUrl || logo} alt={chrome['brand.logo']?.altText || 'GEDECO'} />{chrome['brand.logo']?.caption ? <span className="sr-only">{chrome['brand.logo'].caption}</span> : null}</a>
     <button className="menu-toggle" aria-label={english ? 'Open menu' : 'Mở menu'} aria-expanded={open} onClick={() => setOpen(!open)}><span /><span /><span /></button>
     <nav className={`main-nav${open ? ' open' : ''}`} aria-label={english ? 'Main navigation' : 'Điều hướng chính'}><a className={active === (english ? 'Home' : 'Trang chủ') ? 'active' : ''} href={urls.home} onClick={() => setOpen(false)}>{labels.home}</a><a className={active === (english ? 'About' : 'Giới thiệu') ? 'active' : ''} href={urls.about} onClick={() => setOpen(false)}>{labels.about}</a><a className={active === (english ? 'News' : 'Tin tức') ? 'active' : ''} href={urls.news} onClick={() => setOpen(false)}>{labels.news}</a><div className="nav-dropdown"><a className={active === (english ? 'Products' : 'Sản phẩm') || Boolean(selectedCategory) ? 'active' : ''} href={urls.products} onClick={() => setOpen(false)}>{labels.products} <span className="nav-chevron" aria-hidden="true"><Icon name="chevron" /></span></a><div className="nav-submenu">{categoryLinks.map((category) => <a key={category.id} className={selectedCategory === category.slug ? 'active' : ''} href={`${urls.products}?category=${category.slug}`} onClick={() => setOpen(false)}>{category.label}</a>)}</div></div><a className={active === (english ? 'Contact' : 'Liên hệ') ? 'active' : ''} href={urls.contact} onClick={() => setOpen(false)}>{labels.contact}</a></nav>
-    <div className="nav-tools"><button className="search-btn" aria-label={english ? 'Search' : 'Tìm kiếm'}><Icon name="search" /></button><LanguageSwitcher english={english} /><a className="button button-gold button-small" href={urls.contact}>{labels.cta} <Icon name="arrow" /></a></div>
+    <div className="nav-tools"><button className="search-btn" aria-label={english ? 'Search' : 'Tìm kiếm'}><Icon name="search" /></button><LanguageSwitcher english={english} alternateEnglishPath={alternateEnglishPath} alternateVietnamesePath={alternateVietnamesePath} /><a className="button button-gold button-small" href={urls.contact}>{labels.cta} <Icon name="arrow" /></a></div>
   </div></header>;
 }
 
@@ -99,8 +99,8 @@ export function InnerHero({ eyebrow, title, subtitle, image = '/assets/banner-1.
   return <section className="inner-hero" style={{ backgroundImage: `linear-gradient(90deg,rgba(3,25,54,.86),rgba(3,25,54,.33)),url('${image}')` }}>{imageAlt ? <span className="sr-only" role="img" aria-label={imageAlt} /> : null}{imageCaption ? <span className="sr-only">{imageCaption}</span> : null}<div className="container"><p className="eyebrow">{eyebrow}</p><h1>{title}</h1><p>{subtitle}</p></div></section>;
 }
 
-export function InnerPage({ children, active, pageClass = '', language = 'vi' }: { children: React.ReactNode; active: string; pageClass?: string; language?: 'vi' | 'en' }) {
-  return <div className={`inner-site ${pageClass}`}><InnerHeader active={active} language={language} /><main id="main-content" className="inner-main">{children}</main><InnerFooter language={language} /><ContactActions english={language === 'en'} /></div>;
+export function InnerPage({ children, active, pageClass = '', language = 'vi', alternateEnglishPath, alternateVietnamesePath }: { children: React.ReactNode; active: string; pageClass?: string; language?: 'vi' | 'en'; alternateEnglishPath?: string | null; alternateVietnamesePath?: string | null }) {
+  return <div className={`inner-site ${pageClass}`}><InnerHeader active={active} language={language} alternateEnglishPath={alternateEnglishPath} alternateVietnamesePath={alternateVietnamesePath} /><main id="main-content" className="inner-main">{children}</main><InnerFooter language={language} /><ContactActions english={language === 'en'} /></div>;
 }
 
 export function CTA({ title = 'Hãy để chúng tôi đồng hành cùng bạn', text, language = 'vi', eyebrow, image, imageAlt, imageCaption, primaryLabel, secondaryLabel }: { title?: string; text?: string; language?: 'vi' | 'en'; eyebrow?: string; image?: string; imageAlt?: string; imageCaption?: string; primaryLabel?: string; secondaryLabel?: string }) {
