@@ -15,7 +15,7 @@ Cập nhật: 2026-11-17. Trạng thái dùng bốn mức: `PASS`, `ĐANG LÀM`,
 | Bài viết | CRUD, nháp/lên lịch/xuất bản, category, tag, media alt/caption, SEO | PASS local; CHỜ LIVE migration |
 | Danh mục bài viết | CRUD, SEO VI/EN, slug/canonical riêng, liên kết bài viết, xóa an toàn | PASS local; CHỜ LIVE migration |
 | English bài viết | Nội dung, metadata, media alt/caption, slug và route English lấy từ TranslationEntry | PASS local |
-| Page tùy biến | CRUD section bằng form trực quan; media đầy đủ; draft/publish; SEO; song ngữ | THIẾU: editor còn nhập JSON |
+| Page tùy biến | CRUD section bằng form trực quan; media đầy đủ; draft/publish; SEO; song ngữ | PASS local; CHỜ provider/live migration |
 | Nội dung page hiện hữu | Mọi section frontend đọc database; không ghi file release khi production | THIẾU: một phần static còn ghi JSON |
 | Header/footer | CRUD database, media, link, alt, song ngữ, render toàn site | ĐANG LÀM |
 | Bản dịch | Có trạng thái, lỗi không ghi đè/ẩn bản tốt, cho phép sửa thủ công, slug unique theo entity + locale | PASS product/news local; còn page audit |
@@ -40,7 +40,7 @@ Nguồn chuẩn:
 | Crawl/index | HTTP 200 đúng trang; 404 thật; draft/noindex; robots không chặn tài nguyên render | ĐANG LÀM |
 | Canonical | Self-canonical tuyệt đối/không mâu thuẫn; HTTP/www về HTTPS apex | PASS cấu hình; CHỜ LIVE regression |
 | Sitemap | Chỉ URL canonical/indexable; có sản phẩm, bài, category, page, VI–EN và lastModified thật; cập nhật động sau CRUD | PASS local |
-| Hreflang | Cặp VI/EN hai chiều và x-default; canonical cùng ngôn ngữ | PASS sản phẩm/news/static; thiếu page audit toàn bộ |
+| Hreflang | Cặp VI/EN hai chiều và x-default; canonical cùng ngôn ngữ | PASS sản phẩm/news/page tùy biến/static local |
 | Metadata | Title/description riêng từng URL; robots; OG/Twitter; không trùng hàng loạt | ĐANG LÀM |
 | Structured data | Organization, Breadcrumb, Article, Product hợp lệ và khớp nội dung nhìn thấy | PASS product/news local; còn audit page toàn site |
 | Hình ảnh | Ảnh chất lượng gần nội dung liên quan; alt mô tả; caption; WebP derivative; width/height khi phù hợp | PASS product/news local; còn audit page toàn site |
@@ -74,6 +74,13 @@ Nguồn chuẩn:
 - Luồng QA thật từ dashboard đã tạo danh mục song ngữ, tạo sản phẩm gắn danh mục, đọc lại qua API/database và hiển thị landing page VI/EN; dữ liệu QA được xóa sau kiểm tra.
 - Canonical tuyệt đối, hreflang `vi/en/x-default`, CollectionPage + Breadcrumb JSON-LD và sitemap động đã được kiểm tra. Trang sản phẩm English trả 404 khi dịch thất bại, không lộ nội dung Việt.
 - Build production local, TypeScript, Prisma validate và `git diff --check` PASS. Screenshot Chrome desktop/mobile PASS; sản phẩm thiếu ảnh dùng placeholder có nhãn thay vì ảnh hỏng.
+
+### Bằng chứng audit page builder ngày 2026-11-17
+
+- Đã loại bỏ ô nhập JSON; admin có builder trực quan cho Hero, Nội dung, Lưới điểm nổi bật và CTA, hỗ trợ thêm/xóa/sắp xếp section và item.
+- Hero media có đủ `Chọn từ thư viện` và `Tải ảnh lên`, alt/caption; page có tìm kiếm, sửa, xóa kèm translation, preview SEO, canonical, robots và draft/publish.
+- QA thật đã tạo page qua dashboard, ghi PostgreSQL, render frontend rồi xóa sạch. English lỗi trả 404 và không xuất hiện sitemap; VI có canonical, hreflang phù hợp, WebPage + Breadcrumb JSON-LD.
+- Renderer public được hoàn thiện responsive; screenshot admin, frontend desktop/mobile PASS. Build production local, TypeScript, Prisma validate và `git diff --check` PASS.
 
 ## 4. Điều kiện trước production
 

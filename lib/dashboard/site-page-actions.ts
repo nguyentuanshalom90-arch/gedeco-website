@@ -19,9 +19,48 @@ export type SitePageInput = {
   status: "DRAFT" | "SCHEDULED" | "PUBLISHED";
 };
 
+export type SitePageSectionInput = {
+  type: "hero" | "text" | "feature-grid" | "cta";
+  eyebrow?: string;
+  title?: string;
+  body?: string;
+  imageUrl?: string;
+  imageAlt?: string;
+  imageCaption?: string;
+  items?: Array<{ title: string; body: string }>;
+  buttonLabel?: string;
+  buttonHref?: string;
+};
+
+function canonical(value: string | undefined, slug: string) {
+  const input = value?.trim() || `/pages/${slug}`;
+  if (input.startsWith("/") && !input.startsWith("//")) return input;
+  try {
+    const url = new URL(input);
+    if (url.protocol === "https:" && ["gedeco.vn", "www.gedeco.vn"].includes(url.hostname.toLowerCase())) return input;
+  } catch {}
+  throw new Error("Canonical phải là đường dẫn nội bộ hoặc URL HTTPS của gedeco.vn.");
+}
+
+function validateSections(value: unknown): SitePageSectionInput[] {
+  if (!Array.isArray(value) || value.length === 0) throw new Error("Page phải có ít nhất một section.");
+  if (value.length > 30) throw new Error("Một page không nên vượt quá 30 section.");
+  return value.map((raw, index) => {
+    if (!raw || typeof raw !== "object") throw new Error(`Section ${index + 1} không hợp lệ.`);
+    const section = raw as SitePageSectionInput;
+    if (!["hero", "text", "feature-grid", "cta"].includes(section.type)) throw new Error(`Loại section ${index + 1} không hợp lệ.`);
+    if (!section.title?.trim()) throw new Error(`Section ${index + 1} cần có tiêu đề.`);
+    if (section.imageUrl?.trim() && !section.imageAlt?.trim()) throw new Error(`Ảnh ở section ${index + 1} cần alt text.`);
+    if (section.type === "feature-grid" && (!Array.isArray(section.items) || section.items.length === 0)) throw new Error(`Section ${index + 1} cần ít nhất một ô nội dung.`);
+    if (section.type === "cta" && Boolean(section.buttonLabel?.trim()) !== Boolean(section.buttonHref?.trim())) throw new Error(`Section ${index + 1} cần đủ nhãn và liên kết nút.`);
+    if (section.buttonHref && !section.buttonHref.startsWith("/") && !section.buttonHref.startsWith("https://")) throw new Error(`Liên kết nút ở section ${index + 1} không hợp lệ.`);
+    return section;
+  });
+}
+
 export async function listSitePages() {
   await requireDashboardSession();
-  return prisma.sitePage.findMany({ orderBy: { updatedAt: "desc" }, select: { id: true, slug: true, name: true, title: true, status: true, updatedAt: true } });
+  return prisma.sitePage.findMany({ orderBy: { updatedAt: "desc" } });
 }
 
 export async function saveSitePage(input: SitePageInput) {
@@ -30,10 +69,20 @@ export async function saveSitePage(input: SitePageInput) {
   if (!slug || !input.name.trim() || !input.title.trim()) throw new Error("Slug, tên page và tiêu đề là bắt buộc.");
   if (!input.metaTitle.trim() || input.metaTitle.trim().length > 60) throw new Error("SEO title bắt buộc và không vượt quá 60 ký tự.");
   if (!input.metaDescription.trim() || input.metaDescription.trim().length > 160) throw new Error("Meta description bắt buộc và không vượt quá 160 ký tự.");
-  if (!Array.isArray(input.sections) || input.sections.length === 0) throw new Error("Page phải có ít nhất một section.");
+  const sections = validateSections(input.sections);
+  const canonicalUrl = canonical(input.canonicalUrl, slug);
   const row = input.id
-    ? await prisma.sitePage.update({ where: { id: input.id }, data: { slug, name: input.name.trim(), title: input.title.trim(), excerpt: input.excerpt?.trim() || null, sections: input.sections as object, metaTitle: input.metaTitle.trim(), metaDescription: input.metaDescription.trim(), canonicalUrl: input.canonicalUrl?.trim() || `/pages/${slug}`, robotsIndex: input.robotsIndex, robotsFollow: input.robotsFollow, status: input.status } })
-    : await prisma.sitePage.create({ data: { slug, name: input.name.trim(), title: input.title.trim(), excerpt: input.excerpt?.trim() || null, sections: input.sections as object, metaTitle: input.metaTitle.trim(), metaDescription: input.metaDescription.trim(), canonicalUrl: input.canonicalUrl?.trim() || `/pages/${slug}`, robotsIndex: input.robotsIndex, robotsFollow: input.robotsFollow, status: input.status } });
+    ? await prisma.sitePage.update({ where: { id: input.id }, data: { slug, name: input.name.trim(), title: input.title.trim(), excerpt: input.excerpt?.trim() || null, sections: sections as object, metaTitle: input.metaTitle.trim(), metaDescription: input.metaDescription.trim(), canonicalUrl, robotsIndex: input.robotsIndex, robotsFollow: input.robotsFollow, status: input.status } })
+    : await prisma.sitePage.create({ data: { slug, name: input.name.trim(), title: input.title.trim(), excerpt: input.excerpt?.trim() || null, sections: sections as object, metaTitle: input.metaTitle.trim(), metaDescription: input.metaDescription.trim(), canonicalUrl, robotsIndex: input.robotsIndex, robotsFollow: input.robotsFollow, status: input.status } });
   const translation = await syncSitePageTranslation(row);
   return { ok: true as const, page: row, translation: { status: translation.status, errorMessage: translation.errorMessage } };
+}
+
+export async function deleteSitePage(id: string) {
+  await requireDashboardSession();
+  await prisma.$transaction([
+    prisma.translationEntry.deleteMany({ where: { entityType: "SITE_PAGE", entityId: id } }),
+    prisma.sitePage.delete({ where: { id } }),
+  ]);
+  return { ok: true as const };
 }

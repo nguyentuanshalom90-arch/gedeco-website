@@ -7,6 +7,7 @@ export type SitePageSection = {
   body?: string;
   imageUrl?: string;
   imageAlt?: string;
+  imageCaption?: string;
   items?: Array<{ title: string; body: string }>;
   buttonLabel?: string;
   buttonHref?: string;

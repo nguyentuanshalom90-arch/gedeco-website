@@ -22,10 +22,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }),
     prisma.product.findMany({ where: { isPublished: true, robotsIndex: true, category: { isPublished: true } }, select: { id: true, slug: true, category: { select: { slug: true, slugEn: true } }, updatedAt: true } }),
     prisma.productCategory.findMany({ where: { isPublished: true, robotsIndex: true }, select: { slug: true, slugEn: true, updatedAt: true } }),
-    prisma.sitePage.findMany({ where: { status: "PUBLISHED", robotsIndex: true }, select: { id: true, slug: true, updatedAt: true } }),
-    prisma.translationEntry.findMany({ where: { locale: "en", status: { in: ["TRANSLATED", "NEEDS_REVIEW", "FAILED"] }, slug: { not: null }, entityType: { in: ["PRODUCT", "NEWS_ARTICLE", "SITE_PAGE"] } }, select: { entityType: true, entityId: true, slug: true } }),
+    prisma.sitePage.findMany({ where: { status: "PUBLISHED", robotsIndex: true }, select: { id: true, slug: true, canonicalUrl: true, updatedAt: true } }),
+    prisma.translationEntry.findMany({ where: { locale: "en", status: { in: ["TRANSLATED", "NEEDS_REVIEW", "FAILED"] }, slug: { not: null }, entityType: { in: ["PRODUCT", "NEWS_ARTICLE", "SITE_PAGE"] } }, select: { entityType: true, entityId: true, slug: true, status: true } }),
   ]);
   const translatedSlug = new Map(translations.map((item) => [`${item.entityType}:${item.entityId}`, item.slug]));
+  const translatedPages = new Set(translations.filter((item) => item.entityType === "SITE_PAGE" && item.status === "TRANSLATED").map((item) => item.entityId));
   const staticPages = [
     ["/", "/en"], ["/gioi-thieu", "/en/about"], ["/doi-tac", "/en/partners"], ["/du-an", "/en/projects"],
     ["/san-pham", "/en/products"], ["/tin-tuc", "/en/news"], ["/lien-he", "/en/contact"],
@@ -73,8 +74,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       ];
     }),
     ...pages.flatMap((item) => {
+      const vi = absoluteUrl(item.canonicalUrl || `/pages/${item.slug}`);
+      if (!translatedPages.has(item.id)) return [{ url: vi, lastModified: item.updatedAt, changeFrequency: "monthly" as const, priority: 0.65 }];
       const enSlug = translatedSlug.get(`SITE_PAGE:${item.id}`) || item.slug;
-      const vi = absoluteUrl(`/pages/${item.slug}`); const en = absoluteUrl(`/en/pages/${enSlug}`);
+      const en = absoluteUrl(`/en/pages/${enSlug}`);
       return [
         { url: vi, lastModified: item.updatedAt, changeFrequency: "monthly" as const, priority: 0.65, alternates: { languages: { vi, en, "x-default": vi } } },
         { url: en, lastModified: item.updatedAt, changeFrequency: "monthly" as const, priority: 0.65, alternates: { languages: { vi, en, "x-default": vi } } },
