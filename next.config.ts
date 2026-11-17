@@ -14,6 +14,12 @@ const nextConfig: NextConfig = {
       { source: '/en/san-pham', destination: '/en/products', permanent: true },
       { source: '/en/san-pham/:slug*', destination: '/en/products/:slug*', permanent: true },
       { source: '/tin-tuc/chi-tiet', destination: '/tin-tuc', permanent: true },
+      { source: '/tin-tuc/danh-muc/ho-i-cng-ng', destination: '/tin-tuc/danh-muc/chuoi-cung-ung', permanent: true },
+      { source: '/tin-tuc/danh-muc/oa-t-o-ng', destination: '/tin-tuc/danh-muc/hoat-dong-gedeco', permanent: true },
+      { source: '/tin-tuc/danh-muc/o-p-ta-c', destination: '/tin-tuc/danh-muc/hop-tac', permanent: true },
+      { source: '/tin-tuc/danh-muc/ie-n-th-c-chia-se', destination: '/tin-tuc/danh-muc/kien-thuc-chia-se', permanent: true },
+      { source: '/tin-tuc/danh-muc/ogistics', destination: '/tin-tuc/danh-muc/logistics', permanent: true },
+      { source: '/tin-tuc/danh-muc/hi-tr-o-ng', destination: '/tin-tuc/danh-muc/thi-truong', permanent: true },
     ];
   },
 };

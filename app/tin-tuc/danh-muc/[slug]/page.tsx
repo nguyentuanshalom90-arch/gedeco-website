@@ -30,10 +30,13 @@ export async function generateMetadata({
     `Các bài viết mới nhất thuộc danh mục ${category.name} từ GEDECO.`;
   const canonical =
     category.canonicalUrl || absoluteUrl(`/tin-tuc/danh-muc/${category.slug}`);
+  const englishCanonical = category.slugEn && category.nameEn
+    ? category.canonicalUrlEn || absoluteUrl(`/en/news/category/${category.slugEn}`)
+    : null;
   return {
     title,
     description,
-    alternates: { canonical },
+    alternates: { canonical, languages: englishCanonical ? { vi: canonical, en: englishCanonical, "x-default": canonical } : { vi: canonical, "x-default": canonical } },
     robots: { index: category.robotsIndex, follow: category.robotsFollow },
     openGraph: {
       type: "website",
@@ -78,6 +81,7 @@ export default async function NewsCategoryPage({
       description:
         category.metaDescription || category.description || undefined,
       url: canonical,
+      inLanguage: "vi-VN",
       isPartOf: {
         "@type": "WebSite",
         name: siteConfig.brand,
@@ -142,6 +146,7 @@ export default async function NewsCategoryPage({
                     article.title,
                   ]}
                   imageAlt={article.imageAlt || article.title}
+                  imageCaption={article.imageCaption || ""}
                 />
               ))
             ) : (

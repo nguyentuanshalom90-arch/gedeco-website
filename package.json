@@ -11,7 +11,8 @@
     "lint": "next lint",
     "prisma:generate": "prisma generate",
     "prisma:validate": "prisma validate",
-    "test:media": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/test-media-regression.mjs"
+    "test:media": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/test-media-regression.mjs",
+    "test:news": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/test-news-seo-regression.mjs"
   },
   "dependencies": {
     "@prisma/client": "^6.7.0",

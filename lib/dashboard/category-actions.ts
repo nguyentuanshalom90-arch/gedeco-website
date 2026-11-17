@@ -3,6 +3,8 @@
 import { prisma } from "@/lib/prisma";
 import type { CategoryInput, CategoryListItem } from "./category-types";
 import { requireDashboardSession } from "./auth";
+import { validateOfficialCanonical } from "./canonical-url";
+import { DashboardValidationError, dashboardActionError } from "./action-errors";
 
 function slugify(value: string) {
   const slug = value
@@ -55,47 +57,44 @@ export async function listCategories(): Promise<CategoryListItem[]> {
 
 export async function saveCategory(
   input: CategoryInput,
-): Promise<{ ok: true; category: CategoryListItem }> {
+): Promise<{ ok: true; category: CategoryListItem } | { ok: false; error: string }> {
   await requireDashboardSession();
-  const name = input.name.trim();
-  if (!name) throw new Error("Tên danh mục không được để trống.");
-  const slug = slugify(input.slug || name);
-  const slugEn = input.slugEn.trim() ? slugify(input.slugEn) : null;
-  const duplicate = await prisma.newsCategory.findFirst({
-    where: {
-      OR: [{ slug }, ...(slugEn ? [{ slugEn }] : [])],
-      ...(input.id ? { NOT: { id: input.id } } : {}),
-    },
-  });
-  if (duplicate) throw new Error("Đường dẫn danh mục đã tồn tại.");
-  const data = {
-    name,
-    slug,
-    description: input.description.trim() || null,
-    nameEn: input.nameEn.trim() || null,
-    slugEn,
-    descriptionEn: input.descriptionEn.trim() || null,
-    metaTitle: input.metaTitle.trim() || null,
-    metaDescription: input.metaDescription.trim() || null,
-    metaTitleEn: input.metaTitleEn.trim() || null,
-    metaDescriptionEn: input.metaDescriptionEn.trim() || null,
-    canonicalUrl: input.canonicalUrl.trim() || null,
-    canonicalUrlEn: input.canonicalUrlEn.trim() || null,
-    robotsIndex: input.robotsIndex,
-    robotsFollow: input.robotsFollow,
-    sortOrder: Number.isFinite(input.sortOrder) ? input.sortOrder : 0,
-  };
-  const row = input.id
-    ? await prisma.newsCategory.update({
-        where: { id: input.id },
-        data,
-        include: { _count: { select: { articles: true } } },
-      })
-    : await prisma.newsCategory.create({
-        data,
-        include: { _count: { select: { articles: true } } },
-      });
-  return { ok: true, category: toItem(row) };
+  try {
+    const name = input.name.trim();
+    if (!name) throw new DashboardValidationError("Tên danh mục không được để trống.");
+    const slug = slugify(input.slug || name);
+    const slugEn = input.slugEn.trim() ? slugify(input.slugEn) : null;
+    const duplicate = await prisma.newsCategory.findFirst({
+      where: {
+        OR: [{ slug }, ...(slugEn ? [{ slugEn }] : [])],
+        ...(input.id ? { NOT: { id: input.id } } : {}),
+      },
+    });
+    if (duplicate) throw new DashboardValidationError("Đường dẫn danh mục đã tồn tại.");
+    const data = {
+      name,
+      slug,
+      description: input.description.trim() || null,
+      nameEn: input.nameEn.trim() || null,
+      slugEn,
+      descriptionEn: input.descriptionEn.trim() || null,
+      metaTitle: input.metaTitle.trim() || null,
+      metaDescription: input.metaDescription.trim() || null,
+      metaTitleEn: input.metaTitleEn.trim() || null,
+      metaDescriptionEn: input.metaDescriptionEn.trim() || null,
+      canonicalUrl: validateOfficialCanonical(input.canonicalUrl, { fieldLabel: "Canonical danh mục tiếng Việt", pathPrefix: "/tin-tuc/danh-muc/" }),
+      canonicalUrlEn: validateOfficialCanonical(input.canonicalUrlEn, { fieldLabel: "Canonical danh mục English", pathPrefix: "/en/news/category/" }),
+      robotsIndex: input.robotsIndex,
+      robotsFollow: input.robotsFollow,
+      sortOrder: Number.isFinite(input.sortOrder) ? input.sortOrder : 0,
+    };
+    const row = input.id
+      ? await prisma.newsCategory.update({ where: { id: input.id }, data, include: { _count: { select: { articles: true } } } })
+      : await prisma.newsCategory.create({ data, include: { _count: { select: { articles: true } } } });
+    return { ok: true, category: toItem(row) };
+  } catch (error) {
+    return { ok: false, error: dashboardActionError(error, "Không thể lưu danh mục. Vui lòng kiểm tra dữ liệu và thử lại.") };
+  }
 }
 
 export async function deleteCategory(id: string): Promise<{ ok: true }> {

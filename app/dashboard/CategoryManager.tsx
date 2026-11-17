@@ -95,6 +95,10 @@ export function CategoryManager() {
     setError("");
     try {
       const result = await saveCategory(draft);
+      if (!result.ok) {
+        setError(result.error);
+        return;
+      }
       setItems((current) =>
         [
           result.category,

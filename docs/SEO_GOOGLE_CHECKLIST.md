@@ -71,7 +71,8 @@ Cập nhật: 17/11/2026. Checklist này dùng làm tiêu chuẩn nghiệm thu c
 - [x] URL mô tả, slug ổn định, không dùng ID ngẫu nhiên trên public route. `PASS source`.
 - [x] Header/footer chỉ liên kết canonical; route/page ngoài menu đã bị loại theo phạm vi dự án. `PASS source`.
 - [x] Category, product và article detail có breadcrumb/internal link trở lại listing. `PASS source`.
-- [ ] Khi đổi slug phải tạo permanent redirect có kiểm soát và cập nhật sitemap/internal link. `EDITORIAL/DEV GATE`.
+- [x] Slug danh mục tin tức legacy đã được chuẩn hóa bằng migration giữ nguyên ID/quan hệ; 6 URL lỗi cũ redirect 308 sang URL chuẩn và sitemap dùng slug mới. `PASS local regression`.
+- [ ] Với các lần đổi slug mới, phải tiếp tục tạo permanent redirect có kiểm soát và cập nhật sitemap/internal link. `EDITORIAL/DEV GATE`.
 - [ ] Định kỳ rà bài lỗi thời, orphan page, broken link, soft 404 và redirect chain. `PENDING AUTOMATED AUDIT`.
 
 ## 8. Search Console và vận hành production

@@ -34,7 +34,7 @@ export async function generateMetadata({
   const canonical =
     article.canonicalUrl || absoluteUrl(`/tin-tuc/${article.slug}`);
   const image = article.ogImageUrl || article.imageUrl;
-  const english = await prisma.translationEntry.findUnique({ where: { entityType_entityId_locale: { entityType: "NEWS_ARTICLE", entityId: article.id, locale: "en" } } });
+  const english = await prisma.translationEntry.findFirst({ where: { entityType: "NEWS_ARTICLE", entityId: article.id, locale: "en", status: "TRANSLATED" } });
   const translatedPayload = english?.payload && typeof english.payload === "object" && !Array.isArray(english.payload) ? english.payload as Record<string, unknown> : {};
   const languages = english?.slug && typeof translatedPayload.title === "string" && translatedPayload.title.trim()
     ? { vi: canonical, en: absoluteUrl(`/en/news/${english.slug}`), "x-default": canonical }

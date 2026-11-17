@@ -330,6 +330,10 @@ export function PostComposer() {
     setError("");
     try {
       const result = await savePost(post);
+      if (!result.ok) {
+        setError(result.error);
+        return;
+      }
       setPost(result.post);
       setPosts((current) => [
         result.post,

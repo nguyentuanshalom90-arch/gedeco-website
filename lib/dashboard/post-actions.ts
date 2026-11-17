@@ -4,6 +4,8 @@ import { prisma } from "@/lib/prisma";
 import { syncArticleTranslation } from "@/lib/translation-service";
 import type { PostInput, PostListItem } from "./post-types";
 import { requireDashboardSession } from "./auth";
+import { validateOfficialCanonical } from "./canonical-url";
+import { DashboardValidationError, dashboardActionError } from "./action-errors";
 
 function slugify(value: string): string {
   const out = value
@@ -63,26 +65,19 @@ export async function listPosts(): Promise<PostListItem[]> {
 
 export async function savePost(
   input: PostInput,
-): Promise<{ ok: true; post: PostListItem; translation: { status: string; errorMessage: string | null } }> {
+): Promise<{ ok: true; post: PostListItem; translation: { status: string; errorMessage: string | null } } | { ok: false; error: string }> {
   await requireDashboardSession();
-  const title = input.title.trim();
-  if (!title) throw new Error("Tiêu đề bài viết không được để trống.");
-  if (input.status === "SCHEDULED" && !input.scheduledAt)
-    throw new Error("Vui lòng chọn thời gian đăng bài.");
-  const slug = slugify(input.slug.trim() || title);
-  const duplicate = await prisma.newsArticle.findFirst({
-    where: { slug, ...(input.id ? { NOT: { id: input.id } } : {}) },
-  });
-  if (duplicate) throw new Error("Đường dẫn bài viết đã tồn tại.");
-  const category = input.categoryId
-    ? await prisma.newsCategory.findUnique({ where: { id: input.categoryId } })
-    : null;
-  if (input.categoryId && !category)
-    throw new Error("Danh mục bài viết không tồn tại.");
-  const previous = input.id
-    ? await prisma.newsArticle.findUnique({ where: { id: input.id } })
-    : null;
-  const data = {
+  try {
+    const title = input.title.trim();
+    if (!title) throw new DashboardValidationError("Tiêu đề bài viết không được để trống.");
+    if (input.status === "SCHEDULED" && !input.scheduledAt) throw new DashboardValidationError("Vui lòng chọn thời gian đăng bài.");
+    const slug = slugify(input.slug.trim() || title);
+    const duplicate = await prisma.newsArticle.findFirst({ where: { slug, ...(input.id ? { NOT: { id: input.id } } : {}) } });
+    if (duplicate) throw new DashboardValidationError("Đường dẫn bài viết đã tồn tại.");
+    const category = input.categoryId ? await prisma.newsCategory.findUnique({ where: { id: input.categoryId } }) : null;
+    if (input.categoryId && !category) throw new DashboardValidationError("Danh mục bài viết không tồn tại.");
+    const previous = input.id ? await prisma.newsArticle.findUnique({ where: { id: input.id } }) : null;
+    const data = {
     slug,
     title,
     category: category?.name || input.categoryName.trim() || "Tin tức",
@@ -99,7 +94,7 @@ export async function savePost(
     metaTitle: input.metaTitle.trim() || null,
     metaDescription: input.metaDescription.trim() || null,
     focusKeyword: input.focusKeyword.trim() || null,
-    canonicalUrl: input.canonicalUrl.trim() || null,
+    canonicalUrl: validateOfficialCanonical(input.canonicalUrl, { fieldLabel: "Canonical bài viết", pathPrefix: "/tin-tuc/" }),
     authorName: input.authorName.trim() || null,
     robotsIndex: input.robotsIndex,
     robotsFollow: input.robotsFollow,
@@ -112,12 +107,13 @@ export async function savePost(
       input.status === "PUBLISHED"
         ? (previous?.publishedAt ?? new Date())
         : null,
-  };
-  const row = input.id
-    ? await prisma.newsArticle.update({ where: { id: input.id }, data })
-    : await prisma.newsArticle.create({ data });
-  const translation = await syncArticleTranslation(row);
-  return { ok: true, post: toListItem(row), translation: { status: translation.status, errorMessage: translation.errorMessage } };
+    };
+    const row = input.id ? await prisma.newsArticle.update({ where: { id: input.id }, data }) : await prisma.newsArticle.create({ data });
+    const translation = await syncArticleTranslation(row);
+    return { ok: true, post: toListItem(row), translation: { status: translation.status, errorMessage: translation.errorMessage } };
+  } catch (error) {
+    return { ok: false, error: dashboardActionError(error, "Không thể lưu bài viết. Vui lòng kiểm tra dữ liệu và thử lại.") };
+  }
 }
 
 export async function deletePost(id: string): Promise<{ ok: true }> {
