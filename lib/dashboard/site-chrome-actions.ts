@@ -16,8 +16,8 @@ async function ensureChromeSeeded() {
   }
 }
 
-function toItem(row: { id: string; area: SiteChromeArea; kind: SiteChromeKind; sectionKey: string; fieldKey: string; label: string; value: string; url: string | null; imageUrl: string | null; altText: string | null; isVisible: boolean; sortOrder: number; updatedAt: Date }): SiteChromeItem {
-  return { ...row, url: row.url ?? "", imageUrl: row.imageUrl ?? "", altText: row.altText ?? "", updatedAt: row.updatedAt.toISOString() };
+function toItem(row: { id: string; area: SiteChromeArea; kind: SiteChromeKind; sectionKey: string; fieldKey: string; label: string; value: string; url: string | null; imageUrl: string | null; altText: string | null; imageCaption: string | null; isVisible: boolean; sortOrder: number; updatedAt: Date }): SiteChromeItem {
+  return { ...row, url: row.url ?? "", imageUrl: row.imageUrl ?? "", altText: row.altText ?? "", imageCaption: row.imageCaption ?? "", updatedAt: row.updatedAt.toISOString() };
 }
 
 export async function listSiteChrome(area: SiteChromeArea, kind: SiteChromeKind = "DYNAMIC"): Promise<SiteChromeItem[]> {
@@ -40,12 +40,13 @@ export async function saveSiteChrome(input: SiteChromeInput): Promise<{ ok: true
     url: input.url.trim() || null,
     imageUrl: input.imageUrl.trim() || null,
     altText: input.altText.trim() || null,
+    imageCaption: input.imageCaption.trim() || null,
     isVisible: input.isVisible,
     sortOrder: Number.isFinite(input.sortOrder) ? input.sortOrder : 0,
   };
   const row = await prisma.siteChromeContent.upsert({ where: { area_sectionKey_fieldKey: { area: input.area, sectionKey: data.sectionKey, fieldKey: data.fieldKey } }, update: data, create: data });
   const item = toItem(row);
-  const translation = await syncSiteChromeTranslation({ id: item.id, label: item.label, value: item.value, altText: item.altText, updatedAt: new Date(item.updatedAt) });
+  const translation = await syncSiteChromeTranslation({ id: item.id, label: item.label, value: item.value, altText: item.altText, imageCaption: item.imageCaption, updatedAt: new Date(item.updatedAt) });
   return { ok: true, item, translation: { status: translation.status, errorMessage: translation.errorMessage } };
 }
 

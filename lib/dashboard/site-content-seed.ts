@@ -148,7 +148,21 @@ export const dynamicSeed = [
   ["lien-he", "cta", "image", "Ảnh nền CTA", "", "", 95, "IMAGE", "/assets/banner-2.jpg", "Hợp tác cùng GEDECO", ""],
   ["tin-tuc", "hero", "title", "Tiêu đề hero", "Tin tức GEDECO", "", 1],
   ["tin-tuc", "hero", "subtitle", "Mô tả hero", "Cập nhật nguồn hàng, sản phẩm, hoạt động thương mại và cơ hội hợp tác cùng GEDECO.", "", 2],
-  ["tin-tuc", "subscribe", "title", "Tiêu đề đăng ký bản tin", "Đăng ký nhận bản tin", "H2", 10],
+  ["tin-tuc", "hero", "image", "Ảnh nền hero", "", "", 3, "IMAGE", "/assets/banner-1.jpg", "Tin tức và hoạt động GEDECO", ""],
+  ["tin-tuc", "list", "eyebrow", "Danh sách - nhãn", "TIN MỚI NHẤT", "", 10],
+  ["tin-tuc", "list", "title", "Danh sách - tiêu đề", "Thông tin đáng chú ý", "H2", 11],
+  ["tin-tuc", "list", "allLabel", "Danh sách - tất cả", "Tất cả", "", 12],
+  ["tin-tuc", "list", "empty", "Danh sách - trạng thái trống", "Chưa có bài viết đã xuất bản.", "", 13],
+  ["tin-tuc", "list", "readLabel", "Danh sách - đọc thêm", "Đọc thêm", "", 14],
+  ["tin-tuc", "list", "prevLabel", "Phân trang - trang trước", "← Trang trước", "", 15],
+  ["tin-tuc", "list", "nextLabel", "Phân trang - trang sau", "Trang sau →", "", 16],
+  ["tin-tuc", "list", "pageLabel", "Phân trang - nhãn trang", "Trang", "", 17],
+  ["tin-tuc", "cta", "eyebrow", "CTA - nhãn", "LIÊN HỆ VỚI GEDECO", "", 20],
+  ["tin-tuc", "cta", "title", "CTA - tiêu đề", "Đừng bỏ lỡ những cơ hội mới", "H2", 21],
+  ["tin-tuc", "cta", "body", "CTA - nội dung", "Kết nối với GEDECO để luôn cập nhật những chuyển động quan trọng của thị trường.", "", 22],
+  ["tin-tuc", "cta", "primaryLabel", "CTA - nút chính", "Liên hệ ngay", "", 23],
+  ["tin-tuc", "cta", "secondaryLabel", "CTA - nút phụ", "Gửi yêu cầu tư vấn", "", 24],
+  ["tin-tuc", "cta", "image", "Ảnh nền CTA", "", "", 25, "IMAGE", "/assets/footer.jpg", "Kết nối cùng GEDECO", ""],
 ] as const;
 
 export const staticSeed = [

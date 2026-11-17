@@ -81,7 +81,7 @@ export async function listEnglishArticles(categoryId?: string) {
     where: {
       entityType: "NEWS_ARTICLE",
       locale: "en",
-      status: { in: ["TRANSLATED", "NEEDS_REVIEW", "FAILED"] },
+      status: "TRANSLATED",
       entityId: { in: sources.map((article) => article.id) },
     },
   });
@@ -95,7 +95,7 @@ export async function listEnglishArticles(categoryId?: string) {
 
 export async function getEnglishArticleBySlug(slug: string) {
   const entry = await prisma.translationEntry.findFirst({
-    where: { entityType: "NEWS_ARTICLE", locale: "en", status: { in: ["TRANSLATED", "NEEDS_REVIEW", "FAILED"] }, slug },
+    where: { entityType: "NEWS_ARTICLE", locale: "en", status: "TRANSLATED", slug },
   });
   if (!entry) return null;
   const source = await prisma.newsArticle.findFirst({

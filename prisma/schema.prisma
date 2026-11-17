@@ -312,6 +312,7 @@ model SiteChromeContent {
   url         String?
   imageUrl    String?
   altText     String?
+  imageCaption String?
   isVisible   Boolean        @default(true)
   sortOrder   Int            @default(0)
   createdAt   DateTime       @default(now())

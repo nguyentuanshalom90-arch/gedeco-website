@@ -12,6 +12,7 @@ export type SiteChromeItem = {
   url: string;
   imageUrl: string;
   altText: string;
+  imageCaption: string;
   isVisible: boolean;
   sortOrder: number;
   updatedAt: string;

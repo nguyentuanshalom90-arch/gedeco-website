@@ -23,7 +23,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     prisma.product.findMany({ where: { isPublished: true, robotsIndex: true, category: { isPublished: true } }, select: { id: true, slug: true, category: { select: { slug: true, slugEn: true } }, updatedAt: true } }),
     prisma.productCategory.findMany({ where: { isPublished: true, robotsIndex: true }, select: { slug: true, slugEn: true, updatedAt: true } }),
     prisma.sitePage.findMany({ where: { status: "PUBLISHED", robotsIndex: true }, select: { id: true, slug: true, canonicalUrl: true, updatedAt: true } }),
-    prisma.translationEntry.findMany({ where: { locale: "en", status: { in: ["TRANSLATED", "NEEDS_REVIEW", "FAILED"] }, slug: { not: null }, entityType: { in: ["PRODUCT", "NEWS_ARTICLE", "SITE_PAGE"] } }, select: { entityType: true, entityId: true, slug: true, status: true } }),
+    prisma.translationEntry.findMany({ where: { locale: "en", status: "TRANSLATED", slug: { not: null }, entityType: { in: ["PRODUCT", "NEWS_ARTICLE", "SITE_PAGE"] } }, select: { entityType: true, entityId: true, slug: true, status: true } }),
   ]);
   const translatedSlug = new Map(translations.map((item) => [`${item.entityType}:${item.entityId}`, item.slug]));
   const translatedPages = new Set(translations.filter((item) => item.entityType === "SITE_PAGE" && item.status === "TRANSLATED").map((item) => item.entityId));

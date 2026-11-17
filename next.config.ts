@@ -12,6 +12,8 @@ const nextConfig: NextConfig = {
       { source: '/en/tin-tuc/:slug*', destination: '/en/news/:slug*', permanent: true },
       { source: '/en/lien-he', destination: '/en/contact', permanent: true },
       { source: '/en/san-pham', destination: '/en/products', permanent: true },
+      { source: '/en/san-pham/:slug*', destination: '/en/products/:slug*', permanent: true },
+      { source: '/tin-tuc/chi-tiet', destination: '/tin-tuc', permanent: true },
     ];
   },
 };
