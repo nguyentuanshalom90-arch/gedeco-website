@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
-import SupportPage from '../components/support-pages';
-export const metadata: Metadata = { title: 'Giao hàng và thanh toán', description: 'Thông tin giao nhận, thời gian dự kiến và phương thức thanh toán tại GEDECO.' };
+import SupportPage, { getSupportMetadata } from '../components/support-pages';
+export const dynamic = 'force-dynamic';
+export const generateMetadata = () => getSupportMetadata('shipping', 'vi');
 export default function Page() { return <SupportPage page="shipping" />; }

@@ -3,15 +3,15 @@
 import { useEffect, useMemo, useState } from "react";
 import { Icon } from "@/components/vimigo-icon";
 import { deleteSiteContent, listSiteContent, saveSiteContent } from "@/lib/dashboard/site-content-actions";
+import { contentPages } from "@/lib/dashboard/site-content-seed";
 import type { SiteContentInput, SiteContentItem, SiteContentKind } from "@/lib/dashboard/site-content-types";
 import { MediaPicker } from "./MediaPicker";
 
-const pageTabs = [
-  { pageKey: "home", pageName: "Trang chủ", route: "/" },
-  { pageKey: "gioi-thieu", pageName: "Giới thiệu", route: "/gioi-thieu" },
-  { pageKey: "tin-tuc", pageName: "Tin tức", route: "/tin-tuc" },
-  { pageKey: "lien-he", pageName: "Liên hệ", route: "/lien-he" },
-] as const;
+const pageTabs = contentPages.map((page) => ({
+  pageKey: page.pageKey,
+  pageName: page.name,
+  route: page.route,
+}));
 
 function emptyItem(pageKey = "home"): SiteContentInput {
   const page = pageTabs.find((item) => item.pageKey === pageKey) || pageTabs[0];

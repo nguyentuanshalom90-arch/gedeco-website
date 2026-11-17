@@ -1,6 +1,9 @@
+import type { Metadata } from 'next';
 import { InnerHero, InnerPage } from './inner-pages';
+import { getPublicSiteContent } from '@/lib/site-content-public';
+import { absoluteUrl, siteConfig } from '@/lib/site-config';
 
-type SupportPageKey = 'authentic' | 'ordering' | 'shipping' | 'returns';
+export type SupportPageKey = 'authentic' | 'ordering' | 'shipping' | 'returns';
 
 type SupportCopy = {
   eyebrow: string;
@@ -63,7 +66,44 @@ const copy: Record<'vi' | 'en', Record<SupportPageKey, SupportCopy>> = {
   },
 };
 
-export default function SupportPage({ page, language = 'vi' }: { page: SupportPageKey; language?: 'vi' | 'en' }) {
-  const data = copy[language][page];
-  return <InnerPage active="" pageClass="support-page" language={language}><InnerHero eyebrow={data.eyebrow} title={data.title} subtitle={data.subtitle} /><div className="support-content"><div className="container support-content-inner">{data.sections.map((section) => <section className="support-section" key={section.heading}><h2>{section.heading}</h2>{section.paragraphs?.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}{section.bullets ? <ul>{section.bullets.map((bullet) => <li key={bullet}>{bullet}</li>)}</ul> : null}</section>)}</div></div></InnerPage>;
+const supportConfig: Record<SupportPageKey, { pageKey: string; vi: string; en: string }> = {
+  authentic: { pageKey: 'chinh-sach-hang-chinh-hang', vi: '/chinh-sach-hang-chinh-hang', en: '/en/authentic-product-policy' },
+  ordering: { pageKey: 'huong-dan-mua-hang', vi: '/huong-dan-mua-hang', en: '/en/how-to-order' },
+  shipping: { pageKey: 'giao-hang-va-thanh-toan', vi: '/giao-hang-va-thanh-toan', en: '/en/shipping-and-payment' },
+  returns: { pageKey: 'doi-tra-va-bao-hanh', vi: '/doi-tra-va-bao-hanh', en: '/en/returns-and-warranty' },
+};
+
+export async function getSupportMetadata(page: SupportPageKey, language: 'vi' | 'en'): Promise<Metadata> {
+  const config = supportConfig[page];
+  const content = await getPublicSiteContent(config.pageKey, language);
+  const fallbackData = copy[language][page];
+  const english = language === 'en';
+  const translated = content.translatedKeys.length > 0;
+  const title = english ? (translated && content.page?.metaTitle ? content.page.metaTitle : fallbackData.title) : content.page?.metaTitle || fallbackData.title;
+  const description = english ? (translated && content.page?.metaDescription ? content.page.metaDescription : fallbackData.subtitle) : content.page?.metaDescription || fallbackData.subtitle;
+  const canonical = absoluteUrl(english ? config.en : config.vi);
+  const vi = absoluteUrl(config.vi);
+  const en = absoluteUrl(config.en);
+  const hero = content.media['hero.image'];
+  return { title, description, alternates: { canonical, languages: { vi, en, 'x-default': vi } }, robots: { index: content.page?.robotsIndex ?? true, follow: content.page?.robotsFollow ?? true }, openGraph: { type: 'website', locale: english ? 'en_US' : 'vi_VN', siteName: siteConfig.brand, url: canonical, title, description, images: hero ? [{ url: absoluteUrl(hero.url), alt: hero.altText || fallbackData.title }] : undefined } };
+}
+
+export default async function SupportPage({ page, language = 'vi' }: { page: SupportPageKey; language?: 'vi' | 'en' }) {
+  const fallbackData = copy[language][page];
+  const config = supportConfig[page];
+  const content = await getPublicSiteContent(config.pageKey, language);
+  const english = language === 'en';
+  const translated = new Set(content.translatedKeys);
+  const text = (key: string, fallbackValue: string) => english ? (translated.has(key) ? content.values[key] || fallbackValue : fallbackValue) : content.values[key] || fallbackValue;
+  const heroSource = content.media['hero.image'];
+  const heroLocalized = !english || translated.has('hero.image');
+  const hero = { url: heroSource?.url || '/assets/banner-1.jpg', alt: heroLocalized ? heroSource?.altText || fallbackData.title : fallbackData.title, caption: heroLocalized ? heroSource?.caption || '' : '' };
+  const sections = fallbackData.sections.map((section, index) => {
+    const key = `section.${index + 1}`;
+    const fallbackLines = section.bullets || section.paragraphs || [];
+    return { title: text(`${key}.title`, section.heading), lines: text(`${key}.body`, fallbackLines.join('\n')).split(/\r?\n/).map((line) => line.trim()).filter(Boolean), bullets: Boolean(section.bullets) };
+  });
+  const canonical = absoluteUrl(english ? config.en : config.vi);
+  const jsonLd = [{ '@context': 'https://schema.org', '@type': 'WebPage', name: text('hero.title', fallbackData.title), description: text('hero.subtitle', fallbackData.subtitle), url: canonical, inLanguage: english ? 'en' : 'vi-VN', isPartOf: { '@type': 'WebSite', name: siteConfig.brand, url: siteConfig.officialUrl } }, { '@context': 'https://schema.org', '@type': 'BreadcrumbList', itemListElement: [{ '@type': 'ListItem', position: 1, name: english ? 'Home' : 'Trang chủ', item: absoluteUrl(english ? '/en' : '/') }, { '@type': 'ListItem', position: 2, name: text('hero.title', fallbackData.title), item: canonical }] }];
+  return <InnerPage active="" pageClass="support-page" language={language}><InnerHero eyebrow={text('hero.eyebrow', fallbackData.eyebrow)} title={text('hero.title', fallbackData.title)} subtitle={text('hero.subtitle', fallbackData.subtitle)} image={hero.url} imageAlt={hero.alt} imageCaption={hero.caption} /><div className="support-content"><div className="container support-content-inner">{sections.map((section) => <section className="support-section" key={section.title}><h2>{section.title}</h2>{section.bullets ? <ul>{section.lines.map((line) => <li key={line}>{line}</li>)}</ul> : section.lines.map((line) => <p key={line}>{line}</p>)}</section>)}</div></div><script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, '\\u003c') }} /></InnerPage>;
 }

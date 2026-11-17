@@ -53,6 +53,9 @@ Start-Sleep -Seconds 2
 
 $listeners = @(Get-NetTCPConnection -LocalPort $Port -State Listen -ErrorAction SilentlyContinue)
 foreach ($listener in $listeners) {
+  # Windows can briefly keep a closing TCP row owned by PID 0. It is not a
+  # real process and must not prevent the verified local preview from starting.
+  if ($listener.OwningProcess -eq 0) { continue }
   $process = Get-CimInstance Win32_Process -Filter "ProcessId=$($listener.OwningProcess)" -ErrorAction SilentlyContinue
   if ($process -and $process.CommandLine -and $process.CommandLine.Contains($projectRoot) -and $process.CommandLine.Contains('next')) {
     Stop-Process -Id $listener.OwningProcess -Force -ErrorAction SilentlyContinue
