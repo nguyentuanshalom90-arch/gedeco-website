@@ -3,6 +3,7 @@ import { randomUUID } from "node:crypto";
 import sharp, { type Metadata } from "sharp";
 import { prisma } from "@/lib/prisma";
 import { containedMediaPath, mediaRoot } from "@/lib/media-storage";
+import { mediaStorageErrorMessage } from "@/lib/media-errors";
 import { requireDashboardSession } from "@/lib/dashboard/auth";
 
 export const runtime = "nodejs";
@@ -74,7 +75,12 @@ export async function POST(request: Request) {
     });
     return Response.json({ id: asset.id, name: asset.originalName, url: `/api/media/${asset.id}`, width: asset.width, height: asset.height, altText: asset.altText, caption: asset.caption });
   } catch (error) {
-    await Promise.allSettled([unlink(containedMediaPath(originalTmp)), unlink(containedMediaPath(optimizedTmp))]);
-    return Response.json({ error: error instanceof Error ? error.message : "Không thể lưu ảnh." }, { status: 500 });
+    await Promise.allSettled([
+      unlink(containedMediaPath(originalTmp)),
+      unlink(containedMediaPath(optimizedTmp)),
+      unlink(containedMediaPath(originalFile)),
+      unlink(containedMediaPath(optimizedFile)),
+    ]);
+    return Response.json({ error: mediaStorageErrorMessage(error) }, { status: 500 });
   }
 }

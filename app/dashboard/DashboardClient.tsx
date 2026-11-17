@@ -11,9 +11,10 @@ import { ProductContentManager } from "./ProductContentManager";
 import { listPosts } from "@/lib/dashboard/post-actions";
 import { listIntegrations } from "@/lib/dashboard/integration-actions";
 import { SitePageManager } from "./SitePageManager";
+import { MediaLibraryManager } from "./MediaLibraryManager";
+import { DASHBOARD_TABS, type DashboardTab } from "./dashboard-tabs";
 
-export type DashboardTab = "overview" | "posts" | "products" | "pages" | "content" | "chrome" | "payment" | "shipping";
-const tabs: DashboardTab[] = ["overview", "posts", "products", "pages", "content", "chrome", "payment", "shipping"];
+export type { DashboardTab } from "./dashboard-tabs";
 
 export function DashboardClient({
   initialTab = "overview",
@@ -21,7 +22,7 @@ export function DashboardClient({
   initialTab?: DashboardTab;
 }) {
   const [tab, setTab] = useState<DashboardTab>(
-    tabs.includes(initialTab) ? initialTab : "overview",
+    DASHBOARD_TABS.includes(initialTab) ? initialTab : "overview",
   );
   const [stats, setStats] = useState({
     total: 0,
@@ -148,6 +149,11 @@ export function DashboardClient({
                 <strong>Quản lý header &amp; footer</strong>
                 <p>Quản lý header/footer, menu, liên hệ và bản quyền dùng chung.</p>
               </button>
+              <button type="button" className="panel" onClick={() => selectTab("media")}>
+                <span>06</span>
+                <strong>Thư viện media</strong>
+                <p>Tìm ảnh, tải lên và quản lý alt text/caption dùng toàn website.</p>
+              </button>
             </div>
           </section>
         )}
@@ -168,6 +174,7 @@ export function DashboardClient({
             <SiteChromeManager />
           </section>
         )}
+        {tab === "media" && <section className={styles.content}><MediaLibraryManager /></section>}
         {tab === "payment" && (
           <section className={styles.content}>
             <IntegrationManager category="PAYMENT" />

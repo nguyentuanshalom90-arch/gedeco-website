@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Icon } from "@/components/vimigo-icon";
-import type { DashboardTab } from "./DashboardClient";
+import type { DashboardTab } from "./dashboard-tabs";
 
 type BimiSidebarProps = {
   tab: DashboardTab;
@@ -16,6 +16,7 @@ const navItems: Array<{ id: DashboardTab; label: string; icon: string }> = [
   { id: "pages", label: "Quản lý page song ngữ", icon: "layers" },
   { id: "content", label: "Quản lý body", icon: "layers" },
   { id: "chrome", label: "Quản lý header & footer", icon: "grid" },
+  { id: "media", label: "Thư viện media", icon: "image" },
   { id: "payment", label: "Thanh toán", icon: "creditCard" },
   { id: "shipping", label: "Vận chuyển", icon: "truck" },
 ];

@@ -46,7 +46,7 @@ Cập nhật: 17/11/2026. Checklist này dùng làm tiêu chuẩn nghiệm thu c
 - [x] Product, category, news, page body, header/footer có alt và caption; dữ liệu English tách theo locale. `PASS source/local QA`.
 - [x] Frontend dùng alt mô tả, caption gần ảnh hoặc metadata trợ năng phù hợp với loại media. `PASS các module đã nối CMS`.
 - [x] File gốc được giữ; frontend ưu tiên WebP derivative, không đổi đuôi/ghi đè file gốc. `PASS kiến trúc hiện tại`.
-- [ ] Regression upload PNG/JPG/WebP, alpha, MIME giả, derivative 0 byte, EACCES, ENOENT và hết quota. `PENDING TEST SUITE`.
+- [x] Regression upload PNG/JPG/WebP, alpha, MIME giả, derivative 0 byte, ENOENT, EACCES và hết dung lượng/quota (`ENOSPC`/`EDQUOT`); dữ liệu QA được dọn trong `finally`. `PASS npm run test:media`.
 - [ ] Production media phải nằm trong persistent storage, route media trả 200 và không chứa host demo/localhost. `PENDING DEPLOY AUDIT`.
 
 ## 5. Structured data
