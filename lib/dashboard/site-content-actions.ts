@@ -5,8 +5,11 @@ import type { SiteContentInput, SiteContentItem, SiteContentKind } from "./site-
 import { syncSiteContentTranslation } from "@/lib/translation-service";
 import { requireDashboardSession } from "./auth";
 import { ensureSiteContentSeeded } from "@/lib/site-content-seeding";
+import { revalidatePath } from "next/cache";
 
 const dbKind = (kind: SiteContentKind) => kind === "static" ? "STATIC" as const : "DYNAMIC" as const;
+const englishRoute: Record<string, string> = { "/": "/en", "/gioi-thieu": "/en/about", "/doi-tac": "/en/partners", "/du-an": "/en/projects", "/tin-tuc": "/en/news", "/lien-he": "/en/contact" };
+function revalidateContentRoutes(route: string) { revalidatePath(route); if (englishRoute[route]) revalidatePath(englishRoute[route]); }
 
 function toItem(row: any): SiteContentItem {
   return {
@@ -100,16 +103,18 @@ export async function saveSiteContent(kind: SiteContentKind, input: SiteContentI
   const row = await prisma.siteDynamicContent.upsert({ where: { kind_pageKey_sectionKey_fieldKey: { kind: dbKind(kind), pageKey, sectionKey, fieldKey } }, update: data, create: data, include: { page: true } });
   const item = toItem({ ...row, page: page || row.page });
   const translation = await syncSiteContentTranslation({ id: item.id, label: item.label, value: item.value, altText: item.altText, imageCaption: item.imageCaption, h1: item.h1, metaTitle: item.metaTitle, metaDescription: item.metaDescription, updatedAt: new Date(item.updatedAt) });
+  revalidateContentRoutes(page.route);
   return { ok: true, item, translation: { status: translation.status, errorMessage: translation.errorMessage } };
 }
 
 export async function deleteSiteContent(kind: SiteContentKind, id: string): Promise<{ ok: true }> {
   await requireDashboardSession();
-  const row = await prisma.siteDynamicContent.findUnique({ where: { id }, select: { kind: true } });
+  const row = await prisma.siteDynamicContent.findUnique({ where: { id }, select: { kind: true, page: { select: { route: true } } } });
   if (!row || row.kind !== dbKind(kind)) return { ok: true };
   await prisma.$transaction([
     prisma.translationEntry.deleteMany({ where: { entityType: "SITE_CONTENT", entityId: id } }),
     prisma.siteDynamicContent.delete({ where: { id } }),
   ]);
+  revalidateContentRoutes(row.page.route);
   return { ok: true };
 }

@@ -9,11 +9,11 @@ export function ensureSiteContentSeeded() {
     for (const page of contentPages) {
       await prisma.siteContentPage.upsert({ where: { pageKey: page.pageKey }, update: {}, create: { ...page } });
     }
-    for (const [pageKey, sectionKey, fieldKey, label, value, headingLevel, sortOrder] of dynamicSeed) {
+    for (const [pageKey, sectionKey, fieldKey, label, value, headingLevel, sortOrder, contentType, imageUrl, altText, imageCaption] of dynamicSeed) {
       await prisma.siteDynamicContent.upsert({
         where: { kind_pageKey_sectionKey_fieldKey: { kind: "DYNAMIC", pageKey, sectionKey, fieldKey } },
         update: {},
-        create: { kind: "DYNAMIC", pageKey, sectionKey, fieldKey, label, value, headingLevel: headingLevel || null, sortOrder },
+        create: { kind: "DYNAMIC", pageKey, sectionKey, fieldKey, label, value, contentType: contentType || "TEXT", headingLevel: headingLevel || null, imageUrl: imageUrl || null, altText: altText || null, imageCaption: imageCaption || null, sortOrder },
       });
     }
     for (const [id, pageKey, sectionKey, fieldKey, label, value, contentType, headingLevel, imageUrl, altText, isVisible, sortOrder] of staticSeed) {

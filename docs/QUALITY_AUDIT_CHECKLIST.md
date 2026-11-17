@@ -16,7 +16,7 @@ Cập nhật: 2026-11-17. Trạng thái dùng bốn mức: `PASS`, `ĐANG LÀM`,
 | Danh mục bài viết | CRUD, SEO VI/EN, slug/canonical riêng, liên kết bài viết, xóa an toàn | PASS local; CHỜ LIVE migration |
 | English bài viết | Nội dung, metadata, media alt/caption, slug và route English lấy từ TranslationEntry | PASS local |
 | Page tùy biến | CRUD section bằng form trực quan; media đầy đủ; draft/publish; SEO; song ngữ | PASS local; CHỜ provider/live migration |
-| Nội dung page hiện hữu | Mọi section frontend đọc database; không ghi file release khi production | ĐANG LÀM: storage đã DB-only; còn nối toàn bộ section hardcode |
+| Nội dung page hiện hữu | Mọi section frontend đọc database; không ghi file release khi production | ĐANG LÀM: storage đã DB-only; trang Giới thiệu VI/EN đã nối đầy đủ |
 | Header/footer | CRUD database, media, link, alt, song ngữ, render toàn site | ĐANG LÀM |
 | Bản dịch | Có trạng thái, lỗi không ghi đè/ẩn bản tốt, cho phép sửa thủ công, slug unique theo entity + locale | PASS product/news local; còn page audit |
 | Toàn vẹn giao dịch | Ghi entity và quan hệ media trong transaction; unique/foreign key/validation | PASS sản phẩm; cần rà các module còn lại |
@@ -88,6 +88,14 @@ Nguồn chuẩn:
 - Seed idempotent giữ nguyên 12 ID static cũ để bảo toàn quan hệ translation; 30 bản ghi dynamic hiện hữu được giữ nguyên. Frontend/API chỉ đọc database.
 - Media content dùng picker chung với đủ thư viện/tải lên, alt/caption; caption được đưa vào payload dịch. Xóa content xóa translation liên quan trong transaction.
 - QA qua giao diện thật đã tạo content nền, API đọc đúng từ PostgreSQL rồi dữ liệu/translation QA được xóa. Screenshot admin PASS; TypeScript, Prisma, build và `git diff --check` PASS.
+
+### Bằng chứng audit trang Giới thiệu database-backed ngày 2026-11-17
+
+- Toàn bộ hero, phần giới thiệu, nhóm giá trị, năng lực và CTA của `/gioi-thieu` đọc từ `SiteDynamicContent`; media lấy URL, alt và caption từ cùng bản ghi CMS.
+- Seed idempotent local có 33 trường cho trang Giới thiệu, gồm ba vị trí media. QA sửa tiêu đề qua dashboard đã xuất hiện ngay trên frontend và được khôi phục sạch; không còn translation QA.
+- `/gioi-thieu` và `/en/about` đều trả HTTP 200; bản English dùng translation khi có và fallback English an toàn khi provider chưa dịch, không lộ nội dung Việt.
+- Canonical, hreflang `vi/en/x-default`, robots, Open Graph, AboutPage + Breadcrumb JSON-LD và asset media HTTP 200 đã được kiểm tra.
+- Screenshot Chrome desktop/mobile PASS; mobile 390px có `scrollWidth = innerWidth = 390`, không có phần tử vượt viewport. TypeScript, Prisma validate, build production local và `git diff --check` PASS.
 
 ## 4. Điều kiện trước production
 
