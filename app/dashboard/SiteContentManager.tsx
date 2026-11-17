@@ -9,8 +9,6 @@ import { MediaPicker } from "./MediaPicker";
 const pageTabs = [
   { pageKey: "home", pageName: "Trang chủ", route: "/" },
   { pageKey: "gioi-thieu", pageName: "Giới thiệu", route: "/gioi-thieu" },
-  { pageKey: "doi-tac", pageName: "Đối tác", route: "/doi-tac" },
-  { pageKey: "du-an", pageName: "Dự án", route: "/du-an" },
   { pageKey: "tin-tuc", pageName: "Tin tức", route: "/tin-tuc" },
   { pageKey: "lien-he", pageName: "Liên hệ", route: "/lien-he" },
 ] as const;

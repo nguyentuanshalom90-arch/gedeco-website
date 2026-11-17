@@ -97,6 +97,14 @@ Nguồn chuẩn:
 - Canonical, hreflang `vi/en/x-default`, robots, Open Graph, AboutPage + Breadcrumb JSON-LD và asset media HTTP 200 đã được kiểm tra.
 - Screenshot Chrome desktop/mobile PASS; mobile 390px có `scrollWidth = innerWidth = 390`, không có phần tử vượt viewport. TypeScript, Prisma validate, build production local và `git diff --check` PASS.
 
+### Phạm vi page và header/footer ngày 2026-11-17
+
+- Phạm vi page nội dung chỉ gồm các mục thực sự xuất hiện trong header/footer: Trang chủ, Giới thiệu, Tin tức, Sản phẩm và Liên hệ.
+- Đã xóa hoàn toàn route Đối tác/Dự án và các alias VI/EN khỏi source, CMS tabs, seed, sitemap và language map; sáu URL cũ đều trả 404 local.
+- Đã loại liên kết homepage tới các route vừa xóa để không phát sinh broken link. Khối dự án nổi bật trên homepage vẫn là một section nội dung, không còn dẫn tới page riêng.
+- API header/footer đã hỗ trợ `lang=en`, chỉ trả nội dung English khi có `TranslationEntry` hợp lệ và không fallback tiếng Việt. QA translation tạm PASS rồi được xóa.
+- Build route manifest giảm từ 35 xuống 29 static pages; sitemap/header API không còn Đối tác/Dự án. Screenshot homepage English mobile 390px PASS, không tràn ngang.
+
 ## 4. Điều kiện trước production
 
 - Commit + push; đối chiếu local/staging/live và cấu hình đúng `gedeco.vn`.

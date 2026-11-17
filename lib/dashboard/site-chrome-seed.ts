@@ -3,8 +3,6 @@ export const chromeSeed = [
   ["HEADER", "STATIC", "navigation", "home", "Trang chủ", "Trang chủ", "/", "", "", true, 10],
   ["HEADER", "STATIC", "navigation", "about", "Giới thiệu", "Giới thiệu", "/gioi-thieu", "", "", true, 11],
   ["HEADER", "STATIC", "navigation", "services", "Dịch vụ", "Dịch vụ", "/#services", "", "", true, 12],
-  ["HEADER", "STATIC", "navigation", "partners", "Đối tác", "Đối tác", "/doi-tac", "", "", true, 13],
-  ["HEADER", "STATIC", "navigation", "projects", "Dự án", "Dự án", "/du-an", "", "", true, 14],
   ["HEADER", "STATIC", "navigation", "news", "Tin tức", "Tin tức", "/tin-tuc", "", "", true, 15],
   ["HEADER", "STATIC", "navigation", "contact", "Liên hệ", "Liên hệ", "/lien-he", "", "", true, 16],
   ["HEADER", "DYNAMIC", "cta", "label", "Nhãn nút liên hệ", "Liên hệ ngay", "/lien-he", "", "", true, 20],

@@ -28,7 +28,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const translatedSlug = new Map(translations.map((item) => [`${item.entityType}:${item.entityId}`, item.slug]));
   const translatedPages = new Set(translations.filter((item) => item.entityType === "SITE_PAGE" && item.status === "TRANSLATED").map((item) => item.entityId));
   const staticPages = [
-    ["/", "/en"], ["/gioi-thieu", "/en/about"], ["/doi-tac", "/en/partners"], ["/du-an", "/en/projects"],
+    ["/", "/en"], ["/gioi-thieu", "/en/about"],
     ["/san-pham", "/en/products"], ["/tin-tuc", "/en/news"], ["/lien-he", "/en/contact"],
     ["/chinh-sach-hang-chinh-hang", "/en/authentic-product-policy"], ["/huong-dan-mua-hang", "/en/how-to-order"],
     ["/giao-hang-va-thanh-toan", "/en/shipping-and-payment"], ["/doi-tra-va-bao-hanh", "/en/returns-and-warranty"],
