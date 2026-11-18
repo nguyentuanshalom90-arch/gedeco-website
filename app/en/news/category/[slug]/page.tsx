@@ -4,6 +4,7 @@ import { CTA, InnerHero, InnerPage, NewsCard } from "../../../../components/inne
 import { prisma } from "@/lib/prisma";
 import { listEnglishArticles } from "@/lib/public-news";
 import { absoluteUrl, siteConfig } from "@/lib/site-config";
+import { getPublicSiteContent } from "@/lib/site-content-public";
 
 export const dynamic = "force-dynamic";
 
@@ -33,15 +34,19 @@ export default async function EnglishNewsCategoryPage({ params }: { params: Prom
   const category = await getCategory(slug);
   if (!category?.nameEn || !category.slugEn) notFound();
   const articles = await listEnglishArticles(category.id);
+  const content = await getPublicSiteContent("tin-tuc", "en");
+  const translated = new Set(content.translatedKeys);
+  const text = (key: string, fallback: string) => translated.has(key) ? content.values[key] || content.staticValues[key] || fallback : fallback;
+  const cta = content.media["cta.image"];
   const canonical = absoluteUrl(category.canonicalUrlEn || `/en/news/category/${category.slugEn}`);
   const vi = absoluteUrl(category.canonicalUrl || `/tin-tuc/danh-muc/${category.slug}`);
   const jsonLd = [{ "@context": "https://schema.org", "@type": "CollectionPage", name: category.metaTitleEn || category.nameEn, description: category.metaDescriptionEn || category.descriptionEn || undefined, url: canonical, inLanguage: "en", isPartOf: { "@type": "WebSite", name: siteConfig.brand, url: siteConfig.officialUrl } }, { "@context": "https://schema.org", "@type": "BreadcrumbList", itemListElement: [{ "@type": "ListItem", position: 1, name: "Home", item: absoluteUrl("/en") }, { "@type": "ListItem", position: 2, name: "News", item: absoluteUrl("/en/news") }, { "@type": "ListItem", position: 3, name: category.nameEn, item: canonical }] }];
   return <InnerPage active="News" language="en" alternateVietnamesePath={`/tin-tuc/danh-muc/${category.slug}`}>
-    <InnerHero eyebrow="NEWS CATEGORY" title={category.nameEn} subtitle={category.descriptionEn || `Latest ${category.nameEn} updates and insights from GEDECO.`} />
+    <InnerHero eyebrow={text("category.hero.eyebrow", "NEWS CATEGORY")} title={category.nameEn} subtitle={category.descriptionEn || text("category.hero.subtitle", `Latest ${category.nameEn} updates and insights from GEDECO.`)} />
     <section className="inner-news-list"><div className="container"><div className="inner-title"><p className="eyebrow gold-text">LATEST UPDATES</p><h2>{category.nameEn}</h2></div>
-      {articles.length ? <div className="inner-news-grid">{articles.map((article) => <NewsCard key={article.source.id} item={[article.source.imageUrl || "/assets/news-1-derivative.png", article.category, (article.source.publishedAt || article.source.scheduledAt || article.source.createdAt).toLocaleDateString("en-GB"), article.title]} imageAlt={article.imageAlt} imageCaption={article.imageCaption} excerpt={article.excerpt} href={`/en/news/${article.slug}`} readLabel="Read more" />)}</div> : <p>No English articles have been published in this category yet.</p>}
+      {articles.length ? <div className="inner-news-grid">{articles.map((article) => <NewsCard key={article.source.id} item={[article.source.imageUrl || "/assets/news-1-derivative.png", article.category, (article.source.publishedAt || article.source.scheduledAt || article.source.createdAt).toLocaleDateString("en-GB"), article.title]} imageAlt={article.imageAlt} imageCaption={article.imageCaption} excerpt={article.excerpt} href={`/en/news/${article.slug}`} readLabel={text("list.readLabel", "Read more")} />)}</div> : <p>{text("list.empty", "No English articles have been published in this category yet.")}</p>}
     </div></section>
-    <CTA language="en" title="Stay connected with GEDECO" text="Contact us to discuss products, cooperation and market opportunities." />
+    <CTA language="en" eyebrow={text("cta.eyebrow", "CONTACT GEDECO")} title={text("cta.title", "Stay connected with GEDECO")} text={text("cta.body", "Contact us to discuss products, cooperation and market opportunities.")} image={cta?.url} imageAlt={cta?.altText} imageCaption={cta?.caption} primaryLabel={text("cta.primaryLabel", "Contact us")} secondaryLabel={text("cta.secondaryLabel", "Send an enquiry")} />
     <a className="sr-only" href={vi}>Vietnamese version</a>
     <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }} />
   </InnerPage>;

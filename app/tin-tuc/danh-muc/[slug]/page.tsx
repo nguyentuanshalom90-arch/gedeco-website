@@ -8,6 +8,7 @@ import {
 } from "../../../components/inner-pages";
 import { prisma } from "@/lib/prisma";
 import { absoluteUrl, siteConfig } from "@/lib/site-config";
+import { getPublicSiteContent } from "@/lib/site-content-public";
 
 export const dynamic = "force-dynamic";
 
@@ -70,6 +71,9 @@ export default async function NewsCategoryPage({
       { createdAt: "desc" },
     ],
   });
+  const content = await getPublicSiteContent("tin-tuc", "vi");
+  const text = (key: string, fallback: string) => content.values[key] || content.staticValues[key] || fallback;
+  const cta = content.media["cta.image"];
   const canonical = absoluteUrl(category.canonicalUrl || `/tin-tuc/danh-muc/${category.slug}`);
   const jsonLd = [
     {
@@ -114,17 +118,16 @@ export default async function NewsCategoryPage({
   return (
     <InnerPage active="Tin tức" alternateEnglishPath={category.slugEn ? `/en/news/category/${category.slugEn}` : null}>
       <InnerHero
-        eyebrow="DANH MỤC BÀI VIẾT"
+        eyebrow={text("category.hero.eyebrow", "DANH MỤC BÀI VIẾT")}
         title={category.name}
         subtitle={
-          category.description ||
-          `Những thông tin mới nhất thuộc chủ đề ${category.name}.`
+          category.description || text("category.hero.subtitle", `Những thông tin mới nhất thuộc chủ đề ${category.name}.`)
         }
       />
       <section className="inner-news-list">
         <div className="container">
           <div className="inner-title">
-            <p className="eyebrow gold-text">BÀI VIẾT MỚI NHẤT</p>
+            <p className="eyebrow gold-text">{text("category.list.eyebrow", "BÀI VIẾT MỚI NHẤT")}</p>
             <h2>{category.name}</h2>
           </div>
           <div className="inner-news-grid">
@@ -145,17 +148,24 @@ export default async function NewsCategoryPage({
                   ]}
                   imageAlt={article.imageAlt || article.title}
                   imageCaption={article.imageCaption || ""}
+                  readLabel={text("list.readLabel", "Đọc thêm")}
                 />
               ))
             ) : (
-              <p>Danh mục này chưa có bài viết đã xuất bản.</p>
+              <p>{text("list.empty", "Danh mục này chưa có bài viết đã xuất bản.")}</p>
             )}
           </div>
         </div>
       </section>
       <CTA
-        title="Kết nối cùng GEDECO"
-        text="Liên hệ với chúng tôi để trao đổi về cơ hội hợp tác và giải pháp phù hợp."
+        eyebrow={text("cta.eyebrow", "LIÊN HỆ VỚI GEDECO")}
+        title={text("cta.title", "Kết nối cùng GEDECO")}
+        text={text("cta.body", "Liên hệ với chúng tôi để trao đổi về cơ hội hợp tác và giải pháp phù hợp.")}
+        image={cta?.url}
+        imageAlt={cta?.altText}
+        imageCaption={cta?.caption}
+        primaryLabel={text("cta.primaryLabel", "Liên hệ ngay")}
+        secondaryLabel={text("cta.secondaryLabel", "Gửi yêu cầu tư vấn")}
       />
       <script
         type="application/ld+json"
