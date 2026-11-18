@@ -1,2 +1,2 @@
 ALTER TABLE "SiteChromeContent"
-ADD COLUMN "imageCaption" TEXT;
+ADD COLUMN IF NOT EXISTS "imageCaption" TEXT;

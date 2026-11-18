@@ -1,4 +1,7 @@
 -- Add shared storefront controls without overwriting records already edited on live.
+ALTER TABLE "SiteChromeContent"
+ADD COLUMN IF NOT EXISTS "imageCaption" TEXT;
+
 DELETE FROM "TranslationEntry"
 WHERE "entityType" = 'SITE_CHROME' AND "entityId" IN (
   SELECT "id" FROM "SiteChromeContent" WHERE "area" = 'HEADER' AND "sectionKey" = 'navigation' AND "fieldKey" = 'services'
