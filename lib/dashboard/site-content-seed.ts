@@ -218,7 +218,6 @@ export const dynamicSeed = [
 export const staticSeed = [
   ["static-home-navigation-home", "home", "navigation", "home", "Trang chủ", "Trang chủ", "TEXT", "", "", "", true, 1],
   ["static-home-navigation-about", "home", "navigation", "about", "Giới thiệu", "Giới thiệu", "TEXT", "", "", "", true, 2],
-  ["static-home-navigation-services", "home", "navigation", "services", "Dịch vụ", "Dịch vụ", "TEXT", "", "", "", true, 3],
   ["static-home-navigation-news", "home", "navigation", "news", "Tin tức", "Tin tức", "TEXT", "", "", "", true, 5],
   ["static-home-navigation-contact", "home", "navigation", "contact", "Liên hệ", "Liên hệ", "TEXT", "", "", "", true, 6],
   ["static-about-hero-eyebrow", "gioi-thieu", "hero", "eyebrow", "GEDECO", "GEDECO", "TEXT", "", "", "", true, 1],

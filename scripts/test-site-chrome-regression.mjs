@@ -29,6 +29,9 @@ try {
   assert(!headerVi["DYNAMIC.brand"] && !headerVi["STATIC.navigation"], "API còn sinh key seed sai cấu trúc.");
   const staleServices = await prisma.siteChromeContent.count({ where: { area: "HEADER", sectionKey: "navigation", fieldKey: "services" } });
   assert(staleServices === 0, "Bản ghi menu Dịch vụ cũ chưa được loại bỏ.");
+  await fetch(`${baseUrl}/`);
+  const staleContentSeed = await prisma.siteDynamicContent.count({ where: { kind: "STATIC", pageKey: "home", sectionKey: "navigation", fieldKey: "services" } });
+  assert(staleContentSeed === 0, "Static seed navigation.services cũ bị dựng lại.");
 
   const viQa = `MUA QA ${token}`;
   const enQa = `BUY QA ${token}`;
