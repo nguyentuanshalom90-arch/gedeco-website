@@ -33,6 +33,11 @@ function cookieFrom(response) {
 const env = await loadLocalEnv();
 assert(env.DASHBOARD_USERNAME && env.DASHBOARD_PASSWORD, "Thiếu credentials dashboard cho regression.");
 
+const loginPage = await fetch(`${baseUrl}/vmg-login`);
+const loginHtml = await loginPage.text();
+assert(loginPage.status === 200 && loginHtml.includes("Quản trị GEDECO"), "Route /vmg-login không render được trang đăng nhập.");
+assert(/<meta[^>]+name=["']robots["'][^>]+content=["'][^"']*noindex/i.test(loginHtml), "Route /vmg-login phải có robots noindex.");
+
 const invalid = await fetch(`${baseUrl}/api/dashboard/auth`, {
   method: "POST",
   headers: { "Content-Type": "application/json" },
@@ -78,4 +83,4 @@ assert(media.status === 200 && Array.isArray(mediaPayload.assets), "Session hợ
 const logout = await fetch(`${baseUrl}/api/dashboard/logout`, { method: "POST", headers: { Cookie: cookie } });
 assert(logout.status === 200, `Logout phải trả 200, thực tế ${logout.status}.`);
 
-console.log("DASHBOARD_AUTH_REGRESSION_PASS invalid-login login session dashboard tabs media logout");
+console.log("DASHBOARD_AUTH_REGRESSION_PASS login-route noindex invalid-login login session dashboard tabs media logout");
