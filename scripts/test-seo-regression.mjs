@@ -34,6 +34,9 @@ for (const url of uniqueLocs) {
   assert(canonical && (canonical === officialOrigin || canonical.startsWith(`${officialOrigin}/`)), `URL ${url} thiếu canonical chính thức.`);
 }
 
+const contactHtml = await fetch(`${baseUrl}/lien-he`).then((response) => response.text());
+assert(contactHtml.includes("Đóng thông báo") && contactHtml.includes("Gửi thành công") && contactHtml.includes("Vui lòng kiểm tra lại"), "Nhãn trạng thái form liên hệ chưa đi từ SiteContent database ra frontend.");
+
 for (const oldPath of ["/doi-tac", "/du-an", "/en/gioi-thieu", "/tin-tuc/chi-tiet"]) {
   const response = await fetch(`${baseUrl}${oldPath}`, { redirect: "manual" });
   assert(response.status === 404 || response.status === 308, `Route cũ ${oldPath} không được loại bỏ/redirect đúng: ${response.status}.`);
