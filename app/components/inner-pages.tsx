@@ -231,7 +231,7 @@ export function InnerHeader({
   const getUrl = (key: string, fallback: string) =>
     chromeLoaded ? chrome[key]?.url || "" : fallback;
   const show = (key: string) => !chromeLoaded || Boolean(chrome[key]);
-  const logo = "/assets/logo-new.png";
+  const logo = "/assets/logo-new.optimized.webp";
   const urls = english
     ? {
         home: "/en",
@@ -689,7 +689,7 @@ export function InnerHero({
   eyebrow,
   title,
   subtitle,
-  image = "/assets/banner-1.jpg",
+  image = "/assets/banner-1.optimized.webp",
   imageAlt,
   imageCaption,
 }: {

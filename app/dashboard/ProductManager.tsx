@@ -12,7 +12,7 @@ import { MediaPicker, type MediaSelection } from "./MediaPicker";
 const EMPTY: ProductInput = {
   id: null, slug: "", title: "", categoryId: "", description: "", contentHtml: "", summaryHtml: "",
   priceText: "Liên hệ", stockText: "Còn hàng", imageUrl: "", imageAlt: "", imageCaption: "",
-  shipperImageUrl: "/assets/products/shipper.jpg", shipperImageAlt: "Dịch vụ giao hàng", shipperImageCaption: "", ogImageUrl: "", ogImageAlt: "", gallery: [],
+  shipperImageUrl: "/assets/products/shipper.optimized.webp", shipperImageAlt: "Dịch vụ giao hàng", shipperImageCaption: "", ogImageUrl: "", ogImageAlt: "", gallery: [],
   metaTitle: "", metaDescription: "", canonicalUrl: "", robotsIndex: true, robotsFollow: true,
   isPublished: true, sortOrder: 0,
   translationMode: "AUTO", translationStatus: "PENDING", translationError: "",

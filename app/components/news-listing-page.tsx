@@ -36,7 +36,7 @@ export async function NewsListingPage({ language = "vi", searchParams }: { langu
     return { url: item?.url || fallbackUrl, alt: localized ? item?.altText || (english ? enAlt : viAlt) : enAlt, caption: localized ? item?.caption || "" : "" };
   };
   const items = english
-    ? enArticles.map((article) => ({ id: article.source.id, image: article.source.imageUrl || "/assets/news-1-derivative.png", category: article.category, date: (article.source.publishedAt || article.source.scheduledAt || article.source.createdAt).toLocaleDateString("en-GB"), title: article.title, href: `/en/news/${article.slug}`, excerpt: article.excerpt, imageAlt: article.imageAlt, imageCaption: article.imageCaption }))
+    ? enArticles.map((article) => ({ id: article.source.id, image: article.source.imageUrl || "/assets/news-1.optimized.webp", category: article.category, date: (article.source.publishedAt || article.source.scheduledAt || article.source.createdAt).toLocaleDateString("en-GB"), title: article.title, href: `/en/news/${article.slug}`, excerpt: article.excerpt, imageAlt: article.imageAlt, imageCaption: article.imageCaption }))
     : viArticles.map((article) => ({ id: article.id, image: optimizedStaticMediaUrl(article.imageUrl) || "/assets/news-1.optimized.webp", category: article.category.toLocaleUpperCase("vi"), date: (article.publishedAt || article.scheduledAt || article.createdAt).toLocaleDateString("vi-VN"), title: article.title, href: `/tin-tuc/${article.slug}`, excerpt: article.excerpt || "", imageAlt: article.imageAlt || article.title, imageCaption: article.imageCaption || "" }));
   const pageCount = Math.max(1, Math.ceil(items.length / pageSize));
   const safePage = Math.min(currentPage, pageCount);

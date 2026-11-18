@@ -435,3 +435,6 @@ body{overflow-x:clip}
   opacity: 0.45;
   cursor: not-allowed;
 }
+
+/* Keep late CSS overrides on the optimized static derivatives. */
+.inner-cta { background-image: linear-gradient(90deg,rgba(3,25,53,.85),rgba(3,25,53,.4)),url('/assets/banner-2.optimized.webp'); }

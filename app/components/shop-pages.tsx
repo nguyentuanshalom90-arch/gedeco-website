@@ -176,7 +176,7 @@ export function ShopSidebar({ language = "vi" }: { language?: ShopLanguage }) {
           {(!loaded || supportImage) && (
             <>
               <img
-                src={supportImage?.imageUrl || "/assets/shop-support.jpg"}
+                src={supportImage?.imageUrl || "/assets/shop-support.optimized.webp"}
                 alt={
                   supportImage?.altText ||
                   (english
