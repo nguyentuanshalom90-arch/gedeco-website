@@ -8,7 +8,7 @@
     "build": "powershell -ExecutionPolicy Bypass -File ./scripts/build-safe.ps1",
     "build:next": "next build",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "eslint .",
     "prisma:generate": "prisma generate",
     "prisma:validate": "prisma validate",
     "test:media": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/test-media-regression.mjs",
@@ -41,6 +41,8 @@
     "@types/react": "^19.1.0",
     "@types/react-dom": "^19.1.0",
     "@types/sanitize-html": "^2.16.2",
+    "eslint": "9.39.5",
+    "eslint-config-next": "15.5.29",
     "prisma": "7.10.1",
     "typescript": "^5.8.0"
   },

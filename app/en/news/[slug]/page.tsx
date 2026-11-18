@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { notFound, permanentRedirect } from "next/navigation";
 import { Icon, InnerPage } from "../../../components/inner-pages";
 import { getEnglishArticleBySlug, listEnglishArticles } from "@/lib/public-news";
@@ -44,7 +45,7 @@ export default async function EnglishArticlePage({ params }: { params: Promise<{
   const jsonLd = [{ "@context": "https://schema.org", "@type": "Article", headline: article.title, description: article.metaDescription || article.excerpt || undefined, image: image ? [absoluteUrl(image)] : undefined, datePublished: published.toISOString(), dateModified: article.source.updatedAt.toISOString(), inLanguage: "en", author: { "@type": "Organization", name: article.source.authorName || siteConfig.brand }, publisher: { "@type": "Organization", name: siteConfig.brand, logo: { "@type": "ImageObject", url: absoluteUrl(siteConfig.logo) } }, mainEntityOfPage: canonical, keywords: article.tags.join(", ") }, { "@context": "https://schema.org", "@type": "BreadcrumbList", itemListElement: [{ "@type": "ListItem", position: 1, name: "Home", item: absoluteUrl("/en") }, { "@type": "ListItem", position: 2, name: "News", item: absoluteUrl("/en/news") }, { "@type": "ListItem", position: 3, name: article.title, item: canonical }] }];
   return <InnerPage active="News" language="en" pageClass="article-design" alternateVietnamesePath={`/tin-tuc/${article.source.slug}`}>
     <section className="article-hero" style={{ backgroundImage: `linear-gradient(90deg,rgba(3,25,54,.88),rgba(3,25,54,.28)),url('${optimizedStaticMediaUrl(article.source.imageUrl) || "/assets/banner-1.optimized.webp"}')` }}><div className="container">
-      <nav className="article-breadcrumb" aria-label="Breadcrumb"><a href="/en">Home</a><span>›</span><a href="/en/news">News</a><span>›</span><span>{article.category}</span></nav>
+      <nav className="article-breadcrumb" aria-label="Breadcrumb"><Link href="/en">Home</Link><span>›</span><Link href="/en/news">News</Link><span>›</span><span>{article.category}</span></nav>
       <p className="eyebrow">{article.category.toLocaleUpperCase("en")}</p><h1>{article.title}</h1>
       <div className="article-meta"><span>▣ {published.toLocaleDateString("en-GB")}</span><span>◉ {article.source.authorName || siteConfig.brand}</span><span>Share:</span><a href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(canonical)}`} target="_blank" rel="noopener noreferrer" aria-label="Share on Facebook"><Icon name="facebook" /></a><a href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(canonical)}`} target="_blank" rel="noopener noreferrer" aria-label="Share on LinkedIn"><Icon name="linkedin" /></a></div>
     </div></section>
@@ -54,7 +55,7 @@ export default async function EnglishArticlePage({ params }: { params: Promise<{
       <ArticleContent content={article.content} emptyText="This article is being updated." />
       {article.tags.length > 0 && <div className="article-tags"><strong>Keywords:</strong>{article.tags.map((tag) => <a key={tag} href={`/en/news?tag=${encodeURIComponent(tag)}`}>#{tag}</a>)}</div>}
     </div><aside className="article-side"><div className="side-box"><h3>Related articles</h3>{related.map((item) => <a className="article-related-item" key={item.source.id} href={`/en/news/${item.slug}`}><img src={optimizedStaticMediaUrl(item.source.imageUrl) || "/assets/news-1.optimized.webp"} alt={item.imageAlt} /><span><b>{item.title}</b><small>{(item.source.publishedAt || item.source.scheduledAt || item.source.createdAt).toLocaleDateString("en-GB")}</small></span></a>)}</div></aside></div>
-      <div className="container article-nav"><a href="/en/news">← <span>News</span><b>Back to all articles</b></a><a href={vi}><span>Vietnamese version</span><b>Đọc bản tiếng Việt</b> →</a></div>
+      <div className="container article-nav"><Link href="/en/news">← <span>News</span><b>Back to all articles</b></Link><a href={vi}><span>Vietnamese version</span><b>Đọc bản tiếng Việt</b> →</a></div>
     </article>
     <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }} />
   </InnerPage>;

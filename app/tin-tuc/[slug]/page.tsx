@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { notFound, permanentRedirect } from "next/navigation";
 import {
   Icon,
@@ -151,7 +152,7 @@ export default async function CmsArticlePage({
     <InnerPage active="Tin tức" pageClass="article-design" alternateEnglishPath={alternateEnglishPath}>
       <section className="article-hero" style={{ backgroundImage: `linear-gradient(90deg,rgba(3,25,54,.88),rgba(3,25,54,.28)),url('${articleImage || "/assets/banner-1.optimized.webp"}')` }}>
         <div className="container">
-          <nav className="article-breadcrumb" aria-label="Breadcrumb"><a href="/">Trang chủ</a><span>›</span><a href="/tin-tuc">Tin tức</a><span>›</span><span>{article.category}</span></nav>
+          <nav className="article-breadcrumb" aria-label="Breadcrumb"><Link href="/">Trang chủ</Link><span>›</span><Link href="/tin-tuc">Tin tức</Link><span>›</span><span>{article.category}</span></nav>
           <p className="eyebrow">{article.category.toLocaleUpperCase("vi")}</p>
           <h1>{article.title}</h1>
           <div className="article-meta"><span>▣ {published.toLocaleDateString("vi-VN")}</span><span>◉ GEDECO</span><span>Chia sẻ:</span><a href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(canonical)}`} target="_blank" rel="noopener noreferrer" aria-label="Chia sẻ lên Facebook"><Icon name="facebook" /></a><a href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(canonical)}`} target="_blank" rel="noopener noreferrer" aria-label="Chia sẻ lên LinkedIn"><Icon name="linkedin" /></a></div>
@@ -201,7 +202,7 @@ export default async function CmsArticlePage({
             </div>
           </aside>
         </div>
-        <div className="container article-nav"><a href="/tin-tuc">← <span>Bài viết trước</span><b>Trở lại danh sách tin tức</b></a><a href="/tin-tuc"> <span>Bài viết tiếp theo</span><b>Xem thêm bài viết mới</b> →</a></div>
+        <div className="container article-nav"><Link href="/tin-tuc">← <span>Bài viết trước</span><b>Trở lại danh sách tin tức</b></Link><Link href="/tin-tuc"> <span>Bài viết tiếp theo</span><b>Xem thêm bài viết mới</b> →</Link></div>
       </article>
       <script
         type="application/ld+json"

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { Icon } from "@/components/vimigo-icon";
 import type { DashboardTab } from "./dashboard-tabs";
 
@@ -104,14 +105,14 @@ export function BimiSidebar({ tab, onSelectTab, onLogout }: BimiSidebarProps) {
             gedeco.vn
           </div>
         </div>
-        <a
+        <Link
           className="btn btn-secondary brand-card-site-link"
           href="/"
           aria-label="Xem website"
         >
           <Icon name="external" size={14} />
           <span>Xem web</span>
-        </a>
+        </Link>
       </div>
       <div id="dashboard-navigation" className="nav-frame" role="navigation" aria-label="Các module quản trị">
         <div className="nav-sep" />

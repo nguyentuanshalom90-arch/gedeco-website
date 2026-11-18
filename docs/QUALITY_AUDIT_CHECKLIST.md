@@ -125,3 +125,5 @@ Nguồn chuẩn:
 ## 5. Dependency security gate
 
 - [x] `npm audit --omit=dev` về 0 advisory sau khi nâng Prisma 7.10.1, dùng `@prisma/adapter-pg`/`pg` và giữ PostCSS `8.5.33` bằng `overrides`. `prisma validate`, `prisma generate`, build và toàn bộ regression local PASS; production vẫn cần deploy gate/backup/migration có kiểm soát.
+
+- [x] ESLint đã chuyển sang CLI non-interactive với `eslint.config.mjs`; `npm run lint` chạy PASS, 0 error. Còn 36 warning cần backlog riêng (chủ yếu `<img>` runtime/custom WebP và một số hook dependency), không bị che bằng disable rule toàn cục.
