@@ -24,7 +24,7 @@ try {
         slug: item.slug, title: item.title, categoryId: item.category === "Sản phẩm xuất khẩu" ? exported.id : domestic.id,
         description: item.description || "", contentHtml: item.contentHtml || "", summaryHtml: item.summaryHtml || "",
         priceText: item.priceText || "Liên hệ", stockText: item.stockText || "Còn hàng",
-        imageUrl: item.image, shipperImageUrl: item.shipperImage || "", sortOrder: index,
+        imageUrl: item.image, shipperImageUrl: item.shipperImage || "", shipperImageAlt: item.shipperImage ? item.shipperImageAlt || item.title : "", shipperImageCaption: item.shipperImageCaption || "", sortOrder: index,
       },
       update: {},
     });
@@ -40,7 +40,7 @@ try {
         await prisma.translationEntry.create({
           data: {
             entityType: "PRODUCT", entityId: row.id, locale: "en", slug: english.slug,
-            payload: { title: english.title, description: english.description || "", contentHtml: english.contentHtml || "", summaryHtml: english.summaryHtml || "", priceText: english.priceText || "Contact us", stockText: english.stockText || "In stock", imageAlt: english.title, imageCaption: "", ogImageAlt: english.title, metaTitle: english.title, metaDescription: english.description || "" },
+            payload: { title: english.title, description: english.description || "", contentHtml: english.contentHtml || "", summaryHtml: english.summaryHtml || "", priceText: english.priceText || "Contact us", stockText: english.stockText || "In stock", imageAlt: english.title, imageCaption: "", shipperImageAlt: english.shipperImageAlt || "Delivery service", shipperImageCaption: english.shipperImageCaption || "", ogImageAlt: english.title, metaTitle: english.title, metaDescription: english.description || "" },
             sourceUpdatedAt: row.updatedAt, sourceHash, status: "TRANSLATED", provider: "legacy-import", manualOverride: true, translatedAt: new Date(), reviewedAt: new Date(),
           },
         });
