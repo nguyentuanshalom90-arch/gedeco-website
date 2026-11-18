@@ -41,6 +41,7 @@ export function ProductManager() {
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
+  const [deleting, setDeleting] = useState<string | null>(null);
 
   async function refresh() {
     try {
@@ -87,8 +88,10 @@ export function ProductManager() {
   }
   async function remove(item: ProductListItem) {
     if (!window.confirm(`Xóa sản phẩm “${item.title}”?`)) return;
+    setDeleting(item.id);
     try { await deleteProduct(item.id); setItems((current) => current.filter((row) => row.id !== item.id)); edit(); setMessage("Đã xóa sản phẩm."); }
     catch (caught) { setError(caught instanceof Error ? caught.message : "Không thể xóa sản phẩm."); }
+    finally { setDeleting(null); }
   }
 
   const visible = items.filter((item) => `${item.title} ${item.slug}`.toLocaleLowerCase("vi").includes(query.toLocaleLowerCase("vi")));
@@ -96,7 +99,7 @@ export function ProductManager() {
     <div className="dashboard-view-head cms-title-row"><div><p className="eyebrow">DỮ LIỆU XUYÊN SUỐT</p><h1 className="disp">Sản phẩm</h1><p>Quản lý nội dung, media, alt/caption, SEO và bản dịch từ một màn hình.</p></div><button className="btn btn-primary" type="button" onClick={() => edit()}><Icon name="plus" size={16} />Thêm sản phẩm</button></div>
     {(message || error) ? <div className={`cms-notice ${error ? "error" : "success"}`}>{error || message}</div> : null}
     <div className="cms-category-grid">
-      <section className="panel cms-list-panel"><div className="cms-list-tools"><div className="cms-search"><Icon name="search" size={16} /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Tìm tên hoặc slug sản phẩm" /></div></div>{visible.map((item) => <article key={item.id} className={`cms-category-row${draft.id === item.id ? " active" : ""}`}><div><strong>{item.title}</strong><span>/san-pham/{item.categorySlug}/{item.slug}</span><small>{item.categoryName} · {item.isPublished ? "Đang hiển thị" : "Bản nháp"}</small></div><div className="cms-row-actions"><button className="btn" type="button" onClick={() => edit(item)}><Icon name="pencil" size={15} />Sửa</button><button className="btn cms-danger" type="button" onClick={() => void remove(item)}><Icon name="trash" size={15} />Xóa</button></div></article>)}</section>
+      <section className="panel cms-list-panel"><div className="cms-list-tools"><div className="cms-search"><Icon name="search" size={16} /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Tìm tên hoặc slug sản phẩm" /></div></div>{visible.map((item) => <article key={item.id} className={`cms-category-row${draft.id === item.id ? " active" : ""}`}><div><strong>{item.title}</strong><span>/san-pham/{item.categorySlug}/{item.slug}</span><small>{item.categoryName} · {item.isPublished ? "Đang hiển thị" : "Bản nháp"}</small></div><div className="cms-row-actions"><button className="btn" type="button" onClick={() => edit(item)} disabled={Boolean(deleting)}><Icon name="pencil" size={15} />Sửa</button><button className="btn cms-danger" type="button" onClick={() => void remove(item)} disabled={deleting === item.id || saving}><Icon name="trash" size={15} />{deleting === item.id ? "Đang xóa…" : "Xóa"}</button></div></article>)}</section>
       <section className="panel cms-card cms-category-form product-editor">
         <div className="cms-section-head"><div><p className="eyebrow">{draft.id ? "CHỈNH SỬA" : "TẠO MỚI"}</p><h2>{draft.title || "Sản phẩm mới"}</h2></div><span className={`chip ${draft.isPublished ? "success" : ""}`}>{draft.isPublished ? "Đang hiển thị" : "Bản nháp"}</span></div>
         <div className="site-content-form-grid">

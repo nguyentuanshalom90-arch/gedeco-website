@@ -51,6 +51,7 @@ export function CategoryManager() {
   const [query, setQuery] = useState("");
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+  const [deleting, setDeleting] = useState<string | null>(null);
   const editing = Boolean(draft.id);
   const visible = useMemo(
     () =>
@@ -123,6 +124,7 @@ export function CategoryManager() {
       !window.confirm(`Xóa danh mục “${item.name}”? Bài viết sẽ được giữ lại.`)
     )
       return;
+    setDeleting(item.id);
     try {
       await deleteCategory(item.id);
       setItems((current) => current.filter((value) => value.id !== item.id));
@@ -134,6 +136,8 @@ export function CategoryManager() {
       setError(
         reason instanceof Error ? reason.message : "Không thể xóa danh mục.",
       );
+    } finally {
+      setDeleting(null);
     }
   }
 
@@ -207,9 +211,10 @@ export function CategoryManager() {
                       type="button"
                       className="btn cms-danger"
                       onClick={() => void remove(item)}
+                      disabled={deleting === item.id || saving}
                     >
                       <Icon name="trash" size={15} />
-                      Xóa
+                      {deleting === item.id ? "Đang xóa…" : "Xóa"}
                     </button>
                   </div>
                 </article>
