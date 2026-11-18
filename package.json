@@ -18,8 +18,8 @@
     "test:seo": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/test-seo-regression.mjs"
   },
   "dependencies": {
-    "@prisma/client": "^6.7.0",
-    "next": "^15.3.0",
+    "@prisma/client": "^6.19.3",
+    "next": "^15.5.29",
     "nodemailer": "^10.6.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
@@ -32,7 +32,7 @@
     "@types/react": "^19.1.0",
     "@types/react-dom": "^19.1.0",
     "@types/sanitize-html": "^2.16.2",
-    "prisma": "^6.7.0",
+    "prisma": "^6.19.3",
     "typescript": "^5.8.0"
   }
 }
