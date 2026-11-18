@@ -23,10 +23,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     prisma.product.findMany({ where: { isPublished: true, robotsIndex: true, category: { isPublished: true } }, select: { id: true, slug: true, category: { select: { slug: true, slugEn: true } }, updatedAt: true } }),
     prisma.productCategory.findMany({ where: { isPublished: true, robotsIndex: true }, select: { slug: true, slugEn: true, updatedAt: true } }),
     prisma.sitePage.findMany({ where: { status: "PUBLISHED", robotsIndex: true }, select: { id: true, slug: true, canonicalUrl: true, updatedAt: true } }),
-    prisma.translationEntry.findMany({ where: { locale: "en", status: "TRANSLATED", slug: { not: null }, entityType: { in: ["PRODUCT", "NEWS_ARTICLE", "SITE_PAGE"] } }, select: { entityType: true, entityId: true, slug: true, status: true } }),
+    prisma.translationEntry.findMany({ where: { locale: "en", status: "TRANSLATED", slug: { not: null }, entityType: { in: ["PRODUCT", "NEWS_ARTICLE", "SITE_PAGE"] } }, select: { entityType: true, entityId: true, slug: true, status: true, payload: true } }),
   ]);
-  const translatedSlug = new Map(translations.map((item) => [`${item.entityType}:${item.entityId}`, item.slug]));
-  const translatedPages = new Set(translations.filter((item) => item.entityType === "SITE_PAGE" && item.status === "TRANSLATED").map((item) => item.entityId));
+  const hasTranslatedTitle = (payload: unknown) => {
+    if (!payload || typeof payload !== "object") return false;
+    const title = (payload as Record<string, unknown>).title;
+    return typeof title === "string" && title.trim().length > 0;
+  };
+  const validTranslations = translations.filter((item) => hasTranslatedTitle(item.payload));
+  const translatedSlug = new Map(validTranslations.map((item) => [`${item.entityType}:${item.entityId}`, item.slug]));
+  const translatedPages = new Set(validTranslations.filter((item) => item.entityType === "SITE_PAGE" && item.status === "TRANSLATED").map((item) => item.entityId));
   const staticPages = [
     ["/", "/en"], ["/gioi-thieu", "/en/about"],
     ["/san-pham", "/en/products"], ["/tin-tuc", "/en/news"], ["/lien-he", "/en/contact"],
@@ -66,8 +72,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...products.flatMap((item) => {
       const category = item.category.slug;
       const enCategory = item.category.slugEn;
-      const enSlug = translatedSlug.get(`PRODUCT:${item.id}`) || item.slug;
-      const vi = absoluteUrl(`/san-pham/${category}/${item.slug}`); const en = absoluteUrl(`/en/products/${enCategory}/${enSlug}`);
+      const enSlug = translatedSlug.get(`PRODUCT:${item.id}`);
+      const vi = absoluteUrl(`/san-pham/${category}/${item.slug}`);
+      if (!enSlug) return [{ url: vi, lastModified: item.updatedAt, changeFrequency: "monthly" as const, priority: 0.8 }];
+      const en = absoluteUrl(`/en/products/${enCategory}/${enSlug}`);
       return [
         { url: vi, lastModified: item.updatedAt, changeFrequency: "monthly" as const, priority: 0.8, alternates: { languages: { vi, en, "x-default": vi } } },
         { url: en, lastModified: item.updatedAt, changeFrequency: "monthly" as const, priority: 0.8, alternates: { languages: { vi, en, "x-default": vi } } },
