@@ -17,12 +17,12 @@ export async function generateMetadata(): Promise<Metadata> {
   return { title, description, alternates: { canonical, languages: { vi: absoluteUrl('/san-pham'), en: canonical, 'x-default': absoluteUrl('/san-pham') } }, robots: { index: content.page?.robotsIndex ?? true, follow: content.page?.robotsFollow ?? true }, openGraph: { type: 'website', locale: 'en_US', siteName: siteConfig.brand, url: canonical, title, description } };
 }
 
-export default async function EnglishProductsPage({ searchParams }: { searchParams: Promise<{ category?: string }> }) {
+export default async function EnglishProductsPage({ searchParams }: { searchParams: Promise<{ category?: string; focus?: string }> }) {
   const [products, content] = await Promise.all([listEnglishProducts(), getPublicSiteContent('san-pham', 'en')]);
   const translated = new Set(content.translatedKeys);
   const text = (key: string, fallback: string) => translated.has(key) ? content.values[key] || fallback : fallback;
   const sorted = [...products].sort((a, b) => (sourceOrder.indexOf(a.sourceSlug) === -1 ? 99 : sourceOrder.indexOf(a.sourceSlug)) - (sourceOrder.indexOf(b.sourceSlug) === -1 ? 99 : sourceOrder.indexOf(b.sourceSlug)));
-  const category = (await searchParams).category;
+  const params = await searchParams;
   const hero = content.media['hero.image'];
-  return <ShopShell language="en" current="Products" heroTitle={text('hero.title', 'Domestic and export products')} heroEyebrow={text('hero.eyebrow', 'GEDECO PRODUCTS')} heroSubtitle={text('hero.subtitle', 'Explore GEDECO products, from Vietnamese sources to products connecting with international markets.')} heroImage={hero?.url}><div className="shop-width shop-page-layout"><div className="shop-main"><ShopBreadcrumb language="en" current="Products" /><ProductCatalog items={sorted} initialCategory={category || 'all'} language="en" /></div><ShopSidebar language="en" /></div></ShopShell>;
+  return <ShopShell language="en" current="Products" heroTitle={text('hero.title', 'Domestic and export products')} heroEyebrow={text('hero.eyebrow', 'GEDECO PRODUCTS')} heroSubtitle={text('hero.subtitle', 'Explore GEDECO products, from Vietnamese sources to products connecting with international markets.')} heroImage={hero?.url}><div className="shop-width shop-page-layout"><div className="shop-main"><ShopBreadcrumb language="en" current="Products" /><ProductCatalog items={sorted} initialCategory={params.category || 'all'} focusSearch={params.focus === 'search'} language="en" /></div><ShopSidebar language="en" /></div></ShopShell>;
 }

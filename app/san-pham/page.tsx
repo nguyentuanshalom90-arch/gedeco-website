@@ -16,12 +16,13 @@ export async function generateMetadata(): Promise<Metadata> {
   return { title, description, alternates: { canonical, languages: { vi: canonical, en: absoluteUrl('/en/products'), 'x-default': canonical } }, robots: { index: content.page?.robotsIndex ?? true, follow: content.page?.robotsFollow ?? true }, openGraph: { type: 'website', locale: siteConfig.locale, siteName: siteConfig.brand, url: canonical, title, description } };
 }
 
-export default async function ProductsPage({ searchParams }: { searchParams: Promise<{ category?: string }> }) {
+export default async function ProductsPage({ searchParams }: { searchParams: Promise<{ category?: string; focus?: string }> }) {
   const [products, content] = await Promise.all([listProducts(), getPublicSiteContent('san-pham', 'vi')]);
   const values = content.values;
-  const category = (await searchParams).category;
+  const params = await searchParams;
+  const category = params.category;
   const initialCategory = category || 'all';
   const sorted = [...products].sort((a, b) => (sourceOrder.indexOf(a.slug) === -1 ? 99 : sourceOrder.indexOf(a.slug)) - (sourceOrder.indexOf(b.slug) === -1 ? 99 : sourceOrder.indexOf(b.slug)));
   const hero = content.media['hero.image'];
-  return <ShopShell current="Sản phẩm" heroTitle={values['hero.title'] || 'Sản phẩm trong nước và xuất khẩu'} heroEyebrow={values['hero.eyebrow'] || 'GEDECO PRODUCTS'} heroSubtitle={values['hero.subtitle']} heroImage={hero?.url}><div className="shop-width shop-page-layout"><div className="shop-main"><ShopBreadcrumb current="Sản phẩm" /><ProductCatalog items={sorted} initialCategory={initialCategory} /></div><ShopSidebar /></div></ShopShell>;
+  return <ShopShell current="Sản phẩm" heroTitle={values['hero.title'] || 'Sản phẩm trong nước và xuất khẩu'} heroEyebrow={values['hero.eyebrow'] || 'GEDECO PRODUCTS'} heroSubtitle={values['hero.subtitle']} heroImage={hero?.url}><div className="shop-width shop-page-layout"><div className="shop-main"><ShopBreadcrumb current="Sản phẩm" /><ProductCatalog items={sorted} initialCategory={initialCategory} focusSearch={params.focus === 'search'} /></div><ShopSidebar /></div></ShopShell>;
 }

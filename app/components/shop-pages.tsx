@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import { createContext, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { ContactActions } from "./contact-actions";
 import { EnglishHeader } from "./english-pages";
@@ -566,10 +566,12 @@ export function ShopProductDescriptionLabel({ language = "vi" }: { language?: Sh
 export function ProductCatalog({
   items,
   initialCategory,
+  focusSearch = false,
   language = "vi",
 }: {
   items: ShopProduct[];
   initialCategory?: string;
+  focusSearch?: boolean;
   language?: ShopLanguage;
 }) {
   const english = language === "en";
@@ -591,6 +593,13 @@ export function ProductCatalog({
     null,
   );
   const [loading, setLoading] = useState(false);
+  const searchRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (!focusSearch) return;
+    const timer = window.setTimeout(() => searchRef.current?.focus(), 0);
+    return () => window.clearTimeout(timer);
+  }, [focusSearch]);
 
   useEffect(() => {
     setRemoteItems(null);
@@ -756,6 +765,8 @@ export function ProductCatalog({
           <div className={styles.inlineSearchWrap}>
             <Icon name="search" />
             <input
+              ref={searchRef}
+              className="shop-product-search"
               value={query}
               onChange={(event) => {
                 setQuery(event.target.value);

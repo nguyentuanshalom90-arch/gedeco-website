@@ -400,6 +400,7 @@ export function InnerHeader({
           <button
             className="search-btn"
             aria-label={english ? "Search" : "Tìm kiếm"}
+            onClick={() => { window.location.href = english ? "/en/products?focus=search" : "/san-pham?focus=search"; }}
           >
             <Icon name="search" />
           </button>

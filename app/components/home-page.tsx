@@ -139,7 +139,7 @@ export default function HomePage({ language = 'vi', initialContent, initialNews 
         <div className="nav-dropdown"><a href={language === 'en' ? '/en/products' : '/san-pham'} onClick={closeMenu}>{chromeGet('navigation.products', copy.products)} <span className="nav-chevron" aria-hidden="true"><Icon name="chevron" /></span></a><div className="nav-submenu">{categoryLinks.map((category) => <a key={category.id} href={`${language === 'en' ? '/en/products' : '/san-pham'}?category=${category.slug}`} onClick={closeMenu}>{category.label}</a>)}</div></div>
         <a href={language === 'en' ? '/en/contact' : '/lien-he'} onClick={closeMenu}>{chromeGet('navigation.contact', copy.contact)}</a>
       </nav>
-      <div className="nav-tools"><button className="search-btn" aria-label={copy.search}><Icon name="search" /></button><LanguageSwitcher english={language === 'en'} /><a className="button button-gold button-small" href={chromeUrl('cta.label', language === 'en' ? '/en/contact' : '#contact')}>{chromeGet('cta.label', copy.cta)} <Icon name="arrow" /></a></div>
+      <div className="nav-tools"><button className="search-btn" aria-label={copy.search} onClick={() => { window.location.href = language === 'en' ? '/en/products?focus=search' : '/san-pham?focus=search'; }}><Icon name="search" /></button><LanguageSwitcher english={language === 'en'} /><a className="button button-gold button-small" href={chromeUrl('cta.label', language === 'en' ? '/en/contact' : '#contact')}>{chromeGet('cta.label', copy.cta)} <Icon name="arrow" /></a></div>
     </div></header>
 
     <main id="main-content">
