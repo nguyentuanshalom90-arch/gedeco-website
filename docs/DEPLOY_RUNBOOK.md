@@ -6,7 +6,7 @@ Tài liệu này áp dụng cho production duy nhất: `https://gedeco.vn/`. Kh�
 
 - [ ] Branch đã commit và push; commit release khớp remote.
 - [ ] Chạy `npm ci`, `npm run prisma:validate`, `npm run prisma:generate`, `npm run build`; Prisma 7 đọc connection URL từ `prisma.config.ts` và dùng PostgreSQL driver adapter trong runtime.
-- [ ] Chạy toàn bộ regression: `test:media`, `test:news`, `test:products`, `test:chrome`, `test:seo`, `test:dashboard`, `test:dashboard-actions`.
+- [ ] Chạy toàn bộ regression bằng `npm run test:all` (media, news, products, SiteChrome, SEO, dashboard, action security và static WebP).
 - [ ] Chạy `npm run verify:production` bằng secrets production được inject từ secret manager/persistent env.
 - [ ] Đối chiếu domain, brand, logo, database, `SITE_URL` và `MEDIA_ROOT`; gate phải PASS trước khi tạo release.
 - [ ] Kiểm tra dung lượng disk, quota và inode cho source, build, backup và rollback.
