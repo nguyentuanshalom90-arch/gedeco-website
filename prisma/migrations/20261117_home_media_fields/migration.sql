@@ -12,8 +12,7 @@ SET
     WHEN "sectionKey" = 'projects.3' THEN 'Kết nối xuất khẩu'
     ELSE NULL
   END)
-WHERE "kind" = 'DYNAMIC'
-  AND "pageKey" = 'home'
+WHERE "pageKey" = 'home'
   AND (
     ("sectionKey" = 'hero' AND "fieldKey" IN ('banner1', 'banner2'))
     OR ("sectionKey" IN ('projects.1', 'projects.2', 'projects.3') AND "fieldKey" = 'image')
