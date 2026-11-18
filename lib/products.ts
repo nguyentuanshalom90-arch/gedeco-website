@@ -6,6 +6,7 @@ export function toProductDetail(row: {
   slug: string; title: string; category: { name: string; slug: string; nameEn: string; slugEn: string };
   description: string; contentHtml: string; summaryHtml: string;
   priceText: string; stockText: string; imageUrl: string; shipperImageUrl: string;
+  shipperImageAlt: string; shipperImageCaption: string;
   imageAlt: string; imageCaption: string; ogImageUrl: string; ogImageAlt: string;
   metaTitle: string | null; metaDescription: string | null; canonicalUrl: string | null;
   robotsIndex: boolean; robotsFollow: boolean;
@@ -29,6 +30,8 @@ export function toProductDetail(row: {
     priceText: row.priceText,
     stockText: row.stockText,
     shipperImage: row.shipperImageUrl,
+    shipperImageAlt: row.shipperImageAlt || row.title,
+    shipperImageCaption: row.shipperImageCaption,
     ogImage: row.ogImageUrl || row.imageUrl,
     ogImageAlt: row.ogImageAlt || row.imageAlt || row.title,
     metaTitle: row.metaTitle || row.title,
@@ -109,6 +112,8 @@ function toEnglishView(row: any, entry?: any): EnglishProductView {
     priceText: payloadString(payload, "priceText", row.priceText),
     stockText: payloadString(payload, "stockText", row.stockText),
     shipperImage: row.shipperImageUrl,
+    shipperImageAlt: payloadString(payload, "shipperImageAlt", row.shipperImageAlt || payloadString(payload, "title", row.title)),
+    shipperImageCaption: payloadString(payload, "shipperImageCaption", row.shipperImageCaption || ""),
     ogImage: row.ogImageUrl || row.imageUrl,
     ogImageAlt: payloadString(payload, "ogImageAlt", row.ogImageAlt || row.imageAlt || row.title),
     metaTitle: payloadString(payload, "metaTitle", row.metaTitle || row.title),

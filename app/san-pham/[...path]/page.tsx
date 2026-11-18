@@ -338,7 +338,8 @@ export default async function ProductOrCategoryPage({
               <img
                 className="shop-shipper"
                 src={product.shipperImage}
-                alt="Dịch vụ giao hàng"
+                alt={product.shipperImageAlt || product.title}
+                title={product.shipperImageCaption || undefined}
               />
               <ShopPurchaseLink type="buy" />
               <ShopGuarantee />

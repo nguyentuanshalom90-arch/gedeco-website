@@ -136,6 +136,8 @@ model Product {
   imageAlt        String        @default("")
   imageCaption    String        @default("")
   shipperImageUrl String        @default("")
+  shipperImageAlt String        @default("")
+  shipperImageCaption String    @default("")
   ogImageUrl      String        @default("")
   ogImageAlt      String        @default("")
   metaTitle       String?

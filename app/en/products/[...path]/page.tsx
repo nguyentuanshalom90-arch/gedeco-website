@@ -320,7 +320,8 @@ export default async function EnglishProductOrCategoryPage({
               <img
                 className="shop-shipper"
                 src={product.shipperImage}
-                alt="Delivery service"
+                alt={product.shipperImageAlt || product.title}
+                title={product.shipperImageCaption || undefined}
               />
               <ShopPurchaseLink type="buy" language="en" />
               <ShopGuarantee language="en" />

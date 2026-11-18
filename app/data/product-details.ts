@@ -3,6 +3,7 @@ export type GedecoProductDetail = {
   slug: string; title: string; category: string; categorySlug?: string; categorySlugEn?: string; image: string;
   imageAlt?: string; imageCaption?: string; description: string; contentHtml: string; gallery: string[];
   galleryMedia?: ProductGalleryImage[]; summaryHtml: string; priceText: string; stockText: string; shipperImage: string;
+  shipperImageAlt?: string; shipperImageCaption?: string;
   ogImage?: string; ogImageAlt?: string; metaTitle?: string; metaDescription?: string; canonicalUrl?: string;
   robotsIndex?: boolean; robotsFollow?: boolean;
 };

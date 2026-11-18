@@ -5,12 +5,14 @@ export type ProductInput = {
   id?: string | null; slug: string; title: string; categoryId: string;
   description: string; contentHtml: string; summaryHtml: string; priceText: string;
   stockText: string; imageUrl: string; imageAlt: string; imageCaption: string;
-  shipperImageUrl: string; ogImageUrl: string; ogImageAlt: string; gallery: ProductMediaInput[];
+  shipperImageUrl: string; shipperImageAlt: string; shipperImageCaption: string;
+  ogImageUrl: string; ogImageAlt: string; gallery: ProductMediaInput[];
   metaTitle: string; metaDescription: string; canonicalUrl: string;
   robotsIndex: boolean; robotsFollow: boolean; isPublished: boolean; sortOrder: number;
   translationMode: "AUTO" | "MANUAL"; translationStatus?: string; translationError?: string;
   slugEn: string; titleEn: string; descriptionEn: string; contentHtmlEn: string; summaryHtmlEn: string;
   priceTextEn: string; stockTextEn: string; imageAltEn: string; imageCaptionEn: string;
+  shipperImageAltEn: string; shipperImageCaptionEn: string;
   ogImageAltEn: string; metaTitleEn: string; metaDescriptionEn: string; canonicalUrlEn: string;
 };
 export type ProductListItem = ProductInput & {

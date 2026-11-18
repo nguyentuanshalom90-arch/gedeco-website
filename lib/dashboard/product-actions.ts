@@ -44,6 +44,8 @@ function toItem(row: any, translation?: any): ProductListItem {
     imageAlt: row.imageAlt,
     imageCaption: row.imageCaption,
     shipperImageUrl: row.shipperImageUrl,
+    shipperImageAlt: row.shipperImageAlt,
+    shipperImageCaption: row.shipperImageCaption,
     ogImageUrl: row.ogImageUrl,
     ogImageAlt: row.ogImageAlt,
     gallery: row.gallery.map((item: any) => ({ id: item.id, url: item.url, altText: item.altText, caption: item.caption, altTextEn: translationString(payload, `galleryAlt_${item.id}`), captionEn: translationString(payload, `galleryCaption_${item.id}`), sortOrder: item.sortOrder, isPrimary: item.isPrimary })),
@@ -66,6 +68,8 @@ function toItem(row: any, translation?: any): ProductListItem {
     stockTextEn: translationString(payload, "stockText"),
     imageAltEn: translationString(payload, "imageAlt"),
     imageCaptionEn: translationString(payload, "imageCaption"),
+    shipperImageAltEn: translationString(payload, "shipperImageAlt"),
+    shipperImageCaptionEn: translationString(payload, "shipperImageCaption"),
     ogImageAltEn: translationString(payload, "ogImageAlt"),
     metaTitleEn: translationString(payload, "metaTitle"),
     metaDescriptionEn: translationString(payload, "metaDescription"),
@@ -89,12 +93,14 @@ export async function saveProduct(input: ProductInput) {
   const slug = slugify(input.slug || title);
   if (!slug) throw new Error("Slug sản phẩm không hợp lệ.");
   if (input.imageUrl.trim() && !input.imageAlt.trim()) throw new Error("Ảnh chính phải có alt text.");
+  if (input.shipperImageUrl.trim() && !input.shipperImageAlt.trim()) throw new Error("Ảnh giao hàng phải có alt text.");
   if (input.metaTitle.trim().length > 65) throw new Error("SEO title không vượt quá 65 ký tự.");
   if (input.metaDescription.trim().length > 160) throw new Error("Meta description không vượt quá 160 ký tự.");
   if (input.translationMode === "MANUAL") {
     if (!input.titleEn.trim()) throw new Error("Tên sản phẩm English không được để trống khi tự nhập bản dịch.");
     if (!slugify(input.slugEn || input.titleEn)) throw new Error("Slug English không hợp lệ.");
     if (input.imageUrl.trim() && !input.imageAltEn.trim()) throw new Error("Ảnh chính phải có alt text English.");
+    if (input.shipperImageUrl.trim() && !input.shipperImageAltEn.trim()) throw new Error("Ảnh giao hàng phải có alt text English.");
     if (input.metaTitleEn.trim().length > 65) throw new Error("SEO title English không vượt quá 65 ký tự.");
     if (input.metaDescriptionEn.trim().length > 160) throw new Error("Meta description English không vượt quá 160 ký tự.");
   }
@@ -122,6 +128,8 @@ export async function saveProduct(input: ProductInput) {
     imageAlt: input.imageAlt.trim(),
     imageCaption: input.imageCaption.trim(),
     shipperImageUrl: input.shipperImageUrl.trim(),
+    shipperImageAlt: input.shipperImageAlt.trim(),
+    shipperImageCaption: input.shipperImageCaption.trim(),
     ogImageUrl: input.ogImageUrl.trim(),
     ogImageAlt: input.ogImageAlt.trim(),
     metaTitle: optional(input.metaTitle),
@@ -153,12 +161,14 @@ export async function saveProduct(input: ProductInput) {
         title: input.titleEn.trim(), description: input.descriptionEn.trim(),
         summaryHtml: sanitizeProductHtml(input.summaryHtmlEn), contentHtml: sanitizeProductHtml(input.contentHtmlEn),
         priceText: input.priceTextEn.trim() || "Contact us", stockText: input.stockTextEn.trim() || "In stock",
-        imageAlt: input.imageAltEn.trim(), imageCaption: input.imageCaptionEn.trim(), ogImageAlt: input.ogImageAltEn.trim(),
+        imageAlt: input.imageAltEn.trim(), imageCaption: input.imageCaptionEn.trim(),
+        shipperImageAlt: input.shipperImageAltEn.trim(), shipperImageCaption: input.shipperImageCaptionEn.trim(),
+        ogImageAlt: input.ogImageAltEn.trim(),
         metaTitle: input.metaTitleEn.trim(), metaDescription: input.metaDescriptionEn.trim(),
         canonicalUrl: validateOfficialCanonical(input.canonicalUrlEn, { fieldLabel: "Canonical English", pathPrefix: "/en/products/" }) || "",
         ...Object.fromEntries(saved.gallery.flatMap((item: any, index: number) => [[`galleryAlt_${item.id}`, input.gallery[index]?.altTextEn?.trim() || input.titleEn.trim()], [`galleryCaption_${item.id}`, input.gallery[index]?.captionEn?.trim() || ""]])),
       };
-      const sourceHash = crypto.createHash("sha256").update(JSON.stringify({ title: saved.title, description: saved.description, summaryHtml: saved.summaryHtml, contentHtml: saved.contentHtml, priceText: saved.priceText, stockText: saved.stockText, imageAlt: saved.imageAlt, imageCaption: saved.imageCaption, ogImageAlt: saved.ogImageAlt, metaTitle: saved.metaTitle, metaDescription: saved.metaDescription, gallery: saved.gallery.map((item: any) => ({ id: item.id, altText: item.altText, caption: item.caption })), categoryName: saved.category.name, categoryNameEn: saved.category.nameEn })).digest("hex");
+      const sourceHash = crypto.createHash("sha256").update(JSON.stringify({ title: saved.title, description: saved.description, summaryHtml: saved.summaryHtml, contentHtml: saved.contentHtml, priceText: saved.priceText, stockText: saved.stockText, imageAlt: saved.imageAlt, imageCaption: saved.imageCaption, shipperImageAlt: saved.shipperImageAlt, shipperImageCaption: saved.shipperImageCaption, ogImageAlt: saved.ogImageAlt, metaTitle: saved.metaTitle, metaDescription: saved.metaDescription, gallery: saved.gallery.map((item: any) => ({ id: item.id, altText: item.altText, caption: item.caption })), categoryName: saved.category.name, categoryNameEn: saved.category.nameEn })).digest("hex");
       manualTranslation = await tx.translationEntry.upsert({
         where: { entityType_entityId_locale: { entityType: "PRODUCT", entityId: saved.id, locale: "en" } },
         create: { entityType: "PRODUCT", entityId: saved.id, locale: "en", slug: slugEn, payload, sourceUpdatedAt: saved.updatedAt, sourceHash, status: "TRANSLATED", provider: "manual", manualOverride: true, translatedAt: new Date(), reviewedAt: new Date() },
