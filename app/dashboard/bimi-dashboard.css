@@ -1366,7 +1366,7 @@
 .lw .lw-side::-webkit-scrollbar { width: 7px; }
 .lw .lw-side::-webkit-scrollbar-thumb { border: 0; }
 
-@media (min-width: 821px) {
+@media (min-width: 901px) {
   .lw.dashboard-shell {
     overflow: visible !important;
     align-items: flex-start;
@@ -1390,7 +1390,7 @@ body.dashboard-page-active {
 
 .lw .mobile-sidebar-toggle { display: none; }
 
-@media (max-width: 820px) {
+@media (max-width: 900px) {
   .lw .variant-composer__head {
     align-items: stretch;
     flex-direction: column;

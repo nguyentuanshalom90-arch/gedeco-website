@@ -53,6 +53,7 @@ export function BimiSidebar({ tab, onSelectTab, onLogout }: BimiSidebarProps) {
             alt="Vimigo.vn"
             width={616}
             height={154}
+            unoptimized
           />
         </a>
       </div>
@@ -93,6 +94,7 @@ export function BimiSidebar({ tab, onSelectTab, onLogout }: BimiSidebarProps) {
             alt="GEDECO"
             width={1317}
             height={1194}
+            unoptimized
             style={{ width: "92%", height: "92%", objectFit: "contain" }}
           />
         </div>
@@ -237,6 +239,7 @@ export function BimiSidebar({ tab, onSelectTab, onLogout }: BimiSidebarProps) {
           alt="Zalo"
           width={300}
           height={300}
+          unoptimized
           style={{ flex: "0 0 auto", display: "block", objectFit: "contain" }}
         />
       </a>
@@ -279,6 +282,7 @@ export function BimiSidebar({ tab, onSelectTab, onLogout }: BimiSidebarProps) {
           alt="Messenger"
           width={440}
           height={440}
+          unoptimized
           style={{ flex: "0 0 auto", display: "block", objectFit: "contain" }}
         />
       </a>

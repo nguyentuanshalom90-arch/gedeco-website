@@ -38,12 +38,12 @@ export function LoginForm() {
       <div className={styles.authStack}>
         <div className={styles.brandLogoOutside}>
           <a className={styles.brandLogoLink} href="https://vimigo.vn/" target="_blank" rel="noopener noreferrer" aria-label="Mở website Vimigo.vn trong tab mới">
-            <Image className={styles.brandLogo} src="/vimigo-admin-logo.webp" alt="Vimigo.vn" width={346} height={248} />
+            <Image className={styles.brandLogo} src="/vimigo-admin-logo.webp" alt="Vimigo.vn" width={346} height={248} unoptimized />
           </a>
         </div>
         <form className={styles.authCard} onSubmit={submit} aria-busy={busy}>
           <div className={styles.authBrandRow}>
-            <Image className={styles.authCardLogo} src="/assets/logo-new.optimized.webp" alt="GEDECO" width={1317} height={1194} />
+            <Image className={styles.authCardLogo} src="/assets/logo-new.optimized.webp" alt="GEDECO" width={1317} height={1194} unoptimized />
             <h1><span className={styles.welcomeText}>Chào mừng</span><span className={styles.dashboardText}>Quản trị GEDECO</span></h1>
           </div>
           <label className={styles.fieldLabel}>Tên đăng nhập
