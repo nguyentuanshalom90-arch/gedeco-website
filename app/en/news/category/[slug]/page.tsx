@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { listEnglishArticles } from "@/lib/public-news";
 import { absoluteUrl, siteConfig } from "@/lib/site-config";
 import { getPublicSiteContent } from "@/lib/site-content-public";
+import { optimizedStaticMediaUrl } from "@/lib/static-media";
 
 export const dynamic = "force-dynamic";
 
@@ -44,7 +45,7 @@ export default async function EnglishNewsCategoryPage({ params }: { params: Prom
   return <InnerPage active="News" language="en" alternateVietnamesePath={`/tin-tuc/danh-muc/${category.slug}`}>
     <InnerHero eyebrow={text("category.hero.eyebrow", "NEWS CATEGORY")} title={category.nameEn} subtitle={category.descriptionEn || text("category.hero.subtitle", `Latest ${category.nameEn} updates and insights from GEDECO.`)} />
     <section className="inner-news-list"><div className="container"><div className="inner-title"><p className="eyebrow gold-text">LATEST UPDATES</p><h2>{category.nameEn}</h2></div>
-      {articles.length ? <div className="inner-news-grid">{articles.map((article) => <NewsCard key={article.source.id} item={[article.source.imageUrl || "/assets/news-1-derivative.png", article.category, (article.source.publishedAt || article.source.scheduledAt || article.source.createdAt).toLocaleDateString("en-GB"), article.title]} imageAlt={article.imageAlt} imageCaption={article.imageCaption} excerpt={article.excerpt} href={`/en/news/${article.slug}`} readLabel={text("list.readLabel", "Read more")} />)}</div> : <p>{text("list.empty", "No English articles have been published in this category yet.")}</p>}
+      {articles.length ? <div className="inner-news-grid">{articles.map((article) => <NewsCard key={article.source.id} item={[optimizedStaticMediaUrl(article.source.imageUrl) || "/assets/news-1.optimized.webp", article.category, (article.source.publishedAt || article.source.scheduledAt || article.source.createdAt).toLocaleDateString("en-GB"), article.title]} imageAlt={article.imageAlt} imageCaption={article.imageCaption} excerpt={article.excerpt} href={`/en/news/${article.slug}`} readLabel={text("list.readLabel", "Read more")} />)}</div> : <p>{text("list.empty", "No English articles have been published in this category yet.")}</p>}
     </div></section>
     <CTA language="en" eyebrow={text("cta.eyebrow", "CONTACT GEDECO")} title={text("cta.title", "Stay connected with GEDECO")} text={text("cta.body", "Contact us to discuss products, cooperation and market opportunities.")} image={cta?.url} imageAlt={cta?.altText} imageCaption={cta?.caption} primaryLabel={text("cta.primaryLabel", "Contact us")} secondaryLabel={text("cta.secondaryLabel", "Send an enquiry")} />
     <a className="sr-only" href={vi}>Vietnamese version</a>

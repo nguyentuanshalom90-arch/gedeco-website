@@ -9,6 +9,7 @@ import {
 import { prisma } from "@/lib/prisma";
 import { absoluteUrl, siteConfig } from "@/lib/site-config";
 import { getPublicSiteContent } from "@/lib/site-content-public";
+import { optimizedStaticMediaUrl } from "@/lib/static-media";
 
 export const dynamic = "force-dynamic";
 
@@ -137,7 +138,7 @@ export default async function NewsCategoryPage({
                   key={article.id}
                   href={`/tin-tuc/${article.slug}`}
                   item={[
-                    article.imageUrl || "/assets/news-1-derivative.png",
+                    optimizedStaticMediaUrl(article.imageUrl) || "/assets/news-1.optimized.webp",
                     article.category.toLocaleUpperCase("vi"),
                     (
                       article.publishedAt ||

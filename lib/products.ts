@@ -60,9 +60,10 @@ export async function listAllProducts() {
 }
 
 export async function getProductCategoryBySlug(slug: string, language: "vi" | "en" = "vi") {
-  return prisma.productCategory.findFirst({
+  const category = await prisma.productCategory.findFirst({
     where: { isPublished: true, ...(language === "en" ? { slugEn: slug } : { slug }) },
   });
+  return category ? { ...category, imageUrl: optimizedStaticMediaUrl(category.imageUrl) } : null;
 }
 
 export async function getProductBySlug(slug: string) {

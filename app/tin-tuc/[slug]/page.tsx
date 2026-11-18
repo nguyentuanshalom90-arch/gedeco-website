@@ -8,6 +8,7 @@ import { prisma } from "@/lib/prisma";
 import { absoluteUrl, siteConfig } from "@/lib/site-config";
 import { ArticleContent } from "@/app/components/article-content";
 import { redirectDestination } from "@/lib/url-redirects";
+import { optimizedStaticMediaUrl } from "@/lib/static-media";
 
 export const dynamic = "force-dynamic";
 
@@ -34,7 +35,7 @@ export async function generateMetadata({
   const description =
     article.metaDescription || article.excerpt || siteConfig.defaultDescription;
   const canonical = absoluteUrl(article.canonicalUrl || `/tin-tuc/${article.slug}`);
-  const image = article.ogImageUrl || article.imageUrl;
+  const image = optimizedStaticMediaUrl(article.ogImageUrl || article.imageUrl);
   const english = await prisma.translationEntry.findFirst({ where: { entityType: "NEWS_ARTICLE", entityId: article.id, locale: "en", status: "TRANSLATED" } });
   const translatedPayload = english?.payload && typeof english.payload === "object" && !Array.isArray(english.payload) ? english.payload as Record<string, unknown> : {};
   const languages = english?.slug && typeof translatedPayload.title === "string" && translatedPayload.title.trim()
@@ -97,14 +98,16 @@ export default async function CmsArticlePage({
   const englishTranslation = await prisma.translationEntry.findFirst({ where: { entityType: "NEWS_ARTICLE", entityId: article.id, locale: "en", status: "TRANSLATED", slug: { not: null } } });
   const alternateEnglishPath = englishTranslation?.slug ? `/en/news/${englishTranslation.slug}` : null;
   const canonical = absoluteUrl(article.canonicalUrl || `/tin-tuc/${article.slug}`);
+  const articleImage = optimizedStaticMediaUrl(article.imageUrl);
+  const articleOgImage = optimizedStaticMediaUrl(article.ogImageUrl || article.imageUrl);
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Article",
     headline: article.title,
     description: article.metaDescription || article.excerpt || undefined,
     image:
-      article.ogImageUrl || article.imageUrl
-        ? [absoluteUrl(article.ogImageUrl || article.imageUrl!)]
+      articleOgImage
+        ? [absoluteUrl(articleOgImage)]
         : undefined,
     datePublished: published.toISOString(),
     dateModified: article.updatedAt.toISOString(),
@@ -146,7 +149,7 @@ export default async function CmsArticlePage({
   };
   return (
     <InnerPage active="Tin tức" pageClass="article-design" alternateEnglishPath={alternateEnglishPath}>
-      <section className="article-hero" style={{ backgroundImage: `linear-gradient(90deg,rgba(3,25,54,.88),rgba(3,25,54,.28)),url('${article.imageUrl || "/assets/banner-1.jpg"}')` }}>
+      <section className="article-hero" style={{ backgroundImage: `linear-gradient(90deg,rgba(3,25,54,.88),rgba(3,25,54,.28)),url('${articleImage || "/assets/banner-1.optimized.webp"}')` }}>
         <div className="container">
           <nav className="article-breadcrumb" aria-label="Breadcrumb"><a href="/">Trang chủ</a><span>›</span><a href="/tin-tuc">Tin tức</a><span>›</span><span>{article.category}</span></nav>
           <p className="eyebrow">{article.category.toLocaleUpperCase("vi")}</p>
@@ -158,9 +161,9 @@ export default async function CmsArticlePage({
         <div className="container article-grid">
           <div className="article-main">
             <p className="article-lead">{article.excerpt || "Cập nhật những câu chuyện và cơ hội mới nhất từ GEDECO."}</p>
-            {article.imageUrl && (
+            {articleImage && (
               <figure>
-                <img className="article-cover" src={article.imageUrl} alt={article.imageAlt || article.title} />
+                <img className="article-cover" src={articleImage} alt={article.imageAlt || article.title} />
                 {article.imageCaption && <figcaption>{article.imageCaption}</figcaption>}
               </figure>
             )}
@@ -190,7 +193,7 @@ export default async function CmsArticlePage({
             <div className="side-box">
               <h3>Bài viết liên quan</h3>
               {related.map((item) => (
-                <a className="article-related-item" key={item.id} href={`/tin-tuc/${item.slug}`}><img src={item.imageUrl || "/assets/news-1-derivative.png"} alt={item.imageAlt || item.title} /><span><b>{item.title}</b><small>{(item.publishedAt || item.scheduledAt || item.createdAt).toLocaleDateString("vi-VN")}</small></span></a>
+                <a className="article-related-item" key={item.id} href={`/tin-tuc/${item.slug}`}><img src={optimizedStaticMediaUrl(item.imageUrl) || "/assets/news-1.optimized.webp"} alt={item.imageAlt || item.title} /><span><b>{item.title}</b><small>{(item.publishedAt || item.scheduledAt || item.createdAt).toLocaleDateString("vi-VN")}</small></span></a>
               ))}
             </div>
             <div className="article-newsletter">
