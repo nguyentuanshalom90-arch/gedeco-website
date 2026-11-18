@@ -79,7 +79,7 @@ Cập nhật: 17/11/2026. Checklist này dùng làm tiêu chuẩn nghiệm thu c
 - [x] Slug danh mục tin tức legacy đã được chuẩn hóa bằng migration giữ nguyên ID/quan hệ; 6 URL lỗi cũ redirect 308 sang URL chuẩn và sitemap dùng slug mới. `PASS local regression`.
 - [x] Đổi slug bài viết, sản phẩm hoặc danh mục sản phẩm tạo redirect 308; đổi slug danh mục cập nhật cả URL chi tiết sản phẩm trong danh mục. `PASS source/local regression`.
 - [x] HTML sản phẩm VI/EN được làm sạch theo allowlist khi ghi và khi render; chặn script, event handler, URL JavaScript và ảnh ngoài media/domain chính thức. `PASS npm run test:products`.
-- [x] Regression local quét sitemap 83 URL, kiểm tra HTTP 200, `html lang`, canonical official, robots/sitemap hostname và route cũ `/doi-tac`, `/du-an`, `/tin-tuc/chi-tiet`. `PASS npm run test:seo`; production vẫn cần crawl định kỳ.
+- [x] Regression local quét sitemap 83 URL, kiểm tra HTTP 200, `html lang`, canonical official, robots/sitemap hostname và route cũ `/doi-tac`, `/du-an`, `/en/gioi-thieu`, `/tin-tuc/chi-tiet`. `PASS npm run test:seo`; production vẫn cần crawl định kỳ.
 
 ## 8. Search Console và vận hành production
 
