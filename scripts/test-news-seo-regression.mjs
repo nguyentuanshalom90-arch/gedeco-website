@@ -1,9 +1,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import assert from "node:assert/strict";
-import prismaPackage from "@prisma/client";
-
-const { PrismaClient } = prismaPackage;
+import { prisma } from "./prisma-client.mjs";
 import { validateOfficialCanonical } from "../lib/dashboard/canonical-url.ts";
 
 const projectRoot = process.cwd();
@@ -43,7 +41,6 @@ for (const invalid of [
   assert.throws(() => validateOfficialCanonical(invalid, { pathPrefix: "/tin-tuc/" }), undefined, `Canonical nguy hiểm phải bị từ chối: ${invalid}`);
 }
 
-const prisma = new PrismaClient();
 const suffix = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 let categoryId = "";
 let articleId = "";

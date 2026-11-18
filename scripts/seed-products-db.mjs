@@ -1,8 +1,6 @@
 import fs from "node:fs";
 import crypto from "node:crypto";
-import prismaPackage from "@prisma/client";
-
-const { PrismaClient } = prismaPackage;
+import { prisma } from "./prisma-client.mjs";
 
 const source = fs.readFileSync(new URL("../app/data/product-details.ts", import.meta.url), "utf8");
 const match = source.match(/gedecoProductDetails:\s*GedecoProductDetail\[\]\s*=\s*([\s\S]*);\s*$/m) || source.match(/gedecoProductDetails\s*=\s*([\s\S]*);\s*$/m);
@@ -12,7 +10,6 @@ const englishSource = fs.readFileSync(new URL("../app/data/product-translations-
 const englishMatch = englishSource.match(/englishProductTranslations\s*=\s*([\s\S]*?)\s+as const;/);
 if (!englishMatch) throw new Error("Không đọc được dữ liệu English sản phẩm nguồn.");
 const englishProducts = JSON.parse(englishMatch[1]);
-const prisma = new PrismaClient();
 try {
   const [domestic, exported] = await Promise.all([
     prisma.productCategory.upsert({ where: { slug: "trong-nuoc" }, create: { id: "product-category-domestic", name: "Sản phẩm trong nước", slug: "trong-nuoc", nameEn: "Domestic products", slugEn: "domestic", sortOrder: 10 }, update: {} }),

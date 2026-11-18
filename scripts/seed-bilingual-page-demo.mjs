@@ -1,8 +1,4 @@
-import prismaPackage from "@prisma/client";
-
-const { PrismaClient } = prismaPackage;
-
-const prisma = new PrismaClient();
+import { prisma } from "./prisma-client.mjs";
 const slug = "demo-hop-tac-ben-vung";
 const sections = [
   { type: "hero", eyebrow: "TRANG DEMO", title: "Hợp tác bền vững", body: "Một page mới được tạo từ nội dung tiếng Việt và dùng chung đúng một frontend cho hai ngôn ngữ.", imageUrl: "/assets/service-trade.jpg", imageAlt: "Kết nối hợp tác quốc tế" },

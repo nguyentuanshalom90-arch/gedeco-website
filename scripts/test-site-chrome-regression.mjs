@@ -1,8 +1,5 @@
-import prismaPackage from "@prisma/client";
+import { prisma } from "./prisma-client.mjs";
 
-const { PrismaClient } = prismaPackage;
-
-const prisma = new PrismaClient();
 const baseUrl = process.env.TEST_BASE_URL || "http://localhost:3000";
 const token = Date.now().toString(36);
 let row;

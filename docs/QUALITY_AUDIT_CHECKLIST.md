@@ -124,4 +124,4 @@ Nguồn chuẩn:
 
 ## 5. Dependency security gate
 
-- [ ] `npm audit --omit=dev` về 0 advisory. Đã pin PostCSS `8.5.33` bằng `overrides`, giảm từ 5 xuống còn 3 advisory high; phần còn lại nằm trong Prisma 6 qua `deepmerge-ts`, npm chỉ đề xuất nâng major lên Prisma 7.10.1. Không chạy `npm audit fix --force`; cần một đợt nâng major riêng, migration/test tương thích và phê duyệt trước khi áp dụng.
+- [x] `npm audit --omit=dev` về 0 advisory sau khi nâng Prisma 7.10.1, dùng `@prisma/adapter-pg`/`pg` và giữ PostCSS `8.5.33` bằng `overrides`. `prisma validate`, `prisma generate`, build và toàn bộ regression local PASS; production vẫn cần deploy gate/backup/migration có kiểm soát.

@@ -2,9 +2,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import assert from "node:assert/strict";
 import sharp from "sharp";
-import prismaPackage from "@prisma/client";
-
-const { PrismaClient } = prismaPackage;
+import { prisma } from "./prisma-client.mjs";
 import { mediaStorageErrorMessage } from "../lib/media-errors.ts";
 
 const projectRoot = process.cwd();
@@ -37,7 +35,6 @@ const username = process.env.DASHBOARD_USERNAME;
 const password = process.env.DASHBOARD_PASSWORD;
 assert(username && password, "Thiếu DASHBOARD_USERNAME hoặc DASHBOARD_PASSWORD cho media regression.");
 
-const prisma = new PrismaClient();
 const createdIds = [];
 const createdPaths = new Set();
 
