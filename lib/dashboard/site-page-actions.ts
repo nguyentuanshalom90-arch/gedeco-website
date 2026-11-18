@@ -42,6 +42,17 @@ function canonical(value: string | undefined, slug: string) {
   throw new Error("Canonical phải là đường dẫn nội bộ hoặc URL HTTPS của gedeco.vn.");
 }
 
+function safePageUrl(value: string, label: string) {
+  const input = value.trim();
+  if (!input) return "";
+  if (input.startsWith("/") && !input.startsWith("//") && !input.includes("\\")) return input;
+  try {
+    const url = new URL(input);
+    if (url.protocol === "https:" && ["gedeco.vn", "www.gedeco.vn"].includes(url.hostname.toLowerCase()) && !url.username && !url.password && !url.port && !url.hash) return input;
+  } catch {}
+  throw new Error(`${label} phải là đường dẫn nội bộ hoặc HTTPS của gedeco.vn.`);
+}
+
 function validateSections(value: unknown): SitePageSectionInput[] {
   if (!Array.isArray(value) || value.length === 0) throw new Error("Page phải có ít nhất một section.");
   if (value.length > 30) throw new Error("Một page không nên vượt quá 30 section.");
@@ -51,9 +62,10 @@ function validateSections(value: unknown): SitePageSectionInput[] {
     if (!["hero", "text", "feature-grid", "cta"].includes(section.type)) throw new Error(`Loại section ${index + 1} không hợp lệ.`);
     if (!section.title?.trim()) throw new Error(`Section ${index + 1} cần có tiêu đề.`);
     if (section.imageUrl?.trim() && !section.imageAlt?.trim()) throw new Error(`Ảnh ở section ${index + 1} cần alt text.`);
+    if (section.imageUrl?.trim()) safePageUrl(section.imageUrl, `Ảnh ở section ${index + 1}`);
     if (section.type === "feature-grid" && (!Array.isArray(section.items) || section.items.length === 0)) throw new Error(`Section ${index + 1} cần ít nhất một ô nội dung.`);
     if (section.type === "cta" && Boolean(section.buttonLabel?.trim()) !== Boolean(section.buttonHref?.trim())) throw new Error(`Section ${index + 1} cần đủ nhãn và liên kết nút.`);
-    if (section.buttonHref && !section.buttonHref.startsWith("/") && !section.buttonHref.startsWith("https://")) throw new Error(`Liên kết nút ở section ${index + 1} không hợp lệ.`);
+    if (section.buttonHref) safePageUrl(section.buttonHref, `Liên kết nút ở section ${index + 1}`);
     return section;
   });
 }
