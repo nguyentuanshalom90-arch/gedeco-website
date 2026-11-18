@@ -209,6 +209,7 @@ export function PostComposer() {
   const [filter, setFilter] = useState<"ALL" | PostStatus>("ALL");
   const [query, setQuery] = useState("");
   const [saving, setSaving] = useState(false);
+  const [deleting, setDeleting] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
@@ -278,7 +279,10 @@ export function PostComposer() {
     }
   }
   async function remove(item: PostListItem) {
+    if (saving || deleting) return;
     if (!window.confirm(`Xóa bài viết “${item.title}”?`)) return;
+    setDeleting(item.id);
+    setError("");
     try {
       const result = await deletePost(item.id);
       if (!result.ok) {
@@ -293,6 +297,8 @@ export function PostComposer() {
       setError(
         reason instanceof Error ? reason.message : "Không thể xóa bài viết.",
       );
+    } finally {
+      setDeleting(null);
     }
   }
 
@@ -387,6 +393,7 @@ export function PostComposer() {
                       type="button"
                       className="btn"
                       onClick={() => edit(item)}
+                      disabled={Boolean(saving || deleting)}
                     >
                       <Icon name="pencil" size={15} />
                       Sửa
@@ -395,9 +402,10 @@ export function PostComposer() {
                       type="button"
                       className="btn cms-danger"
                       onClick={() => void remove(item)}
+                      disabled={Boolean(saving || deleting)}
                     >
                       <Icon name="trash" size={15} />
-                      Xóa
+                      {deleting === item.id ? "Đang xóa…" : "Xóa"}
                     </button>
                   </div>
                 </article>

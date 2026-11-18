@@ -203,6 +203,7 @@ export function CategoryManager() {
                       type="button"
                       className="btn"
                       onClick={() => edit(item)}
+                      disabled={Boolean(saving || deleting)}
                     >
                       <Icon name="pencil" size={15} />
                       Sửa
@@ -211,7 +212,7 @@ export function CategoryManager() {
                       type="button"
                       className="btn cms-danger"
                       onClick={() => void remove(item)}
-                      disabled={deleting === item.id || saving}
+                      disabled={Boolean(saving || deleting)}
                     >
                       <Icon name="trash" size={15} />
                       {deleting === item.id ? "Đang xóa…" : "Xóa"}
