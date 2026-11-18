@@ -1,5 +1,5 @@
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
   binaryTargets = ["native", "debian-openssl-3.0.x"]
 }
 
@@ -61,24 +61,24 @@ model NewsArticle {
 }
 
 model NewsCategory {
-  id              String   @id @default(cuid())
-  name            String
-  slug            String   @unique
-  description     String?
-  nameEn          String?
-  slugEn          String?  @unique
-  descriptionEn   String?
-  metaTitle       String?
-  metaDescription String?
-  metaTitleEn     String?
+  id                String   @id @default(cuid())
+  name              String
+  slug              String   @unique
+  description       String?
+  nameEn            String?
+  slugEn            String?  @unique
+  descriptionEn     String?
+  metaTitle         String?
+  metaDescription   String?
+  metaTitleEn       String?
   metaDescriptionEn String?
-  canonicalUrl    String?
-  canonicalUrlEn  String?
-  robotsIndex     Boolean  @default(true)
-  robotsFollow    Boolean  @default(true)
-  sortOrder       Int      @default(0)
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  canonicalUrl      String?
+  canonicalUrlEn    String?
+  robotsIndex       Boolean  @default(true)
+  robotsFollow      Boolean  @default(true)
+  sortOrder         Int      @default(0)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
 
   articles NewsArticle[]
 }
@@ -108,7 +108,7 @@ enum ArticleStatus {
 }
 
 model MediaAsset {
-  id            String   @id @default(cuid())
+  id            String    @id @default(cuid())
   originalName  String
   originalFile  String
   optimizedFile String
@@ -116,43 +116,43 @@ model MediaAsset {
   width         Int
   height        Int
   sizeBytes     Int
-  altText       String   @default("")
-  caption       String   @default("")
+  altText       String    @default("")
+  caption       String    @default("")
   archivedAt    DateTime?
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @default(now()) @updatedAt
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @default(now()) @updatedAt
 }
 
 model Product {
-  id              String        @id @default(cuid())
-  slug            String        @unique
-  title           String
-  categoryId      String
-  description     String        @default("")
-  contentHtml     String        @default("") @db.Text
-  summaryHtml     String        @default("") @db.Text
-  priceText       String        @default("Liên hệ")
-  stockText       String        @default("Còn hàng")
-  imageUrl        String        @default("")
-  imageAlt        String        @default("")
-  imageCaption    String        @default("")
-  shipperImageUrl String        @default("")
-  shipperImageAlt String        @default("")
-  shipperImageCaption String    @default("")
-  ogImageUrl      String        @default("")
-  ogImageAlt      String        @default("")
-  metaTitle       String?
-  metaDescription String?
-  canonicalUrl    String?
-  robotsIndex     Boolean       @default(true)
-  robotsFollow    Boolean       @default(true)
-  isPublished     Boolean       @default(true)
-  sortOrder       Int           @default(0)
-  createdAt       DateTime      @default(now())
-  updatedAt       DateTime      @updatedAt
+  id                  String   @id @default(cuid())
+  slug                String   @unique
+  title               String
+  categoryId          String
+  description         String   @default("")
+  contentHtml         String   @default("") @db.Text
+  summaryHtml         String   @default("") @db.Text
+  priceText           String   @default("Liên hệ")
+  stockText           String   @default("Còn hàng")
+  imageUrl            String   @default("")
+  imageAlt            String   @default("")
+  imageCaption        String   @default("")
+  shipperImageUrl     String   @default("")
+  shipperImageAlt     String   @default("")
+  shipperImageCaption String   @default("")
+  ogImageUrl          String   @default("")
+  ogImageAlt          String   @default("")
+  metaTitle           String?
+  metaDescription     String?
+  canonicalUrl        String?
+  robotsIndex         Boolean  @default(true)
+  robotsFollow        Boolean  @default(true)
+  isPublished         Boolean  @default(true)
+  sortOrder           Int      @default(0)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
 
-  gallery         ProductMedia[]
-  category        ProductCategory @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  gallery  ProductMedia[]
+  category ProductCategory @relation(fields: [categoryId], references: [id], onDelete: Restrict)
 
   @@index([categoryId, isPublished, sortOrder])
 }
@@ -238,8 +238,8 @@ model ProductMedia {
 }
 
 model SitePage {
-  id              String       @id @default(cuid())
-  slug            String       @unique
+  id              String        @id @default(cuid())
+  slug            String        @unique
   name            String
   title           String
   excerpt         String?
@@ -247,11 +247,11 @@ model SitePage {
   metaTitle       String?
   metaDescription String?
   canonicalUrl    String?
-  robotsIndex     Boolean      @default(true)
-  robotsFollow    Boolean      @default(true)
+  robotsIndex     Boolean       @default(true)
+  robotsFollow    Boolean       @default(true)
   status          ArticleStatus @default(DRAFT)
-  createdAt       DateTime     @default(now())
-  updatedAt       DateTime     @updatedAt
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
 
   @@index([status, updatedAt])
 }
@@ -276,24 +276,24 @@ model SiteContentPage {
 }
 
 model SiteDynamicContent {
-  id          String   @id @default(cuid())
-  kind        SiteContentKind @default(DYNAMIC)
-  pageKey     String
-  sectionKey  String
-  fieldKey    String
-  label       String
-  value       String   @default("")
-  contentType String   @default("TEXT")
+  id           String          @id @default(cuid())
+  kind         SiteContentKind @default(DYNAMIC)
+  pageKey      String
+  sectionKey   String
+  fieldKey     String
+  label        String
+  value        String          @default("")
+  contentType  String          @default("TEXT")
   headingLevel String?
-  imageUrl    String?
-  altText     String?
+  imageUrl     String?
+  altText      String?
   imageCaption String?
-  isVisible   Boolean  @default(true)
-  sortOrder   Int      @default(0)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  isVisible    Boolean         @default(true)
+  sortOrder    Int             @default(0)
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
 
-  page        SiteContentPage @relation(fields: [pageKey], references: [pageKey], onDelete: Cascade)
+  page SiteContentPage @relation(fields: [pageKey], references: [pageKey], onDelete: Cascade)
 
   @@unique([kind, pageKey, sectionKey, fieldKey])
   @@index([kind, pageKey, sortOrder])
@@ -315,23 +315,22 @@ enum SiteChromeKind {
 }
 
 model SiteChromeContent {
-  id          String         @id @default(cuid())
-  area        SiteChromeArea
-  kind        SiteChromeKind @default(DYNAMIC)
-  sectionKey  String
-  fieldKey    String
-  label       String
-  value       String         @default("")
-  url         String?
-  imageUrl    String?
-  altText     String?
+  id           String         @id @default(cuid())
+  area         SiteChromeArea
+  kind         SiteChromeKind @default(DYNAMIC)
+  sectionKey   String
+  fieldKey     String
+  label        String
+  value        String         @default("")
+  url          String?
+  imageUrl     String?
+  altText      String?
   imageCaption String?
-  isVisible   Boolean        @default(true)
-  sortOrder   Int            @default(0)
-  createdAt   DateTime       @default(now())
-  updatedAt   DateTime       @updatedAt
+  isVisible    Boolean        @default(true)
+  sortOrder    Int            @default(0)
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
 
   @@unique([area, sectionKey, fieldKey])
   @@index([area, kind, sortOrder])
 }
-
