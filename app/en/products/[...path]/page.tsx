@@ -5,12 +5,12 @@ import {
   getProductCategoryBySlug,
   listEnglishProducts,
 } from "@/lib/products";
-import { Icon } from "../../../components/inner-pages";
 import {
   ProductCatalog,
   ProductDetailGallery,
   ShopBreadcrumb,
   ShopGuarantee,
+  ShopPurchaseLink,
   ShopRelated,
   ShopShell,
   ShopSidebar,
@@ -322,10 +322,7 @@ export default async function EnglishProductOrCategoryPage({
                 src={product.shipperImage}
                 alt="Delivery service"
               />
-              <a className="shop-buy" href="tel:+84914943653">
-                <Icon name="phone" />
-                BUY NOW
-              </a>
+              <ShopPurchaseLink type="buy" language="en" />
               <ShopGuarantee language="en" />
             </article>
           </section>
@@ -334,10 +331,7 @@ export default async function EnglishProductOrCategoryPage({
             <article
               dangerouslySetInnerHTML={{ __html: product.contentHtml }}
             />
-            <a className="shop-product-contact" href="tel:+84914943653">
-              <Icon name="phone" />
-              Contact about this product · 0914 94 3653
-            </a>
+            <ShopPurchaseLink type="contact" language="en" />
           </section>
           <ShopRelated products={all} current={product.slug} language="en" />
         </div>

@@ -16,6 +16,14 @@ export type SiteChromeItem = {
   isVisible: boolean;
   sortOrder: number;
   updatedAt: string;
+  translationMode: "AUTO" | "MANUAL";
+  translationStatus: string;
+  translationError: string;
+  labelEn: string;
+  valueEn: string;
+  altTextEn: string;
+  imageCaptionEn: string;
+  isSystem: boolean;
 };
 
-export type SiteChromeInput = Omit<SiteChromeItem, "id" | "updatedAt"> & { id?: string };
+export type SiteChromeInput = Omit<SiteChromeItem, "id" | "updatedAt" | "isSystem"> & { id?: string; isSystem?: boolean };

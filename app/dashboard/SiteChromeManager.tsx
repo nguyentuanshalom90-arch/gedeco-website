@@ -1,49 +1,543 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Icon } from "@/components/vimigo-icon";
 import { MediaPicker } from "./MediaPicker";
-import { deleteSiteChrome, listSiteChrome, saveSiteChrome } from "@/lib/dashboard/site-chrome-actions";
-import type { SiteChromeArea, SiteChromeInput, SiteChromeItem, SiteChromeKind } from "@/lib/dashboard/site-chrome-types";
+import {
+  deleteSiteChrome,
+  listSiteChrome,
+  saveSiteChrome,
+} from "@/lib/dashboard/site-chrome-actions";
+import type {
+  SiteChromeArea,
+  SiteChromeInput,
+  SiteChromeItem,
+  SiteChromeKind,
+} from "@/lib/dashboard/site-chrome-types";
 
-function emptyItem(area: SiteChromeArea, kind: SiteChromeKind): SiteChromeInput {
-  return { area, kind, sectionKey: area === "HEADER" ? "navigation" : "contact", fieldKey: "new-field", label: "Nội dung mới", value: "", url: "", imageUrl: "", altText: "", imageCaption: "", isVisible: true, sortOrder: 99 };
+function emptyItem(
+  area: SiteChromeArea,
+  kind: SiteChromeKind,
+): SiteChromeInput {
+  return {
+    area,
+    kind,
+    sectionKey: area === "HEADER" ? "navigation" : "contact",
+    fieldKey: "new-field",
+    label: "Nội dung mới",
+    value: "",
+    url: "",
+    imageUrl: "",
+    altText: "",
+    imageCaption: "",
+    isVisible: true,
+    sortOrder: 99,
+    translationMode: "AUTO",
+    translationStatus: "PENDING",
+    translationError: "",
+    labelEn: "",
+    valueEn: "",
+    altTextEn: "",
+    imageCaptionEn: "",
+  };
 }
 
 export function SiteChromeManager() {
   const [area, setArea] = useState<SiteChromeArea>("HEADER");
   const [kind, setKind] = useState<SiteChromeKind>("DYNAMIC");
   const [items, setItems] = useState<SiteChromeItem[]>([]);
-  const [editing, setEditing] = useState<SiteChromeInput>(emptyItem("HEADER", "DYNAMIC"));
+  const [editing, setEditing] = useState<SiteChromeInput>(
+    emptyItem("HEADER", "DYNAMIC"),
+  );
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState("");
+  const [query, setQuery] = useState("");
+  const [sectionFilter, setSectionFilter] = useState("");
 
   async function load(nextArea = area, nextKind = kind) {
     setBusy(true);
-    try { setItems(await listSiteChrome(nextArea, nextKind)); setNotice(""); } catch (error) { setNotice(error instanceof Error ? error.message : "Không thể tải nội dung header/footer."); } finally { setBusy(false); }
+    try {
+      setItems(await listSiteChrome(nextArea, nextKind));
+      setNotice("");
+    } catch (error) {
+      setNotice(
+        error instanceof Error
+          ? error.message
+          : "Không thể tải nội dung header/footer.",
+      );
+    } finally {
+      setBusy(false);
+    }
   }
-  useEffect(() => { void load(area, kind); }, [area, kind]);
+  useEffect(() => {
+    setQuery("");
+    setSectionFilter("");
+    void load(area, kind);
+  }, [area, kind]);
 
-  function setField<K extends keyof SiteChromeInput>(field: K, value: SiteChromeInput[K]) { setEditing((current) => ({ ...current, [field]: value })); }
-  function createNew() { setEditing(emptyItem(area, kind)); setNotice(""); }
-  function edit(item: SiteChromeItem) { setEditing({ ...item }); setNotice(""); }
+  const sections = useMemo(
+    () =>
+      Array.from(new Set(items.map((item) => item.sectionKey))).sort((a, b) =>
+        a.localeCompare(b),
+      ),
+    [items],
+  );
+  const visibleItems = useMemo(() => {
+    const keyword = query.trim().toLocaleLowerCase("vi-VN");
+    return items.filter(
+      (item) =>
+        (!sectionFilter || item.sectionKey === sectionFilter) &&
+        (!keyword ||
+          `${item.label} ${item.sectionKey}.${item.fieldKey} ${item.value} ${item.valueEn}`
+            .toLocaleLowerCase("vi-VN")
+            .includes(keyword)),
+    );
+  }, [items, query, sectionFilter]);
+
+  function setField<K extends keyof SiteChromeInput>(
+    field: K,
+    value: SiteChromeInput[K],
+  ) {
+    setEditing((current) => ({ ...current, [field]: value }));
+  }
+  function createNew() {
+    setEditing(emptyItem(area, kind));
+    setNotice("");
+  }
+  function edit(item: SiteChromeItem) {
+    setEditing({ ...item });
+    setNotice("");
+  }
 
   async function save() {
     setBusy(true);
-    try { const result = await saveSiteChrome(editing); setItems((current) => [result.item, ...current.filter((item) => item.id !== result.item.id)]); setEditing({ ...result.item }); setNotice(`Đã lưu nội dung Header/Footer. English: ${result.translation.status === "TRANSLATED" ? "đã sinh" : result.translation.status === "FAILED" ? "dịch lỗi — bản cũ được giữ nguyên" : "cần rà soát"}.`); } catch (error) { setNotice(error instanceof Error ? error.message : "Không thể lưu nội dung."); } finally { setBusy(false); }
+    try {
+      const result = await saveSiteChrome(editing);
+      setItems((current) => [
+        result.item,
+        ...current.filter((item) => item.id !== result.item.id),
+      ]);
+      setEditing({ ...result.item });
+      setNotice(
+        `Đã lưu nội dung Header/Footer. English: ${result.translation.status === "TRANSLATED" ? "đã sinh" : result.translation.status === "FAILED" ? "dịch lỗi — bản cũ được giữ nguyên" : "cần rà soát"}.`,
+      );
+    } catch (error) {
+      setNotice(
+        error instanceof Error ? error.message : "Không thể lưu nội dung.",
+      );
+    } finally {
+      setBusy(false);
+    }
   }
   async function remove() {
-    if (!editing.id || !window.confirm("Xóa nội dung Header/Footer này?")) return;
+    if (!editing.id || !window.confirm("Xóa nội dung Header/Footer này?"))
+      return;
     setBusy(true);
-    try { await deleteSiteChrome(editing.id); setItems((current) => current.filter((item) => item.id !== editing.id)); createNew(); setNotice("Đã xóa nội dung."); } catch (error) { setNotice(error instanceof Error ? error.message : "Không thể xóa nội dung."); } finally { setBusy(false); }
+    try {
+      await deleteSiteChrome(editing.id);
+      setItems((current) => current.filter((item) => item.id !== editing.id));
+      createNew();
+      setNotice("Đã xóa nội dung.");
+    } catch (error) {
+      setNotice(
+        error instanceof Error ? error.message : "Không thể xóa nội dung.",
+      );
+    } finally {
+      setBusy(false);
+    }
   }
 
-  return <section className="site-chrome-manager">
-      <div className="dashboard-view-head cms-title-row"><div><p className="eyebrow">GIAO DIỆN DÙNG CHUNG</p><h1 className="disp">Quản lý header &amp; footer</h1><p>Quản lý logo, menu, CTA, thông tin liên hệ, liên kết mạng xã hội và bản quyền dùng trên toàn website.</p></div><button type="button" className="btn btn-primary" onClick={createNew}><Icon name="plus" size={16} /> Thêm nội dung</button></div>
-    <div className="site-chrome-tabs panel" role="tablist" aria-label="Khu vực giao diện dùng chung"><button type="button" role="tab" aria-selected={area === "HEADER"} className={area === "HEADER" ? "active" : ""} onClick={() => { setArea("HEADER"); setKind("DYNAMIC"); setEditing(emptyItem("HEADER", "DYNAMIC")); }}><Icon name="grid" size={18} /><span><strong>Header</strong><small>Logo, menu và CTA đầu trang</small></span></button><button type="button" role="tab" aria-selected={area === "FOOTER"} className={area === "FOOTER" ? "active" : ""} onClick={() => { setArea("FOOTER"); setKind("DYNAMIC"); setEditing(emptyItem("FOOTER", "DYNAMIC")); }}><Icon name="layers" size={18} /><span><strong>Footer</strong><small>Thương hiệu, liên hệ và liên kết cuối trang</small></span></button></div>
-    <div className="site-chrome-subtabs panel" role="tablist" aria-label={`Loại nội dung ${area === "HEADER" ? "Header" : "Footer"}`}><button type="button" role="tab" aria-selected={kind === "DYNAMIC"} className={kind === "DYNAMIC" ? "active" : ""} onClick={() => { setKind("DYNAMIC"); setEditing(emptyItem(area, "DYNAMIC")); }}><Icon name="database" size={17} /><span><strong>Nội dung động</strong><small>Quản lý qua database</small></span></button><button type="button" role="tab" aria-selected={kind === "STATIC"} className={kind === "STATIC" ? "active" : ""} onClick={() => { setKind("STATIC"); setEditing(emptyItem(area, "STATIC")); }}><Icon name="code" size={17} /><span><strong>Nội dung tĩnh</strong><small>Nội dung cố định của giao diện</small></span></button></div>
-    <div className="site-chrome-workspace"><aside className="panel site-chrome-list"><div className="site-chrome-list-head"><div><strong>{items.length} nội dung</strong><small>{area === "HEADER" ? "Header" : "Footer"} · {kind === "DYNAMIC" ? "Nội dung động" : "Nội dung tĩnh"}</small></div><button type="button" className="btn btn-secondary" onClick={() => void load()} disabled={busy}><Icon name="history" size={15} /> Làm mới</button></div><div className="site-chrome-list-items">{items.map((item) => <button type="button" key={item.id} className={`site-chrome-row${editing.id === item.id ? " active" : ""}`} onClick={() => edit(item)}><span><strong>{item.label}</strong><small>{item.isVisible ? "Đang hiển thị" : "Đang ẩn"}</small></span><em>{item.sectionKey}.{item.fieldKey}</em><p>{item.value || item.imageUrl || item.url || "Chưa có giá trị"}</p></button>)}{!items.length && <p className="site-content-empty">Chưa có nội dung.</p>}</div></aside>
-      <div className="panel site-chrome-editor"><div className="site-content-editor-head"><div><p className="eyebrow">{editing.id ? "CHỈNH SỬA" : "BẢN GHI MỚI"}</p><h2>{editing.label}</h2></div>{editing.id && <button type="button" className="btn btn-danger" onClick={() => void remove()} disabled={busy}><Icon name="trash" size={15} /> Xóa</button>}</div><div className="site-content-form-grid"><label>Section key<input value={editing.sectionKey} onChange={(event) => setField("sectionKey", event.target.value)} /></label><label>Field key<input value={editing.fieldKey} onChange={(event) => setField("fieldKey", event.target.value)} /></label><label className="site-content-full">Nhãn quản trị<input value={editing.label} onChange={(event) => setField("label", event.target.value)} /></label><label className="site-content-full">Giá trị nội dung<textarea rows={4} value={editing.value} onChange={(event) => setField("value", event.target.value)} /></label><label>URL liên kết<input value={editing.url} onChange={(event) => setField("url", event.target.value)} placeholder="https://... hoặc /lien-he" /></label><label>Thứ tự hiển thị<input type="number" value={editing.sortOrder} onChange={(event) => setField("sortOrder", Number(event.target.value))} /></label></div><div className="site-chrome-media"><p className="eyebrow">LOGO / MEDIA</p><MediaPicker label="Media Header/Footer" value={editing.imageUrl} altText={editing.altText} caption={editing.imageCaption} onSelect={(asset) => setEditing((current) => ({ ...current, imageUrl: asset.url, altText: asset.altText || current.altText, imageCaption: asset.caption || current.imageCaption }))} onClear={() => setEditing((current) => ({ ...current, imageUrl: "", altText: "", imageCaption: "" }))} /></div><div className="site-content-form-grid"><label>Alt text ảnh<input value={editing.altText} onChange={(event) => setField("altText", event.target.value)} /></label><label>Caption ảnh<input value={editing.imageCaption} onChange={(event) => setField("imageCaption", event.target.value)} /></label><label className="site-chrome-visible"><input type="checkbox" checked={editing.isVisible} onChange={(event) => setField("isVisible", event.target.checked)} /> Hiển thị trên frontend</label></div><div className="site-content-editor-actions"><span className={notice.includes("không") || notice.includes("Không") ? "error" : "success"}>{notice}</span><button type="button" className="btn btn-primary" onClick={() => void save()} disabled={busy}>{busy ? "Đang lưu..." : "Lưu nội dung"}</button></div></div></div>
-  </section>;
+  return (
+    <section className="site-chrome-manager">
+      <div className="dashboard-view-head cms-title-row">
+        <div>
+          <p className="eyebrow">GIAO DIỆN DÙNG CHUNG</p>
+          <h1 className="disp">Nội dung dùng chung</h1>
+          <p>
+            Quản lý header, footer, khối hỗ trợ sản phẩm, cam kết mua hàng và
+            nút liên hệ dùng trên toàn website.
+          </p>
+        </div>
+        <button type="button" className="btn btn-primary" onClick={createNew}>
+          <Icon name="plus" size={16} /> Thêm nội dung
+        </button>
+      </div>
+      <div
+        className="site-chrome-tabs panel"
+        role="tablist"
+        aria-label="Khu vực giao diện dùng chung"
+      >
+        <button
+          type="button"
+          role="tab"
+          aria-selected={area === "HEADER"}
+          className={area === "HEADER" ? "active" : ""}
+          onClick={() => {
+            setArea("HEADER");
+            setKind("DYNAMIC");
+            setEditing(emptyItem("HEADER", "DYNAMIC"));
+          }}
+        >
+          <Icon name="grid" size={18} />
+          <span>
+            <strong>Header</strong>
+            <small>Logo, menu và CTA đầu trang</small>
+          </span>
+        </button>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={area === "FOOTER"}
+          className={area === "FOOTER" ? "active" : ""}
+          onClick={() => {
+            setArea("FOOTER");
+            setKind("DYNAMIC");
+            setEditing(emptyItem("FOOTER", "DYNAMIC"));
+          }}
+        >
+          <Icon name="layers" size={18} />
+          <span>
+            <strong>Footer &amp; tiện ích</strong>
+            <small>Footer, hỗ trợ sản phẩm và nút liên hệ nổi</small>
+          </span>
+        </button>
+      </div>
+      <div
+        className="site-chrome-subtabs panel"
+        role="tablist"
+        aria-label={`Loại nội dung ${area === "HEADER" ? "Header" : "Footer"}`}
+      >
+        <button
+          type="button"
+          role="tab"
+          aria-selected={kind === "DYNAMIC"}
+          className={kind === "DYNAMIC" ? "active" : ""}
+          onClick={() => {
+            setKind("DYNAMIC");
+            setEditing(emptyItem(area, "DYNAMIC"));
+          }}
+        >
+          <Icon name="database" size={17} />
+          <span>
+            <strong>Nội dung động</strong>
+            <small>Quản lý qua database</small>
+          </span>
+        </button>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={kind === "STATIC"}
+          className={kind === "STATIC" ? "active" : ""}
+          onClick={() => {
+            setKind("STATIC");
+            setEditing(emptyItem(area, "STATIC"));
+          }}
+        >
+          <Icon name="code" size={17} />
+          <span>
+            <strong>Nội dung tĩnh</strong>
+            <small>Nội dung cố định của giao diện</small>
+          </span>
+        </button>
+      </div>
+      <div className="site-chrome-workspace">
+        <aside className="panel site-chrome-list">
+          <div className="site-chrome-list-head">
+            <div>
+              <strong>{items.length} nội dung</strong>
+              <small>
+                {area === "HEADER" ? "Header" : "Footer"} ·{" "}
+                {kind === "DYNAMIC" ? "Nội dung động" : "Nội dung tĩnh"}
+              </small>
+            </div>
+            <button
+              type="button"
+              className="btn btn-secondary"
+              onClick={() => void load()}
+              disabled={busy}
+            >
+              <Icon name="history" size={15} /> Làm mới
+            </button>
+          </div>
+          <div className="site-content-form-grid">
+            <label className="site-content-full">
+              Tìm nội dung
+              <input
+                value={query}
+                onChange={(event) => setQuery(event.target.value)}
+                placeholder="Tên, key hoặc giá trị VI/EN"
+              />
+            </label>
+            <label className="site-content-full">
+              Nhóm section
+              <select
+                value={sectionFilter}
+                onChange={(event) => setSectionFilter(event.target.value)}
+              >
+                <option value="">Tất cả section ({items.length})</option>
+                {sections.map((section) => (
+                  <option key={section} value={section}>
+                    {section} (
+                    {items.filter((item) => item.sectionKey === section).length}
+                    )
+                  </option>
+                ))}
+              </select>
+            </label>
+          </div>
+          <div className="site-chrome-list-items">
+            {visibleItems.map((item) => (
+              <button
+                type="button"
+                key={item.id}
+                className={`site-chrome-row${editing.id === item.id ? " active" : ""}`}
+                onClick={() => edit(item)}
+              >
+                <span>
+                  <strong>{item.label}</strong>
+                  <small>
+                    {item.isVisible ? "Đang hiển thị" : "Đang ẩn"}
+                    {item.isSystem ? " · Hệ thống" : ""}
+                  </small>
+                </span>
+                <em>
+                  {item.sectionKey}.{item.fieldKey}
+                </em>
+                <p>
+                  {item.value || item.imageUrl || item.url || "Chưa có giá trị"}
+                </p>
+              </button>
+            ))}
+            {!visibleItems.length && (
+              <p className="site-content-empty">
+                Không có nội dung phù hợp bộ lọc.
+              </p>
+            )}
+          </div>
+        </aside>
+        <div className="panel site-chrome-editor">
+          <div className="site-content-editor-head">
+            <div>
+              <p className="eyebrow">
+                {editing.id ? "CHỈNH SỬA" : "BẢN GHI MỚI"}
+              </p>
+              <h2>{editing.label}</h2>
+            </div>
+            {editing.id && !editing.isSystem && (
+              <button
+                type="button"
+                className="btn btn-danger"
+                onClick={() => void remove()}
+                disabled={busy}
+              >
+                <Icon name="trash" size={15} /> Xóa
+              </button>
+            )}
+            {editing.id && editing.isSystem && (
+              <span className="chip">Nội dung hệ thống · có thể ẩn</span>
+            )}
+          </div>
+          <div className="site-content-form-grid">
+            <label>
+              Section key
+              <input
+                value={editing.sectionKey}
+                disabled={Boolean(editing.id && editing.isSystem)}
+                onChange={(event) => setField("sectionKey", event.target.value)}
+              />
+            </label>
+            <label>
+              Field key
+              <input
+                value={editing.fieldKey}
+                disabled={Boolean(editing.id && editing.isSystem)}
+                onChange={(event) => setField("fieldKey", event.target.value)}
+              />
+            </label>
+            <label className="site-content-full">
+              Nhãn quản trị
+              <input
+                value={editing.label}
+                onChange={(event) => setField("label", event.target.value)}
+              />
+            </label>
+            <label className="site-content-full">
+              Giá trị nội dung
+              <textarea
+                rows={4}
+                value={editing.value}
+                onChange={(event) => setField("value", event.target.value)}
+              />
+            </label>
+            <label>
+              URL liên kết
+              <input
+                value={editing.url}
+                onChange={(event) => setField("url", event.target.value)}
+                placeholder="https://... hoặc /lien-he"
+              />
+            </label>
+            <label>
+              Thứ tự hiển thị
+              <input
+                type="number"
+                value={editing.sortOrder}
+                onChange={(event) =>
+                  setField("sortOrder", Number(event.target.value))
+                }
+              />
+            </label>
+          </div>
+          <div className="site-chrome-media">
+            <p className="eyebrow">LOGO / MEDIA</p>
+            <MediaPicker
+              label="Media Header/Footer"
+              value={editing.imageUrl}
+              altText={editing.altText}
+              caption={editing.imageCaption}
+              onSelect={(asset) =>
+                setEditing((current) => ({
+                  ...current,
+                  imageUrl: asset.url,
+                  altText: asset.altText || current.altText,
+                  imageCaption: asset.caption || current.imageCaption,
+                }))
+              }
+              onClear={() =>
+                setEditing((current) => ({
+                  ...current,
+                  imageUrl: "",
+                  altText: "",
+                  imageCaption: "",
+                }))
+              }
+            />
+          </div>
+          <div className="site-content-form-grid">
+            <label>
+              Alt text ảnh
+              <input
+                value={editing.altText}
+                onChange={(event) => setField("altText", event.target.value)}
+              />
+            </label>
+            <label>
+              Caption ảnh
+              <input
+                value={editing.imageCaption}
+                onChange={(event) =>
+                  setField("imageCaption", event.target.value)
+                }
+              />
+            </label>
+            <label className="site-chrome-visible">
+              <input
+                type="checkbox"
+                checked={editing.isVisible}
+                onChange={(event) =>
+                  setField("isVisible", event.target.checked)
+                }
+              />{" "}
+              Hiển thị trên frontend
+            </label>
+          </div>
+          <div className="site-content-seo">
+            <div>
+              <p className="eyebrow">ENGLISH</p>
+              <h3>Bản tiếng Anh dùng chung</h3>
+              <p>
+                Chọn tự nhập để duyệt chính xác; bản dịch lỗi sẽ không được API
+                English sử dụng.
+              </p>
+            </div>
+            <div className="site-content-checks">
+              <label>
+                <input
+                  type="radio"
+                  name="chrome-translation-mode"
+                  checked={editing.translationMode === "AUTO"}
+                  onChange={() => setField("translationMode", "AUTO")}
+                />{" "}
+                Dịch tự động
+              </label>
+              <label>
+                <input
+                  type="radio"
+                  name="chrome-translation-mode"
+                  checked={editing.translationMode === "MANUAL"}
+                  onChange={() => setField("translationMode", "MANUAL")}
+                />{" "}
+                Tự nhập và duyệt
+              </label>
+            </div>
+            <p>
+              Trạng thái: <strong>{editing.translationStatus}</strong>
+              {editing.translationError ? ` · ${editing.translationError}` : ""}
+            </p>
+            {editing.translationMode === "MANUAL" && (
+              <div className="site-content-form-grid">
+                <label className="site-content-full">
+                  Admin label English
+                  <input
+                    value={editing.labelEn}
+                    onChange={(event) =>
+                      setField("labelEn", event.target.value)
+                    }
+                  />
+                </label>
+                <label className="site-content-full">
+                  English value
+                  <textarea
+                    rows={4}
+                    value={editing.valueEn}
+                    onChange={(event) =>
+                      setField("valueEn", event.target.value)
+                    }
+                  />
+                </label>
+                <label>
+                  English media alt
+                  <input
+                    value={editing.altTextEn}
+                    onChange={(event) =>
+                      setField("altTextEn", event.target.value)
+                    }
+                  />
+                </label>
+                <label>
+                  English media caption
+                  <input
+                    value={editing.imageCaptionEn}
+                    onChange={(event) =>
+                      setField("imageCaptionEn", event.target.value)
+                    }
+                  />
+                </label>
+              </div>
+            )}
+          </div>
+          <div className="site-content-editor-actions">
+            <span
+              className={
+                notice.includes("không") || notice.includes("Không")
+                  ? "error"
+                  : "success"
+              }
+            >
+              {notice}
+            </span>
+            <button
+              type="button"
+              className="btn btn-primary"
+              onClick={() => void save()}
+              disabled={busy}
+            >
+              {busy ? "Đang lưu..." : "Lưu nội dung"}
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
 }

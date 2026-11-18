@@ -73,6 +73,8 @@ Cập nhật: 17/11/2026. Checklist này dùng làm tiêu chuẩn nghiệm thu c
 
 - [x] URL mô tả, slug ổn định, không dùng ID ngẫu nhiên trên public route. `PASS source`.
 - [x] Header/footer chỉ liên kết canonical; route/page ngoài menu đã bị loại theo phạm vi dự án. `PASS source`.
+- [x] Menu, footer, CTA, hotline, hỗ trợ sản phẩm và nút liên hệ nổi đọc dữ liệu VI/EN đã duyệt từ database; ẩn bản ghi trong dashboard loại nội dung khỏi API/frontend thay vì dựng lại fallback. `PASS npm run test:chrome`.
+- [x] URL dùng chung từ dashboard chỉ nhận internal path, `tel:`, `mailto:` hoặc HTTPS an toàn; media chỉ nhận thư viện nội bộ/domain chính thức. `PASS source`.
 - [x] Category, product và article detail có breadcrumb/internal link trở lại listing. `PASS source`.
 - [x] Slug danh mục tin tức legacy đã được chuẩn hóa bằng migration giữ nguyên ID/quan hệ; 6 URL lỗi cũ redirect 308 sang URL chuẩn và sitemap dùng slug mới. `PASS local regression`.
 - [x] Đổi slug bài viết, sản phẩm hoặc danh mục sản phẩm tạo redirect 308; đổi slug danh mục cập nhật cả URL chi tiết sản phẩm trong danh mục. `PASS source/local regression`.

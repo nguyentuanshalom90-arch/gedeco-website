@@ -12,11 +12,11 @@ import {
   ProductDetailGallery,
   ShopBreadcrumb,
   ShopGuarantee,
+  ShopPurchaseLink,
   ShopRelated,
   ShopShell,
   ShopSidebar,
 } from "@/app/components/shop-pages";
-import { Icon } from "@/app/components/inner-pages";
 import { redirectDestination } from "@/lib/url-redirects";
 
 export const dynamic = "force-dynamic";
@@ -340,10 +340,7 @@ export default async function ProductOrCategoryPage({
                 src={product.shipperImage}
                 alt="Dịch vụ giao hàng"
               />
-              <a className="shop-buy" href="tel:+84914943653">
-                <Icon name="phone" />
-                MUA HÀNG
-              </a>
+              <ShopPurchaseLink type="buy" />
               <ShopGuarantee />
             </article>
           </section>
@@ -354,10 +351,7 @@ export default async function ProductOrCategoryPage({
                 __html: localize(product.contentHtml),
               }}
             />
-            <a className="shop-product-contact" href="tel:+84914943653">
-              <Icon name="phone" />
-              Liên hệ về sản phẩm · 0914 94 3653
-            </a>
+            <ShopPurchaseLink type="contact" />
           </section>
           <ShopRelated products={all} current={product.slug} />
         </div>

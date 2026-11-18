@@ -13,7 +13,8 @@
     "prisma:validate": "prisma validate",
     "test:media": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/test-media-regression.mjs",
     "test:news": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/test-news-seo-regression.mjs",
-    "test:products": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/test-products-regression.mjs"
+    "test:products": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/test-products-regression.mjs",
+    "test:chrome": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/test-site-chrome-regression.mjs"
   },
   "dependencies": {
     "@prisma/client": "^6.7.0",
