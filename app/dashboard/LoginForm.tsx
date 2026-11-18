@@ -13,15 +13,23 @@ export function LoginForm() {
     event.preventDefault();
     setBusy(true);
     setError("");
-    const response = await fetch("/api/dashboard/auth", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ username, password }),
-    });
-    const payload = await response.json().catch(() => ({}));
-    setBusy(false);
-    if (!response.ok) return setError(payload.error || "Không thể đăng nhập.");
-    window.location.href = "/dashboard";
+    try {
+      const response = await fetch("/api/dashboard/auth", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password }),
+      });
+      const payload = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        setError(payload.error || "Không thể đăng nhập.");
+        return;
+      }
+      window.location.href = "/dashboard";
+    } catch {
+      setError("Không thể kết nối máy chủ. Vui lòng thử lại.");
+    } finally {
+      setBusy(false);
+    }
   }
 
   return (
