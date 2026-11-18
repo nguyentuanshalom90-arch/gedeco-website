@@ -15,14 +15,10 @@ function credentials() {
   const username = process.env.DASHBOARD_USERNAME?.trim();
   const password = process.env.DASHBOARD_PASSWORD;
   const secret = process.env.DASHBOARD_SESSION_SECRET;
-  if (process.env.NODE_ENV === "production" && (!username || !password || !secret || secret.length < 32)) {
-    throw new Error("Dashboard production cần DASHBOARD_USERNAME, DASHBOARD_PASSWORD và DASHBOARD_SESSION_SECRET tối thiểu 32 ký tự.");
+  if (!username || !password || !secret || secret.length < 32) {
+    throw new Error("Dashboard cần DASHBOARD_USERNAME, DASHBOARD_PASSWORD và DASHBOARD_SESSION_SECRET tối thiểu 32 ký tự.");
   }
-  return {
-    username: username || "admin",
-    password: password || "Gedeco@2025!",
-    secret: secret || "local-dashboard-session-secret-change-me",
-  };
+  return { username, password, secret };
 }
 
 function safeEqual(left: string, right: string) {
