@@ -7,6 +7,7 @@ import { requireDashboardSession } from "./auth";
 import { ensureSiteContentSeeded } from "@/lib/site-content-seeding";
 import { revalidatePath } from "next/cache";
 import { validateManagedMediaUrl } from "./media-url";
+import { validateOfficialCanonical } from "./canonical-url";
 
 const dbKind = (kind: SiteContentKind) => kind === "static" ? "STATIC" as const : "DYNAMIC" as const;
 const englishRoute: Record<string, string> = { "/": "/en", "/gioi-thieu": "/en/about", "/tin-tuc": "/en/news", "/san-pham": "/en/products", "/lien-he": "/en/contact" };
@@ -56,7 +57,7 @@ export async function saveSiteContent(kind: SiteContentKind, input: SiteContentI
   if (!input.metaTitle.trim() || input.metaTitle.trim().length > 60) throw new Error("SEO title bắt buộc và không vượt quá 60 ký tự.");
   if (!input.metaDescription.trim() || input.metaDescription.trim().length > 160) throw new Error("Meta description bắt buộc và không vượt quá 160 ký tự.");
   if (!input.canonicalUrl.trim()) throw new Error("Canonical URL là bắt buộc cho mỗi page.");
-  if (!input.canonicalUrl.startsWith("/") && !/^https:\/\/(www\.)?gedeco\.vn(?:\/|$)/i.test(input.canonicalUrl)) throw new Error("Canonical phải là đường dẫn nội bộ hoặc URL HTTPS của gedeco.vn.");
+  const canonicalUrl = validateOfficialCanonical(input.canonicalUrl, { fieldLabel: "Canonical page" });
   if (input.imageUrl.trim() && !input.altText.trim()) throw new Error("Ảnh nội dung phải có alt text.");
   if (input.headingLevel === "H1") {
     const duplicate = await prisma.siteDynamicContent.findFirst({ where: { kind: dbKind(kind), pageKey, headingLevel: "H1", ...(input.id ? { NOT: { id: input.id } } : {}) } });
@@ -70,7 +71,7 @@ export async function saveSiteContent(kind: SiteContentKind, input: SiteContentI
       h1: input.h1.trim() || null,
       metaTitle: input.metaTitle.trim() || null,
       metaDescription: input.metaDescription.trim() || null,
-      canonicalUrl: input.canonicalUrl.trim() || null,
+      canonicalUrl,
       robotsIndex: input.robotsIndex,
       robotsFollow: input.robotsFollow,
     },
@@ -81,7 +82,7 @@ export async function saveSiteContent(kind: SiteContentKind, input: SiteContentI
       h1: input.h1.trim() || null,
       metaTitle: input.metaTitle.trim() || null,
       metaDescription: input.metaDescription.trim() || null,
-      canonicalUrl: input.canonicalUrl.trim() || null,
+      canonicalUrl,
       robotsIndex: input.robotsIndex,
       robotsFollow: input.robotsFollow,
     },
