@@ -3,6 +3,7 @@
 import { prisma } from "@/lib/prisma";
 import { syncSitePageTranslation } from "@/lib/translation-service";
 import { requireDashboardSession } from "./auth";
+import { validateOfficialCanonical } from "./canonical-url";
 
 export type SitePageInput = {
   id?: string;
@@ -31,16 +32,6 @@ export type SitePageSectionInput = {
   buttonLabel?: string;
   buttonHref?: string;
 };
-
-function canonical(value: string | undefined, slug: string) {
-  const input = value?.trim() || `/pages/${slug}`;
-  if (input.startsWith("/") && !input.startsWith("//")) return input;
-  try {
-    const url = new URL(input);
-    if (url.protocol === "https:" && ["gedeco.vn", "www.gedeco.vn"].includes(url.hostname.toLowerCase())) return input;
-  } catch {}
-  throw new Error("Canonical phải là đường dẫn nội bộ hoặc URL HTTPS của gedeco.vn.");
-}
 
 function safePageUrl(value: string, label: string) {
   const input = value.trim();
@@ -82,7 +73,7 @@ export async function saveSitePage(input: SitePageInput) {
   if (!input.metaTitle.trim() || input.metaTitle.trim().length > 60) throw new Error("SEO title bắt buộc và không vượt quá 60 ký tự.");
   if (!input.metaDescription.trim() || input.metaDescription.trim().length > 160) throw new Error("Meta description bắt buộc và không vượt quá 160 ký tự.");
   const sections = validateSections(input.sections);
-  const canonicalUrl = canonical(input.canonicalUrl, slug);
+  const canonicalUrl = validateOfficialCanonical(input.canonicalUrl?.trim() || `/pages/${slug}`, { fieldLabel: "Canonical page", pathPrefix: "/pages/" }) || `/pages/${slug}`;
   const row = input.id
     ? await prisma.sitePage.update({ where: { id: input.id }, data: { slug, name: input.name.trim(), title: input.title.trim(), excerpt: input.excerpt?.trim() || null, sections: sections as object, metaTitle: input.metaTitle.trim(), metaDescription: input.metaDescription.trim(), canonicalUrl, robotsIndex: input.robotsIndex, robotsFollow: input.robotsFollow, status: input.status } })
     : await prisma.sitePage.create({ data: { slug, name: input.name.trim(), title: input.title.trim(), excerpt: input.excerpt?.trim() || null, sections: sections as object, metaTitle: input.metaTitle.trim(), metaDescription: input.metaDescription.trim(), canonicalUrl, robotsIndex: input.robotsIndex, robotsFollow: input.robotsFollow, status: input.status } });
