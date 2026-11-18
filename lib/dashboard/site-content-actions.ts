@@ -8,7 +8,7 @@ import { ensureSiteContentSeeded } from "@/lib/site-content-seeding";
 import { revalidatePath } from "next/cache";
 
 const dbKind = (kind: SiteContentKind) => kind === "static" ? "STATIC" as const : "DYNAMIC" as const;
-const englishRoute: Record<string, string> = { "/": "/en", "/gioi-thieu": "/en/about", "/tin-tuc": "/en/news", "/lien-he": "/en/contact" };
+const englishRoute: Record<string, string> = { "/": "/en", "/gioi-thieu": "/en/about", "/tin-tuc": "/en/news", "/san-pham": "/en/products", "/lien-he": "/en/contact" };
 function revalidateContentRoutes(route: string) { revalidatePath(route); if (englishRoute[route]) revalidatePath(englishRoute[route]); }
 
 function toItem(row: any): SiteContentItem {

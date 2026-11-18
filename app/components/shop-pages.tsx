@@ -67,11 +67,13 @@ export function ShopHeader({
 
 export function ShopHero({
   title = "Sản phẩm",
+  eyebrow = "GEDECO PRODUCTS",
   language = "vi",
   image = "/assets/banner-1.jpg",
   subtitle,
 }: {
   title?: string;
+  eyebrow?: string;
   language?: ShopLanguage;
   image?: string;
   subtitle?: string;
@@ -80,7 +82,7 @@ export function ShopHero({
   const english = language === "en";
   return (
     <InnerHero
-      eyebrow="GEDECO PRODUCTS"
+      eyebrow={eyebrow}
       title={
         isProductsLanding
           ? english
@@ -228,6 +230,8 @@ export function ShopShell({
   current = "Sản phẩm",
   language = "vi",
   heroImage,
+  heroTitle,
+  heroEyebrow,
   heroSubtitle,
   alternateEnglishPath,
   alternateVietnamesePath,
@@ -237,6 +241,8 @@ export function ShopShell({
   current?: string;
   language?: ShopLanguage;
   heroImage?: string;
+  heroTitle?: string;
+  heroEyebrow?: string;
   heroSubtitle?: string;
   alternateEnglishPath?: string | null;
   alternateVietnamesePath?: string | null;
@@ -273,7 +279,8 @@ export function ShopShell({
         />
         {hero && (
           <ShopHero
-            title={current}
+            title={heroTitle || current}
+            eyebrow={heroEyebrow}
             language={language}
             image={heroImage}
             subtitle={heroSubtitle}
