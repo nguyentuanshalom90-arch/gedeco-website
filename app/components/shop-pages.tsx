@@ -69,7 +69,7 @@ export function ShopHero({
   title = "Sản phẩm",
   eyebrow = "GEDECO PRODUCTS",
   language = "vi",
-  image = "/assets/banner-1.jpg",
+  image = "/assets/banner-1.optimized.webp",
   subtitle,
 }: {
   title?: string;

@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import type { GedecoProductDetail } from "@/app/data/product-details";
 import { sanitizeProductHtml } from "@/lib/sanitize-product-html";
+import { optimizedStaticMediaUrl } from "@/lib/static-media";
 
 export function toProductDetail(row: {
   slug: string; title: string; category: { name: string; slug: string; nameEn: string; slugEn: string };
@@ -12,14 +13,14 @@ export function toProductDetail(row: {
   robotsIndex: boolean; robotsFollow: boolean;
   gallery: Array<{ url: string; altText: string; caption: string; sortOrder: number }>;
 }): GedecoProductDetail {
-  const galleryMedia = row.gallery.sort((a, b) => a.sortOrder - b.sortOrder).map((item) => ({ url: item.url, altText: item.altText, caption: item.caption }));
+  const galleryMedia = row.gallery.sort((a, b) => a.sortOrder - b.sortOrder).map((item) => ({ url: optimizedStaticMediaUrl(item.url), altText: item.altText, caption: item.caption }));
   return {
     slug: row.slug,
     title: row.title,
     category: row.category.name,
     categorySlug: row.category.slug,
     categorySlugEn: row.category.slugEn,
-    image: row.imageUrl,
+    image: optimizedStaticMediaUrl(row.imageUrl),
     imageAlt: row.imageAlt || row.title,
     imageCaption: row.imageCaption,
     description: row.description,
@@ -29,10 +30,10 @@ export function toProductDetail(row: {
     summaryHtml: sanitizeProductHtml(row.summaryHtml),
     priceText: row.priceText,
     stockText: row.stockText,
-    shipperImage: row.shipperImageUrl,
+    shipperImage: optimizedStaticMediaUrl(row.shipperImageUrl),
     shipperImageAlt: row.shipperImageAlt || row.title,
     shipperImageCaption: row.shipperImageCaption,
-    ogImage: row.ogImageUrl || row.imageUrl,
+    ogImage: optimizedStaticMediaUrl(row.ogImageUrl || row.imageUrl),
     ogImageAlt: row.ogImageAlt || row.imageAlt || row.title,
     metaTitle: row.metaTitle || row.title,
     metaDescription: row.metaDescription || row.description,
@@ -101,20 +102,20 @@ function toEnglishView(row: any, entry?: any): EnglishProductView {
     category: row.category.nameEn,
     categorySlug: row.category.slug,
     categorySlugEn: row.category.slugEn,
-    image: row.imageUrl,
+    image: optimizedStaticMediaUrl(row.imageUrl),
     imageAlt: payloadString(payload, "imageAlt", row.imageAlt || payloadString(payload, "title", row.title)),
     imageCaption: payloadString(payload, "imageCaption", row.imageCaption || ""),
     description: payloadString(payload, "description", row.description),
     contentHtml: sanitizeProductHtml(payloadString(payload, "contentHtml", row.contentHtml)),
-    gallery: row.gallery.sort((a: any, b: any) => a.sortOrder - b.sortOrder).map((item: any) => item.url),
-    galleryMedia: row.gallery.sort((a: any, b: any) => a.sortOrder - b.sortOrder).map((item: any) => ({ url: item.url, altText: payloadString(payload, `galleryAlt_${item.id}`, item.altText), caption: payloadString(payload, `galleryCaption_${item.id}`, item.caption) })),
+    gallery: row.gallery.sort((a: any, b: any) => a.sortOrder - b.sortOrder).map((item: any) => optimizedStaticMediaUrl(item.url)),
+    galleryMedia: row.gallery.sort((a: any, b: any) => a.sortOrder - b.sortOrder).map((item: any) => ({ url: optimizedStaticMediaUrl(item.url), altText: payloadString(payload, `galleryAlt_${item.id}`, item.altText), caption: payloadString(payload, `galleryCaption_${item.id}`, item.caption) })),
     summaryHtml: sanitizeProductHtml(payloadString(payload, "summaryHtml", row.summaryHtml)),
     priceText: payloadString(payload, "priceText", row.priceText),
     stockText: payloadString(payload, "stockText", row.stockText),
-    shipperImage: row.shipperImageUrl,
+    shipperImage: optimizedStaticMediaUrl(row.shipperImageUrl),
     shipperImageAlt: payloadString(payload, "shipperImageAlt", row.shipperImageAlt || payloadString(payload, "title", row.title)),
     shipperImageCaption: payloadString(payload, "shipperImageCaption", row.shipperImageCaption || ""),
-    ogImage: row.ogImageUrl || row.imageUrl,
+    ogImage: optimizedStaticMediaUrl(row.ogImageUrl || row.imageUrl),
     ogImageAlt: payloadString(payload, "ogImageAlt", row.ogImageAlt || row.imageAlt || row.title),
     metaTitle: payloadString(payload, "metaTitle", row.metaTitle || row.title),
     metaDescription: payloadString(payload, "metaDescription", row.metaDescription || row.description),

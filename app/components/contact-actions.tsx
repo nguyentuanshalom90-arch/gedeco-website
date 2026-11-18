@@ -112,7 +112,7 @@ export function ContactActions({ english = false }: { english?: boolean }) {
           <img
             src={
               chrome["floating.zalo"]?.imageUrl ||
-              "/assets/contact-icons/zalo-chat.png"
+              "/assets/contact-icons/zalo-chat.optimized.webp"
             }
             alt={chrome["floating.zalo"]?.altText || "Zalo"}
           />

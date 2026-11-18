@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { chromeSeed } from "@/lib/dashboard/site-chrome-seed";
 import type { SiteChromeArea } from "@/lib/dashboard/site-chrome-types";
+import { optimizedStaticMediaUrl } from "@/lib/static-media";
 
 export async function GET(request: Request) {
   const searchParams = new URL(request.url).searchParams;
@@ -14,7 +15,7 @@ export async function GET(request: Request) {
   const existingKeys = new Set(rows.map((row) => `${row.sectionKey}.${row.fieldKey}`));
   for (const [seedArea, , sectionKey, fieldKey, , value, url, imageUrl, altText, isVisible] of chromeSeed) {
     const key = `${sectionKey}.${fieldKey}`;
-    if (seedArea === area && isVisible && !existingKeys.has(key)) values[key] = { value: english ? "" : value, url, imageUrl, altText: english ? "" : altText, caption: "" };
+    if (seedArea === area && isVisible && !existingKeys.has(key)) values[key] = { value: english ? "" : value, url, imageUrl: optimizedStaticMediaUrl(imageUrl), altText: english ? "" : altText, caption: "" };
   }
   for (const row of rows) {
     if (!row.isVisible) continue;
@@ -22,7 +23,7 @@ export async function GET(request: Request) {
     values[`${row.sectionKey}.${row.fieldKey}`] = {
       value: english ? (typeof payload?.value === "string" ? payload.value : "") : row.value,
       url: row.url ?? "",
-      imageUrl: row.imageUrl ?? "",
+      imageUrl: optimizedStaticMediaUrl(row.imageUrl),
       altText: english ? (typeof payload?.altText === "string" ? payload.altText : "") : row.altText ?? "",
       caption: english ? (typeof payload?.imageCaption === "string" ? payload.imageCaption : "") : row.imageCaption ?? "",
     };

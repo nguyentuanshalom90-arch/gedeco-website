@@ -18,6 +18,8 @@
     "test:seo": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/test-seo-regression.mjs",
     "test:dashboard": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/test-dashboard-auth-regression.mjs",
     "test:dashboard-actions": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/test-dashboard-action-security.mjs",
+    "media:static-webp": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/generate-static-webp.mjs",
+    "test:static-webp": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/test-static-webp-regression.mjs",
     "verify:production": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/verify-production-config.mjs"
   },
   "dependencies": {

@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { listEnglishArticles, visibleArticleWhere } from "@/lib/public-news";
+import { optimizedStaticMediaUrl } from "@/lib/static-media";
 
 export type FeaturedNewsItem = {
   id: string;
@@ -20,7 +21,7 @@ export async function getFeaturedNews(language: "vi" | "en"): Promise<FeaturedNe
       category: article.category,
       date: (article.source.publishedAt || article.source.scheduledAt || article.source.createdAt).toLocaleDateString("en-GB"),
       href: `/en/news/${article.slug}`,
-      imageUrl: article.source.imageUrl || "/assets/news-1-derivative.png",
+    imageUrl: article.source.imageUrl || "/assets/news-1.optimized.webp",
       imageAlt: article.imageAlt,
       imageCaption: article.imageCaption,
     }));
@@ -38,7 +39,7 @@ export async function getFeaturedNews(language: "vi" | "en"): Promise<FeaturedNe
     category: article.category,
     date: (article.publishedAt || article.scheduledAt || article.createdAt).toLocaleDateString("vi-VN"),
     href: `/tin-tuc/${article.slug}`,
-    imageUrl: article.imageUrl || "/assets/news-1-derivative.png",
+    imageUrl: optimizedStaticMediaUrl(article.imageUrl) || "/assets/news-1.optimized.webp",
     imageAlt: article.imageAlt || article.title,
     imageCaption: article.imageCaption || "",
   }));

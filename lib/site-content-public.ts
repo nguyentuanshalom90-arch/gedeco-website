@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { dynamicSeed } from "@/lib/dashboard/site-content-seed";
 import { ensureSiteContentSeeded } from "@/lib/site-content-seeding";
+import { optimizedStaticMediaUrl } from "@/lib/static-media";
 
 export async function getPublicSiteContent(pageKey: string, locale: "vi" | "en" = "vi") {
   await ensureSiteContentSeeded();
@@ -13,7 +14,7 @@ export async function getPublicSiteContent(pageKey: string, locale: "vi" | "en" 
   const dynamicRows = rows.filter((row) => row.kind === "DYNAMIC");
   const staticRows = rows.filter((row) => row.kind === "STATIC");
   const values = Object.fromEntries(dynamicRows.map((row) => [`${row.sectionKey}.${row.fieldKey}`, row.value]));
-  const media = Object.fromEntries(rows.filter((row) => row.imageUrl).map((row) => [`${row.kind === "STATIC" ? "static." : ""}${row.sectionKey}.${row.fieldKey}`, { url: row.imageUrl || "", altText: row.altText || "", caption: row.imageCaption || "" }]));
+  const media = Object.fromEntries(rows.filter((row) => row.imageUrl).map((row) => [`${row.kind === "STATIC" ? "static." : ""}${row.sectionKey}.${row.fieldKey}`, { url: optimizedStaticMediaUrl(row.imageUrl), altText: row.altText || "", caption: row.imageCaption || "" }]));
   for (const [seedPage, sectionKey, fieldKey, , value] of dynamicSeed) {
     const key = `DYNAMIC.${sectionKey}.${fieldKey}`;
     if (seedPage === pageKey && !existingKeys.has(key)) values[`${sectionKey}.${fieldKey}`] = value;

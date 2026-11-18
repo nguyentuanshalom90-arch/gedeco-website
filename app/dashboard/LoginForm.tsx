@@ -42,7 +42,7 @@ export function LoginForm() {
         </div>
         <form className={styles.authCard} onSubmit={submit}>
           <div className={styles.authBrandRow}>
-            <img className={styles.authCardLogo} src="/assets/logo-new.png" alt="GEDECO" width={120} height={120} />
+            <img className={styles.authCardLogo} src="/assets/logo-new.optimized.webp" alt="GEDECO" width={120} height={120} />
             <h1><span className={styles.welcomeText}>Chào mừng</span><span className={styles.dashboardText}>Quản trị GEDECO</span></h1>
           </div>
           <label className={styles.fieldLabel}>Tên đăng nhập

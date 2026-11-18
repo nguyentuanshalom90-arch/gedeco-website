@@ -29,9 +29,9 @@ export async function SharedContactPage({ language = "vi" }: { language?: "vi" |
     if (/^tel:\+?[0-9 ()-]{8,24}$/i.test(value)) return value;
     try { const url = new URL(value); return url.protocol === "https:" && !url.username && !url.password ? url.toString() : fallback; } catch { return fallback; }
   };
-  const hero = media("hero.image", "/assets/banner-1.jpg", "Liên hệ với GEDECO", "Contact GEDECO");
-  const intro = media("intro.image", "/assets/banner-2.jpg", "Sản phẩm và hoạt động thương mại của GEDECO", "GEDECO products and trade activities");
-  const map = media("location.image", "/assets/banner-2.jpg", "Bản đồ văn phòng GEDECO", "GEDECO office map");
+  const hero = media("hero.image", "/assets/banner-1.optimized.webp", "Liên hệ với GEDECO", "Contact GEDECO");
+  const intro = media("intro.image", "/assets/banner-2.optimized.webp", "Sản phẩm và hoạt động thương mại của GEDECO", "GEDECO products and trade activities");
+  const map = media("location.image", "/assets/banner-2.optimized.webp", "Bản đồ văn phòng GEDECO", "GEDECO office map");
   const cards: Array<[InnerIcon, string, string, string]> = [
     ["phone", text("cards.1.title", "Hotline tư vấn", "Advisory hotline"), text("cards.1.value", "0914 94 3653", "0914 94 3653"), text("cards.1.body", "Hỗ trợ nhanh chóng, tư vấn giải pháp phù hợp cho doanh nghiệp.", "Fast support and suitable solutions for businesses.")],
     ["mail", text("cards.2.title", "Email liên hệ", "Contact email"), text("cards.2.value", "info@gedeco.vn", "info@gedeco.vn"), text("cards.2.body", "Tiếp nhận yêu cầu, báo giá và hợp tác kinh doanh.", "Receiving enquiries, quotations and business cooperation.")],

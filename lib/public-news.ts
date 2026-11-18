@@ -1,5 +1,6 @@
 import type { NewsArticle, TranslationEntry } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
+import { optimizedStaticMediaUrl } from "@/lib/static-media";
 
 export function visibleArticleWhere() {
   return {
@@ -54,7 +55,7 @@ export function toEnglishArticle(source: NewsArticle, entry: TranslationEntry): 
   const slug = entry.slug?.trim();
   if (!title || !slug) return null;
   return {
-    source,
+    source: { ...source, imageUrl: optimizedStaticMediaUrl(source.imageUrl), ogImageUrl: optimizedStaticMediaUrl(source.ogImageUrl) },
     slug,
     title,
     category: text(payload, "category") || "News",

@@ -97,7 +97,7 @@ export default async function SupportPage({ page, language = 'vi' }: { page: Sup
   const text = (key: string, fallbackValue: string) => english ? (translated.has(key) ? content.values[key] || fallbackValue : fallbackValue) : content.values[key] || fallbackValue;
   const heroSource = content.media['hero.image'];
   const heroLocalized = !english || translated.has('hero.image');
-  const hero = { url: heroSource?.url || '/assets/banner-1.jpg', alt: heroLocalized ? heroSource?.altText || fallbackData.title : fallbackData.title, caption: heroLocalized ? heroSource?.caption || '' : '' };
+  const hero = { url: heroSource?.url || '/assets/banner-1.optimized.webp', alt: heroLocalized ? heroSource?.altText || fallbackData.title : fallbackData.title, caption: heroLocalized ? heroSource?.caption || '' : '' };
   const sections = fallbackData.sections.map((section, index) => {
     const key = `section.${index + 1}`;
     const fallbackLines = section.bullets || section.paragraphs || [];

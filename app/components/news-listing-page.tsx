@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { absoluteUrl, siteConfig } from "@/lib/site-config";
 import { getPublicSiteContent } from "@/lib/site-content-public";
 import { listEnglishArticles } from "@/lib/public-news";
+import { optimizedStaticMediaUrl } from "@/lib/static-media";
 
 export const dynamic = "force-dynamic";
 
@@ -36,12 +37,12 @@ export async function NewsListingPage({ language = "vi", searchParams }: { langu
   };
   const items = english
     ? enArticles.map((article) => ({ id: article.source.id, image: article.source.imageUrl || "/assets/news-1-derivative.png", category: article.category, date: (article.source.publishedAt || article.source.scheduledAt || article.source.createdAt).toLocaleDateString("en-GB"), title: article.title, href: `/en/news/${article.slug}`, excerpt: article.excerpt, imageAlt: article.imageAlt, imageCaption: article.imageCaption }))
-    : viArticles.map((article) => ({ id: article.id, image: article.imageUrl || "/assets/news-1-derivative.png", category: article.category.toLocaleUpperCase("vi"), date: (article.publishedAt || article.scheduledAt || article.createdAt).toLocaleDateString("vi-VN"), title: article.title, href: `/tin-tuc/${article.slug}`, excerpt: article.excerpt || "", imageAlt: article.imageAlt || article.title, imageCaption: article.imageCaption || "" }));
+    : viArticles.map((article) => ({ id: article.id, image: optimizedStaticMediaUrl(article.imageUrl) || "/assets/news-1.optimized.webp", category: article.category.toLocaleUpperCase("vi"), date: (article.publishedAt || article.scheduledAt || article.createdAt).toLocaleDateString("vi-VN"), title: article.title, href: `/tin-tuc/${article.slug}`, excerpt: article.excerpt || "", imageAlt: article.imageAlt || article.title, imageCaption: article.imageCaption || "" }));
   const pageCount = Math.max(1, Math.ceil(items.length / pageSize));
   const safePage = Math.min(currentPage, pageCount);
   const displayItems = items.slice((safePage - 1) * pageSize, safePage * pageSize);
-  const hero = media("hero.image", "/assets/banner-1.jpg", "Tin tức và hoạt động GEDECO", "GEDECO news and activities");
-  const cta = media("cta.image", "/assets/footer.jpg", "Kết nối cùng GEDECO", "Connect with GEDECO");
+  const hero = media("hero.image", "/assets/banner-1.optimized.webp", "Tin tức và hoạt động GEDECO", "GEDECO news and activities");
+  const cta = media("cta.image", "/assets/footer.optimized.webp", "Kết nối cùng GEDECO", "Connect with GEDECO");
   const listPath = english ? "/en/news" : "/tin-tuc";
   const queryKey = english ? "page" : "trang";
   const canonical = absoluteUrl(listPath);

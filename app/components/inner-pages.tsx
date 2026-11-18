@@ -574,7 +574,7 @@ export function InnerFooter({ language = "vi" }: { language?: "vi" | "en" }) {
           {show("brand.logo") && (
             <img
               src={
-                chrome["brand.logo"]?.imageUrl || "/assets/logo-new-footer.png"
+                chrome["brand.logo"]?.imageUrl || "/assets/logo-new-footer.optimized.webp"
               }
               alt={chrome["brand.logo"]?.altText || "GEDECO"}
             />

@@ -29,7 +29,7 @@ export const siteConfig = {
   defaultTitle: "GEDECO | Thương mại và xuất khẩu",
   defaultDescription: "GEDECO phát triển nguồn hàng Việt Nam và kết nối sản phẩm chất lượng với khách hàng, đối tác trong nước và quốc tế.",
   locale: "vi_VN",
-  logo: "/assets/logo-new.png",
+  logo: "/assets/logo-new.optimized.webp",
   email: "info@gedeco.vn",
   phone: "0914943653",
   address:

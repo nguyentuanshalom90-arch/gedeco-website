@@ -85,7 +85,7 @@ export function BimiSidebar({ tab, onSelectTab, onLogout }: BimiSidebarProps) {
           }}
         >
           <img
-            src="/assets/logo-new.png"
+            src="/assets/logo-new.optimized.webp"
             alt="GEDECO"
             style={{ width: "92%", height: "92%", objectFit: "contain" }}
           />
