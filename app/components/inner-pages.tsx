@@ -822,7 +822,7 @@ export function CTA({
 
 export function NewsCard({
   item,
-  href = "/tin-tuc/chi-tiet",
+  href = "/tin-tuc",
   excerpt = "",
   readLabel = "Đọc thêm",
   imageAlt,
