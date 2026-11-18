@@ -4,12 +4,12 @@ WHERE "entityType" = 'SITE_CONTENT'
   AND "entityId" IN (
     SELECT "id" FROM "SiteDynamicContent"
     WHERE "pageKey" IN ('doi-tac', 'du-an')
-       OR ("kind" = 'STATIC' AND "pageKey" = 'home' AND "sectionKey" = 'navigation' AND "fieldKey" = 'partners')
+       OR ("pageKey" = 'home' AND "sectionKey" = 'navigation' AND "fieldKey" = 'partners')
   );
 
 DELETE FROM "SiteDynamicContent"
 WHERE "pageKey" IN ('doi-tac', 'du-an')
-   OR ("kind" = 'STATIC' AND "pageKey" = 'home' AND "sectionKey" = 'navigation' AND "fieldKey" = 'partners');
+   OR ("pageKey" = 'home' AND "sectionKey" = 'navigation' AND "fieldKey" = 'partners');
 
 DELETE FROM "SiteContentPage" WHERE "pageKey" IN ('doi-tac', 'du-an');
 
