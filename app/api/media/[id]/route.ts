@@ -41,3 +41,18 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     return Response.json({ error: "Không tìm thấy media." }, { status: 404 });
   }
 }
+
+export async function DELETE(_request: Request, { params }: { params: Promise<{ id: string }> }) {
+  try {
+    await requireDashboardSession();
+  } catch (error) {
+    return Response.json({ error: error instanceof Error ? error.message : "Chưa đăng nhập." }, { status: 401 });
+  }
+  const { id } = await params;
+  try {
+    const asset = await prisma.mediaAsset.update({ where: { id }, data: { archivedAt: new Date() } });
+    return Response.json({ ok: true, id: asset.id });
+  } catch {
+    return Response.json({ error: "Không tìm thấy media." }, { status: 404 });
+  }
+}

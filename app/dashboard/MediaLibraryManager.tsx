@@ -99,6 +99,26 @@ export function MediaLibraryManager() {
     }
   }
 
+  async function archiveSelected() {
+    if (!selected || busy) return;
+    if (!window.confirm(`Ẩn “${selected.name}” khỏi thư viện? File gốc và các URL đang dùng sẽ được giữ nguyên.`)) return;
+    setBusy(true);
+    setError("");
+    setMessage("");
+    try {
+      const response = await fetch(`/api/media/${selected.id}`, { method: "DELETE" });
+      const payload = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(payload.error || "Không thể ẩn media.");
+      setAssets((current) => current.filter((asset) => asset.id !== selected.id));
+      setSelected(null);
+      setMessage("Đã ẩn media khỏi thư viện. File gốc và URL cũ vẫn được bảo toàn.");
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : "Không thể ẩn media.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
   return (
     <section className="media-library-manager">
       <input ref={inputRef} hidden type="file" accept="image/png,image/jpeg,image/webp" onChange={upload} />
@@ -147,7 +167,7 @@ export function MediaLibraryManager() {
             <label className="field"><span>Alt text <small>{selected.altText.length}/300</small></span><input className="input" maxLength={300} value={selected.altText} onChange={(event) => setSelected((current) => current ? { ...current, altText: event.target.value } : current)} placeholder="Mô tả nội dung và mục đích của ảnh" /></label>
             <label className="field"><span>Caption <small>{selected.caption.length}/500</small></span><textarea className="input" maxLength={500} rows={4} value={selected.caption} onChange={(event) => setSelected((current) => current ? { ...current, caption: event.target.value } : current)} placeholder="Chú thích hiển thị khi vị trí sử dụng hỗ trợ caption" /></label>
             <p className="cms-help">File gốc được giữ nguyên; website phân phối bản WebP tối ưu qua cùng một URL media.</p>
-            <button type="button" className="btn btn-primary media-library-save" onClick={() => void saveMetadata()} disabled={busy}><Icon name="check" size={16} /> {busy ? "Đang lưu…" : "Lưu alt và caption"}</button>
+            <div className="media-library-actions"><button type="button" className="btn btn-primary media-library-save" onClick={() => void saveMetadata()} disabled={busy}><Icon name="check" size={16} /> {busy ? "Đang lưu…" : "Lưu alt và caption"}</button><button type="button" className="btn cms-danger" onClick={() => void archiveSelected()} disabled={busy}>Ẩn khỏi thư viện</button></div>
           </> : <p className="cms-empty">Chọn một media để xem và chỉnh metadata.</p>}
         </aside>
       </div>

@@ -16,7 +16,7 @@ export async function GET() {
   } catch (error) {
     return Response.json({ error: error instanceof Error ? error.message : "Chưa đăng nhập." }, { status: 401 });
   }
-  const assets = await prisma.mediaAsset.findMany({ orderBy: { createdAt: "desc" }, take: 100 });
+  const assets = await prisma.mediaAsset.findMany({ where: { archivedAt: null }, orderBy: { createdAt: "desc" }, take: 100 });
   return Response.json({
     assets: assets.map((asset) => ({ id: asset.id, name: asset.originalName, url: `/api/media/${asset.id}`, width: asset.width, height: asset.height, altText: asset.altText, caption: asset.caption })),
   });

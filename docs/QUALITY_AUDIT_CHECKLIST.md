@@ -7,7 +7,7 @@ Cập nhật: 2026-11-18. Trạng thái dùng bốn mức: `PASS`, `ĐANG LÀM`,
 | Hạng mục | Tiêu chí nghiệm thu | Trạng thái |
 |---|---|---|
 | Xác thực dashboard | Phiên ký ở server, cookie HttpOnly, route/API/server action đều kiểm tra quyền | PASS local |
-| Media library | Giữ file gốc, WebP derivative, MIME thật, tên ngẫu nhiên, storage persistent, alt/caption | PASS local; CHỜ LIVE migration |
+| Media library | Giữ file gốc, WebP derivative, MIME thật, tên ngẫu nhiên, storage persistent, alt/caption, soft-delete an toàn | PASS local; CHỜ LIVE migration |
 | Sản phẩm | Create/read/update/delete; nháp không lộ; nội dung và trạng thái ra frontend ngay | PASS local |
 | Media sản phẩm | Mọi vị trí có `Chọn từ thư viện` và `Tải ảnh lên`; ảnh chính/album có alt/caption | PASS local |
 | SEO sản phẩm | Title, description, canonical, robots, OG image, hreflang, Product/Breadcrumb JSON-LD | PASS local |

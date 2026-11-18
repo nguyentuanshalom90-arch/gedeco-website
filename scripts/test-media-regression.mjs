@@ -127,6 +127,16 @@ try {
     await verifyAsset(cookie, uploaded, fixture);
   }
 
+  const archivedId = createdIds[0];
+  const archiveResponse = await fetch(`${baseUrl}/api/media/${archivedId}`, { method: "DELETE", headers: { Cookie: cookie } });
+  assert.equal(archiveResponse.status, 200, "DELETE media thất bại.");
+  const archived = await prisma.mediaAsset.findUnique({ where: { id: archivedId } });
+  assert(archived?.archivedAt, "DELETE media phải lưu archivedAt thay vì xóa vật lý.");
+  const libraryAfterArchive = await fetch(`${baseUrl}/api/media`, { headers: { Cookie: cookie } }).then((response) => response.json());
+  assert(!libraryAfterArchive.assets?.some((asset) => asset.id === archivedId), "Media đã ẩn vẫn xuất hiện trong thư viện.");
+  const archivedUrl = await fetch(`${baseUrl}/api/media/${archivedId}`);
+  assert.equal(archivedUrl.status, 200, "URL media cũ phải tiếp tục hoạt động sau soft-delete.");
+
   const fakeBody = new FormData();
   fakeBody.append("file", new File([Buffer.from("not-an-image")], "qa-fake.png", { type: "image/png" }));
   const fakeResponse = await fetch(`${baseUrl}/api/media`, { method: "POST", headers: { Cookie: cookie }, body: fakeBody });
@@ -136,7 +146,7 @@ try {
   assert.match(mediaStorageErrorMessage(Object.assign(new Error("private path"), { code: "ENOSPC" })), /Dung lượng/);
   assert.match(mediaStorageErrorMessage(Object.assign(new Error("private path"), { code: "EDQUOT" })), /quota/);
   assert(!mediaStorageErrorMessage(new Error("C:\\secret\\uploads")).includes("secret"), "Thông báo lỗi không được lộ đường dẫn storage.");
-  console.log("MEDIA_REGRESSION_PASS png jpeg webp alpha fake-mime zero-byte enoent eacces enospc edquot metadata");
+  console.log("MEDIA_REGRESSION_PASS png jpeg webp alpha fake-mime zero-byte enoent eacces enospc edquot metadata soft-delete");
 } finally {
   if (createdIds.length) await prisma.mediaAsset.deleteMany({ where: { id: { in: createdIds } } });
   await Promise.allSettled([...createdPaths].map((filename) => fs.unlink(filename)));

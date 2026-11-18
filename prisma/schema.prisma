@@ -118,6 +118,7 @@ model MediaAsset {
   sizeBytes     Int
   altText       String   @default("")
   caption       String   @default("")
+  archivedAt    DateTime?
   createdAt     DateTime @default(now())
   updatedAt     DateTime @default(now()) @updatedAt
 }
