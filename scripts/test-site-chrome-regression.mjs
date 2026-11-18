@@ -1,4 +1,6 @@
-import { PrismaClient } from "@prisma/client";
+import prismaPackage from "@prisma/client";
+
+const { PrismaClient } = prismaPackage;
 
 const prisma = new PrismaClient();
 const baseUrl = process.env.TEST_BASE_URL || "http://localhost:3000";

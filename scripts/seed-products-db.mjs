@@ -1,6 +1,8 @@
 import fs from "node:fs";
 import crypto from "node:crypto";
-import { PrismaClient } from "@prisma/client";
+import prismaPackage from "@prisma/client";
+
+const { PrismaClient } = prismaPackage;
 
 const source = fs.readFileSync(new URL("../app/data/product-details.ts", import.meta.url), "utf8");
 const match = source.match(/gedecoProductDetails:\s*GedecoProductDetail\[\]\s*=\s*([\s\S]*);\s*$/m) || source.match(/gedecoProductDetails\s*=\s*([\s\S]*);\s*$/m);

@@ -2,7 +2,9 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import assert from "node:assert/strict";
 import sharp from "sharp";
-import { PrismaClient } from "@prisma/client";
+import prismaPackage from "@prisma/client";
+
+const { PrismaClient } = prismaPackage;
 import { mediaStorageErrorMessage } from "../lib/media-errors.ts";
 
 const projectRoot = process.cwd();

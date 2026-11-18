@@ -1,7 +1,9 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import assert from "node:assert/strict";
-import { PrismaClient } from "@prisma/client";
+import prismaPackage from "@prisma/client";
+
+const { PrismaClient } = prismaPackage;
 import { validateOfficialCanonical } from "../lib/dashboard/canonical-url.ts";
 
 const projectRoot = process.cwd();
