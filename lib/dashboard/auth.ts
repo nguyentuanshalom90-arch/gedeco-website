@@ -53,11 +53,11 @@ export function verifyDashboardSession(value?: string | null): SessionPayload | 
   if (!value) return null;
   const [payload, signature, extra] = value.split(".");
   if (!payload || !signature || extra) return null;
-  const { secret } = credentials();
-  if (!safeEqual(signature, sign(payload, secret))) return null;
+  const expected = credentials();
+  if (!safeEqual(signature, sign(payload, expected.secret))) return null;
   try {
     const parsed = JSON.parse(Buffer.from(payload, "base64url").toString("utf8")) as SessionPayload;
-    if (!parsed.username || !Number.isFinite(parsed.expiresAt) || parsed.expiresAt <= Math.floor(Date.now() / 1000)) return null;
+    if (!parsed.username || !safeEqual(parsed.username, expected.username) || !Number.isFinite(parsed.expiresAt) || parsed.expiresAt <= Math.floor(Date.now() / 1000)) return null;
     return parsed;
   } catch {
     return null;
