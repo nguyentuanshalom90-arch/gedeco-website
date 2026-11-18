@@ -1,6 +1,6 @@
 # Checklist chất lượng backend, database, frontend và SEO
 
-Cập nhật: 2026-11-17. Trạng thái dùng bốn mức: `PASS`, `ĐANG LÀM`, `THIẾU`, `CHỜ LIVE`.
+Cập nhật: 2026-11-18. Trạng thái dùng bốn mức: `PASS`, `ĐANG LÀM`, `THIẾU`, `CHỜ LIVE`.
 
 ## 1. Chuỗi dữ liệu admin → database → frontend
 
@@ -16,11 +16,11 @@ Cập nhật: 2026-11-17. Trạng thái dùng bốn mức: `PASS`, `ĐANG LÀM`,
 | Danh mục bài viết | CRUD, SEO VI/EN, slug/canonical riêng, liên kết bài viết, xóa an toàn | PASS local; CHỜ LIVE migration |
 | English bài viết | Nội dung, metadata, media alt/caption, slug và route English lấy từ TranslationEntry | PASS local |
 | Page tùy biến | CRUD section bằng form trực quan; media đầy đủ; draft/publish; SEO; song ngữ | PASS local; CHỜ provider/live migration |
-| Nội dung page hiện hữu | Mọi section frontend đọc database; không ghi file release khi production | ĐANG LÀM: Giới thiệu và Liên hệ VI/EN đã nối đầy đủ; còn Trang chủ |
-| Header/footer | CRUD database, media, link, alt, song ngữ, render toàn site | ĐANG LÀM |
-| Bản dịch | Có trạng thái, lỗi không ghi đè/ẩn bản tốt, cho phép sửa thủ công, slug unique theo entity + locale | PASS product/news local; còn page audit |
+| Nội dung page hiện hữu | Mọi section frontend đọc database; không ghi file release khi production | PASS local cho Home, Giới thiệu và Liên hệ; CHỜ LIVE migration |
+| Header/footer | CRUD database, media, link, alt, song ngữ, render toàn site | PASS local; CHỜ LIVE migration |
+| Bản dịch | Có trạng thái, lỗi không ghi đè/ẩn bản tốt, cho phép sửa thủ công, slug unique theo entity + locale | PASS local product/news/page |
 | Toàn vẹn giao dịch | Ghi entity và quan hệ media trong transaction; unique/foreign key/validation | PASS sản phẩm; cần rà các module còn lại |
-| Kiểm thử hồi quy | CRUD + render + upload lỗi MIME/EACCES/ENOENT/quota/0 byte + song ngữ | THIẾU |
+| Kiểm thử hồi quy | CRUD + render + upload lỗi MIME/EACCES/ENOENT/quota/0 byte + song ngữ | PASS local; còn nghiệm thu live |
 
 ## 2. SEO theo Google Search Central
 
@@ -37,17 +37,17 @@ Nguồn chuẩn:
 
 | Nhóm | Tiêu chí | Trạng thái |
 |---|---|---|
-| Crawl/index | HTTP 200 đúng trang; 404 thật; draft/noindex; robots không chặn tài nguyên render | ĐANG LÀM |
+| Crawl/index | HTTP 200 đúng trang; 404 thật; draft/noindex; robots không chặn tài nguyên render | PASS local; CHỜ production crawl |
 | Canonical | Self-canonical tuyệt đối/không mâu thuẫn; HTTP/www về HTTPS apex | PASS cấu hình; CHỜ LIVE regression |
 | Sitemap | Chỉ URL canonical/indexable; có sản phẩm, bài, category, page, VI–EN và lastModified thật; cập nhật động sau CRUD | PASS local |
 | Hreflang | Cặp VI/EN hai chiều và x-default; canonical cùng ngôn ngữ | PASS sản phẩm/news/page tùy biến/static local |
-| Metadata | Title/description riêng từng URL; robots; OG/Twitter; không trùng hàng loạt | ĐANG LÀM |
-| Structured data | Organization, Breadcrumb, Article, Product hợp lệ và khớp nội dung nhìn thấy | PASS product/news local; còn audit page toàn site |
-| Hình ảnh | Ảnh chất lượng gần nội dung liên quan; alt mô tả; caption; WebP derivative; width/height khi phù hợp | PASS product/news local; còn audit page toàn site |
+| Metadata | Title/description riêng từng URL; robots; OG/Twitter; không trùng hàng loạt | PASS local; cần editorial review |
+| Structured data | Organization, Breadcrumb, Article, Product hợp lệ và khớp nội dung nhìn thấy | PASS local cho template chính; CHỜ Rich Results production |
+| Hình ảnh | Ảnh chất lượng gần nội dung liên quan; alt mô tả; caption; WebP derivative; width/height khi phù hợp | PASS local; CHỜ kiểm tra persistent media live |
 | Nội dung | Hữu ích, nguyên bản, cập nhật, heading rõ; không keyword stuffing/meta keywords | ĐANG LÀM |
 | Internal links | Link crawl được, anchor mô tả, không orphan page, breadcrumb nhất quán | THIẾU audit toàn site |
 | Core Web Vitals | LCP ≤ 2,5 giây; INP < 200 ms; CLS < 0,1 ở percentile 75 | THIẾU đo field data/Search Console |
-| Mobile/a11y | Responsive, không overflow, keyboard/focus, tên truy cập, contrast/heading hợp lý | ĐANG LÀM |
+| Mobile/a11y | Responsive, không overflow, keyboard/focus, tên truy cập, contrast/heading hợp lý | PASS local; còn screenshot dashboard đầy đủ |
 | Search Console | Property, sitemap, index coverage, enhancement, CWV, manual actions | CHỜ quyền truy cập live |
 
 ## 3. Admin UI/UX
@@ -66,6 +66,7 @@ Nguồn chuẩn:
 - Build production local PASS; TypeScript và Prisma validate PASS.
 - QA tạm đã chứng minh English listing/detail/category đọc đúng `TranslationEntry` và trường English của `NewsCategory`; không fallback nội dung tiếng Việt.
 - Canonical, hreflang VI/EN/x-default, Article + Breadcrumb JSON-LD, alt/caption và sitemap động đều được kiểm tra trên HTTP 200.
+- Regression `test:site-chrome` còn xác nhận sửa `home.hero.title` trong PostgreSQL xuất hiện trong API và HTML homepage server-rendered; dữ liệu được khôi phục trong `finally`.
 - Screenshot Chrome desktop/mobile PASS cho article English và admin category. Sidebar admin mobile được thu gọn mặc định để nội dung tác vụ xuất hiện trước; dữ liệu QA đã được xóa sau kiểm tra.
 
 ### Bằng chứng audit danh mục sản phẩm ngày 2026-11-17

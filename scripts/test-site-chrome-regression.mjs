@@ -8,6 +8,7 @@ const token = Date.now().toString(36);
 let row;
 let translation;
 let contentRow;
+let contentOriginal;
 
 function assert(condition, message) {
   if (!condition) throw new Error(message);
@@ -51,13 +52,18 @@ try {
   const expectedNews = await prisma.newsArticle.findFirst({ where: { status: "PUBLISHED", OR: [{ publishedAt: null }, { publishedAt: { lte: new Date() } }] }, orderBy: [{ isFeatured: "desc" }, { publishedAt: "desc" }, { createdAt: "desc" }] });
   if (expectedNews) assert(featured.items?.some((item) => item.id === expectedNews.id), "Sidebar sản phẩm không lấy tin nổi bật thật từ database.");
 
-  contentRow = await prisma.siteDynamicContent.findFirst({ where: { pageKey: "home", kind: "DYNAMIC", isVisible: true }, orderBy: [{ sortOrder: "asc" }, { sectionKey: "asc" }] });
-  assert(contentRow, "Thiếu row SiteContent để kiểm tra visibility.");
+  contentRow = await prisma.siteDynamicContent.findUnique({ where: { kind_pageKey_sectionKey_fieldKey: { kind: "DYNAMIC", pageKey: "home", sectionKey: "hero", fieldKey: "title" } } });
+  assert(contentRow?.isVisible, "Thiếu row SiteContent home.hero.title để kiểm tra database → frontend.");
+  contentOriginal = contentRow.value;
   const contentResponse = await fetch(`${baseUrl}/api/site-content?page=home&locale=vi`);
   assert(contentResponse.status === 200, `API site-content trả ${contentResponse.status}.`);
   const beforeHidden = await contentResponse.json();
   const contentKey = `${contentRow.sectionKey}.${contentRow.fieldKey}`;
   assert(beforeHidden.values?.[contentKey] === contentRow.value, "SiteContent visible không đi từ database ra API.");
+  const homepageQa = `HOME QA ${token}`;
+  await prisma.siteDynamicContent.update({ where: { id: contentRow.id }, data: { value: homepageQa } });
+  const homepageHtml = await fetch(`${baseUrl}/`, { headers: { "Cache-Control": "no-cache" } }).then((response) => response.text());
+  assert(homepageHtml.includes(homepageQa), "Thay đổi SiteContent home.hero.title chưa xuất hiện trong HTML frontend server-rendered.");
   await prisma.siteDynamicContent.update({ where: { id: contentRow.id }, data: { isVisible: false } });
   const hiddenResponse = await fetch(`${baseUrl}/api/site-content?page=home&locale=vi`);
   const hiddenPayload = await hiddenResponse.json();
@@ -67,6 +73,6 @@ try {
 } finally {
   if (row) await prisma.siteChromeContent.update({ where: { id: row.id }, data: { value: row.value, isVisible: row.isVisible } });
   if (translation) await prisma.translationEntry.update({ where: { id: translation.id }, data: { payload: translation.payload, status: translation.status, manualOverride: translation.manualOverride, provider: translation.provider, errorMessage: translation.errorMessage, sourceHash: translation.sourceHash, sourceUpdatedAt: translation.sourceUpdatedAt, translatedAt: translation.translatedAt, reviewedAt: translation.reviewedAt } });
-  if (contentRow) await prisma.siteDynamicContent.update({ where: { id: contentRow.id }, data: { isVisible: contentRow.isVisible } });
+  if (contentRow) await prisma.siteDynamicContent.update({ where: { id: contentRow.id }, data: { value: contentOriginal ?? contentRow.value, isVisible: contentRow.isVisible } });
   await prisma.$disconnect();
 }
