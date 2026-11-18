@@ -77,9 +77,9 @@ export function MediaPicker({ label, value, altText = "", caption = "", onSelect
         <button type="button" className="drop" onClick={() => inputRef.current?.click()} disabled={busy}><Icon name="upload" size={20} /><strong>{busy ? "Đang xử lý…" : "Tải ảnh lên"}</strong></button>
       </div>
       {error ? <p className="cms-help error">{error}</p> : null}
-      {libraryOpen ? <div className="post-media-library">
-        <div className="post-media-library-head"><strong>Thư viện media</strong><button type="button" className="btn" onClick={() => setLibraryOpen(false)}>Đóng</button></div>
-        {busy ? <p>Đang tải ảnh…</p> : assets.length ? <div className="post-media-grid">{assets.map((asset) => <button type="button" key={asset.id} onClick={() => { onSelect(asset); setLibraryOpen(false); }}><img src={asset.url} alt={asset.altText || asset.name} /><span>{asset.name}</span></button>)}</div> : <p>Chưa có ảnh trong thư viện.</p>}
+      {libraryOpen ? <div className="post-media-library" role="dialog" aria-modal="true" aria-label="Thư viện media">
+        <div className="post-media-library-head"><strong>Thư viện media</strong><button type="button" className="btn" aria-label="Đóng thư viện media" onClick={() => setLibraryOpen(false)}>Đóng</button></div>
+        {busy ? <p>Đang tải ảnh…</p> : assets.length ? <div className="post-media-grid">{assets.map((asset) => <button type="button" key={asset.id} aria-label={`Chọn media ${asset.name}`} onClick={() => { onSelect(asset); setLibraryOpen(false); }}><img src={asset.url} alt={asset.altText || asset.name} /><span>{asset.name}</span></button>)}</div> : <p>Chưa có ảnh trong thư viện.</p>}
       </div> : null}
     </div>
   );
