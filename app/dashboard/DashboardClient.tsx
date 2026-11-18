@@ -162,6 +162,16 @@ export function DashboardClient({
                 <strong>Thư viện media</strong>
                 <p>Tìm ảnh, tải lên và quản lý alt text/caption dùng toàn website.</p>
               </button>
+              <button type="button" className="panel" onClick={() => selectTab("products")}>
+                <span>07</span>
+                <strong>Quản lý sản phẩm</strong>
+                <p>Chỉnh nội dung, danh mục, media, song ngữ và SEO sản phẩm.</p>
+              </button>
+              <button type="button" className="panel" onClick={() => selectTab("pages")}>
+                <span>08</span>
+                <strong>Quản lý page</strong>
+                <p>Soạn section, bản dịch và metadata cho các page trong menu.</p>
+              </button>
             </div>
           </section>
         )}
