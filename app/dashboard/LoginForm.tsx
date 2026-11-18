@@ -41,19 +41,19 @@ export function LoginForm() {
             <Image className={styles.brandLogo} src="/vimigo-admin-logo.webp" alt="Vimigo.vn" width={346} height={248} />
           </a>
         </div>
-        <form className={styles.authCard} onSubmit={submit}>
+        <form className={styles.authCard} onSubmit={submit} aria-busy={busy}>
           <div className={styles.authBrandRow}>
             <Image className={styles.authCardLogo} src="/assets/logo-new.optimized.webp" alt="GEDECO" width={1317} height={1194} />
             <h1><span className={styles.welcomeText}>Chào mừng</span><span className={styles.dashboardText}>Quản trị GEDECO</span></h1>
           </div>
           <label className={styles.fieldLabel}>Tên đăng nhập
-            <input className={styles.input} type="text" value={username} onChange={(event) => setUsername(event.target.value)} autoComplete="username" autoFocus required />
+            <input className={styles.input} type="text" value={username} onChange={(event) => setUsername(event.target.value)} autoComplete="username" autoFocus required disabled={busy} />
           </label>
           <label className={styles.fieldLabel}>Mật khẩu
-            <input className={styles.input} type="password" value={password} onChange={(event) => setPassword(event.target.value)} autoComplete="current-password" required />
+            <input className={styles.input} type="password" value={password} onChange={(event) => setPassword(event.target.value)} autoComplete="current-password" required disabled={busy} />
           </label>
-          {error ? <p className={styles.error}>{error}</p> : null}
-          <button className={styles.primaryButton} disabled={busy}>{busy ? "Đang đăng nhập…" : "Mở trang quản trị"}</button>
+          {error ? <p className={styles.error} role="alert">{error}</p> : null}
+          <button type="submit" className={styles.primaryButton} disabled={busy}>{busy ? "Đang đăng nhập…" : "Mở trang quản trị"}</button>
         </form>
       </div>
     </main>
