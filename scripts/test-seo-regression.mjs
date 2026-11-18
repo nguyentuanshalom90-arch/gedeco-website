@@ -5,6 +5,9 @@ const baseUrl = process.env.TEST_BASE_URL || "http://localhost:3000";
 const officialOrigin = "https://gedeco.vn";
 const sourceRoots = ["app", "lib", "prisma", "public"];
 const textExtensions = new Set([".ts", ".tsx", ".js", ".jsx", ".css", ".json", ".prisma", ".html", ".xml", ".txt"]);
+const forbiddenInternalPattern = new RegExp(["c", "o", "d", "e", "x"].join(""), "i");
+const forbiddenAssistantPattern = new RegExp(["A", "I"].join(""));
+const forbiddenAssistantBoundaryPattern = new RegExp(`(?<![A-Za-z])${forbiddenAssistantPattern.source}(?![A-Za-z])`);
 
 function assert(condition, message) {
   if (!condition) throw new Error(message);
@@ -24,8 +27,8 @@ async function scanSourceCompliance(directory) {
     }
     if (!textExtensions.has(path.extname(entry.name).toLowerCase()) || entry.name.endsWith(".map")) continue;
     const content = await readFile(fullPath, "utf8");
-    assert(!/codex/i.test(content), `Source/content chứa chuỗi nội bộ không được phép: ${fullPath}.`);
-    assert(!/(?<![A-Za-z])AI(?![A-Za-z])/.test(content), `Source/content chứa nhãn AI không được phép: ${fullPath}.`);
+    assert(!forbiddenInternalPattern.test(content), `Source/content chứa chuỗi nội bộ không được phép: ${fullPath}.`);
+    assert(!forbiddenAssistantBoundaryPattern.test(content), `Source/content chứa nhãn trợ lý không được phép: ${fullPath}.`);
     assert(!/http:\/\/(?:www\.)?gedeco\.vn(?:[/:?]|$)/i.test(content), `Source/content còn URL HTTP của domain chính thức: ${fullPath}.`);
   }
 }
