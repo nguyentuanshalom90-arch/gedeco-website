@@ -8,6 +8,7 @@ import { recordPermanentRedirect } from "@/lib/url-redirects";
 import { revalidatePath } from "next/cache";
 import { requireDashboardSession } from "./auth";
 import { validateOfficialCanonical } from "./canonical-url";
+import { validateManagedMediaUrl } from "./media-url";
 import type { ProductInput, ProductListItem } from "./product-types";
 
 function slugify(value: string) {
@@ -94,6 +95,7 @@ export async function saveProduct(input: ProductInput) {
   if (!slug) throw new Error("Slug sản phẩm không hợp lệ.");
   if (input.imageUrl.trim() && !input.imageAlt.trim()) throw new Error("Ảnh chính phải có alt text.");
   if (input.shipperImageUrl.trim() && !input.shipperImageAlt.trim()) throw new Error("Ảnh giao hàng phải có alt text.");
+  if (input.ogImageUrl.trim() && !input.ogImageAlt.trim()) throw new Error("Ảnh Open Graph phải có alt text.");
   if (input.metaTitle.trim().length > 65) throw new Error("SEO title không vượt quá 65 ký tự.");
   if (input.metaDescription.trim().length > 160) throw new Error("Meta description không vượt quá 160 ký tự.");
   if (input.translationMode === "MANUAL") {
@@ -107,7 +109,7 @@ export async function saveProduct(input: ProductInput) {
   const category = await prisma.productCategory.findUnique({ where: { id: input.categoryId } });
   if (!category) throw new Error("Danh mục sản phẩm không tồn tại.");
   const gallery = input.gallery.filter((item) => item.url.trim()).map((item, index) => ({
-    url: item.url.trim(),
+    url: validateManagedMediaUrl(item.url, `Ảnh album ${index + 1}`) || "",
     altText: item.altText.trim() || title,
     caption: item.caption.trim(),
     sortOrder: index,
@@ -124,13 +126,13 @@ export async function saveProduct(input: ProductInput) {
     summaryHtml: sanitizeProductHtml(input.summaryHtml),
     priceText: input.priceText.trim() || "Liên hệ",
     stockText: input.stockText.trim() || "Còn hàng",
-    imageUrl: input.imageUrl.trim(),
+    imageUrl: validateManagedMediaUrl(input.imageUrl, "Ảnh chính") || "",
     imageAlt: input.imageAlt.trim(),
     imageCaption: input.imageCaption.trim(),
-    shipperImageUrl: input.shipperImageUrl.trim(),
+    shipperImageUrl: validateManagedMediaUrl(input.shipperImageUrl, "Ảnh giao hàng") || "",
     shipperImageAlt: input.shipperImageAlt.trim(),
     shipperImageCaption: input.shipperImageCaption.trim(),
-    ogImageUrl: input.ogImageUrl.trim(),
+    ogImageUrl: validateManagedMediaUrl(input.ogImageUrl, "Ảnh Open Graph") || "",
     ogImageAlt: input.ogImageAlt.trim(),
     metaTitle: optional(input.metaTitle),
     metaDescription: optional(input.metaDescription),

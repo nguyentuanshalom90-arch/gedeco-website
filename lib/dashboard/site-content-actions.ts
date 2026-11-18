@@ -6,6 +6,7 @@ import { syncSiteContentTranslation } from "@/lib/translation-service";
 import { requireDashboardSession } from "./auth";
 import { ensureSiteContentSeeded } from "@/lib/site-content-seeding";
 import { revalidatePath } from "next/cache";
+import { validateManagedMediaUrl } from "./media-url";
 
 const dbKind = (kind: SiteContentKind) => kind === "static" ? "STATIC" as const : "DYNAMIC" as const;
 const englishRoute: Record<string, string> = { "/": "/en", "/gioi-thieu": "/en/about", "/tin-tuc": "/en/news", "/san-pham": "/en/products", "/lien-he": "/en/contact" };
@@ -94,7 +95,7 @@ export async function saveSiteContent(kind: SiteContentKind, input: SiteContentI
     value: input.value,
     contentType: input.contentType,
     headingLevel: input.headingLevel || null,
-    imageUrl: input.imageUrl.trim() || null,
+    imageUrl: validateManagedMediaUrl(input.imageUrl, "Ảnh nội dung"),
     altText: input.altText.trim() || null,
     imageCaption: input.imageCaption.trim() || null,
     isVisible: input.isVisible,
