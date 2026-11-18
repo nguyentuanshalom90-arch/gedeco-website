@@ -5,7 +5,7 @@ Tài liệu này áp dụng cho production duy nhất: `https://gedeco.vn/`. Kh�
 ## 1. Preflight bắt buộc
 
 - [ ] Branch đã commit và push; commit release khớp remote.
-- [ ] Chạy `npm ci`, `npm run prisma:generate`, `npm run build`.
+- [ ] Chạy `npm ci`, `npm run prisma:validate`, `npm run prisma:generate`, `npm run build`; Prisma 7 đọc connection URL từ `prisma.config.ts` và dùng PostgreSQL driver adapter trong runtime.
 - [ ] Chạy toàn bộ regression: `test:media`, `test:news`, `test:products`, `test:chrome`, `test:seo`, `test:dashboard`, `test:dashboard-actions`.
 - [ ] Chạy `npm run verify:production` bằng secrets production được inject từ secret manager/persistent env.
 - [ ] Đối chiếu domain, brand, logo, database, `SITE_URL` và `MEDIA_ROOT`; gate phải PASS trước khi tạo release.
@@ -15,6 +15,7 @@ Tài liệu này áp dụng cho production duy nhất: `https://gedeco.vn/`. Kh�
 
 - [ ] Backup database live và ghi checksum; kiểm tra backup có thể đọc/restore thử ở môi trường cô lập.
 - [ ] Backup toàn bộ persistent uploads/media live và ghi checksum.
+- [ ] Sau backup và review migration additive, chạy `npx prisma migrate deploy` bằng `DATABASE_URL` production; không chạy reset/push schema và không restore database local.
 - [ ] Ghi nhận số bản ghi và thời điểm cập nhật của sản phẩm, danh mục, bài viết, SiteContent, SiteChrome và media.
 - [ ] Nếu cần đưa dữ liệu từ local lên live, chỉ export/import chọn lọc hoặc upsert theo ID/slug/key; tuyệt đối không restore full database local lên live.
 - [ ] Không thay thế volume uploads/media live bằng thư mục local.
