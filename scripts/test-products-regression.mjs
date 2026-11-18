@@ -24,6 +24,9 @@ try {
       summaryHtml: `<p onclick="alert(1)">Nội dung an toàn</p><script>alert(1)</script>`,
       contentHtml: `<h2>Chi tiết kiểm thử</h2><img src="https://evil.example/x.jpg" alt="x"><img src="/assets/logo-new.png" alt="Logo hợp lệ"><a href="javascript:alert(1)">Liên kết lỗi</a>`,
       imageAlt: "Ảnh sản phẩm kiểm thử",
+      shipperImageUrl: "/assets/products/shipper.jpg",
+      shipperImageAlt: "Ảnh giao hàng kiểm thử",
+      shipperImageCaption: "Caption giao hàng kiểm thử",
       isPublished: true,
     },
   });
@@ -36,6 +39,7 @@ try {
   assert(!viHtml.includes("onclick=\"alert(1)\"") && !viHtml.includes("<script>alert(1)</script>"), "HTML nguy hiểm chưa bị loại.");
   assert(!viHtml.includes("evil.example") && !viHtml.includes("javascript:alert"), "URL nguy hiểm chưa bị loại.");
   assert(viHtml.includes("/assets/logo-new.png") && viHtml.includes("Logo hợp lệ"), "Ảnh nội bộ hợp lệ bị loại nhầm.");
+  assert(viHtml.includes('alt="Ảnh giao hàng kiểm thử"') && viHtml.includes('title="Caption giao hàng kiểm thử"'), "Metadata ảnh giao hàng VI không đi tới frontend.");
 
   const now = new Date();
   await prisma.translationEntry.create({
@@ -47,13 +51,14 @@ try {
 
   await prisma.translationEntry.update({
     where: { entityType_entityId_locale: { entityType: "PRODUCT", entityId: productId, locale: "en" } },
-    data: { status: "TRANSLATED", manualOverride: true, provider: "manual", errorMessage: null, translatedAt: new Date(), payload: { title: "Approved English product", description: "Approved description", summaryHtml: `<p onmouseover="alert(1)">Approved summary</p>`, contentHtml: `<h2>Approved detail</h2><script>alert(2)</script>`, imageAlt: "Approved image alt", metaTitle: "Approved English product", metaDescription: "Approved description" } },
+    data: { status: "TRANSLATED", manualOverride: true, provider: "manual", errorMessage: null, translatedAt: new Date(), payload: { title: "Approved English product", description: "Approved description", summaryHtml: `<p onmouseover="alert(1)">Approved summary</p>`, contentHtml: `<h2>Approved detail</h2><script>alert(2)</script>`, imageAlt: "Approved image alt", shipperImageAlt: "Approved delivery image alt", shipperImageCaption: "Approved delivery caption", metaTitle: "Approved English product", metaDescription: "Approved description" } },
   });
   const translatedResponse = await fetch(`${baseUrl}${enPath}`, { redirect: "manual" });
   const translatedHtml = await translatedResponse.text();
   assert(translatedResponse.status === 200, `Bản English đã duyệt trả ${translatedResponse.status}.`);
   assert(translatedHtml.includes("Approved English product") && translatedHtml.includes("Approved detail"), "Bản English đã duyệt không hiển thị.");
   assert(!translatedHtml.includes("onmouseover=\"alert(1)\"") && !translatedHtml.includes("<script>alert(2)</script>"), "HTML English nguy hiểm chưa bị loại.");
+  assert(translatedHtml.includes('alt="Approved delivery image alt"') && translatedHtml.includes('title="Approved delivery caption"'), "Metadata ảnh giao hàng English không đi tới frontend.");
   assert(translatedHtml.includes(`hrefLang="vi" href="https://gedeco.vn${viPath}"`) && translatedHtml.includes(`href="${viPath}"`), "Hreflang hoặc language switcher English không trỏ về URL VI thực tế.");
   const viTranslatedResponse = await fetch(`${baseUrl}${viPath}`);
   const viTranslatedHtml = await viTranslatedResponse.text();
@@ -64,7 +69,7 @@ try {
   const redirectResponse = await fetch(`${baseUrl}${oldPath}`, { redirect: "manual" });
   assert(redirectResponse.status === 308 && redirectResponse.headers.get("location") === viPath, `Redirect sản phẩm không đúng: ${redirectResponse.status} ${redirectResponse.headers.get("location")}`);
 
-  console.log("PRODUCT_REGRESSION_PASS sanitation failed-translation manual-translation hreflang switcher redirect");
+  console.log("PRODUCT_REGRESSION_PASS sanitation failed-translation manual-translation delivery-media-metadata hreflang switcher redirect");
 } finally {
   if (productId) {
     await prisma.$transaction([
