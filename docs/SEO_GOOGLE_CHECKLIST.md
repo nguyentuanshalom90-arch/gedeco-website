@@ -89,6 +89,10 @@ Cập nhật: 17/11/2026. Checklist này dùng làm tiêu chuẩn nghiệm thu c
 - [ ] Theo dõi Core Web Vitals, Enhancements, Manual Actions và Security Issues. `REQUIRES SEARCH CONSOLE ACCESS`.
 - [ ] Sau mỗi deploy: quét HTTP status, canonical, hreflang, JSON-LD, sitemap, robots, ảnh và hostname ngoài allowlist. `DEPLOY GATE`.
 
+## 9. Production configuration gate
+
+- [x] `npm run verify:production` fail-closed nếu thiếu/sai official domain, `MEDIA_ROOT` nằm trong release, database trỏ local hoặc session secret yếu. `PASS source`; chỉ chạy với secrets production được inject từ môi trường persistent.
+
 ## Ghi chú Google quan trọng
 
 - Google không đảm bảo xếp hạng hoặc rich result chỉ vì checklist kỹ thuật đạt.
