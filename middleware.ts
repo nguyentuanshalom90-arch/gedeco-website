@@ -4,7 +4,7 @@ const canonicalHost = "gedeco.vn";
 
 export function middleware(request: NextRequest) {
   const requestHeaders = new Headers(request.headers);
-  for (const header of ["x-forwarded-host", "x-forwarded-proto", "x-forwarded-port"]) {
+  for (const header of ["host", "origin", "referer", "x-forwarded-host", "x-forwarded-proto", "x-forwarded-port"]) {
     const value = requestHeaders.get(header);
     if (value?.includes(",")) requestHeaders.set(header, value.split(",", 1)[0].trim());
   }
@@ -14,7 +14,7 @@ export function middleware(request: NextRequest) {
   if (process.env.NODE_ENV !== "production") return continueRequest();
 
   const forwardedProto = requestHeaders.get("x-forwarded-proto") || request.nextUrl.protocol.replace(":", "");
-  const hostHeader = request.headers.get("host")?.toLowerCase() || "";
+  const hostHeader = (requestHeaders.get("host") || "").toLowerCase();
   const host = hostHeader.split(":")[0];
   const isLocalPreview = hostHeader.startsWith("localhost") || hostHeader.startsWith("127.0.0.1") || hostHeader.startsWith("[::1]");
 
