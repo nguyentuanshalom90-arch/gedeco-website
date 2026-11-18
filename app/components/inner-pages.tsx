@@ -773,6 +773,18 @@ export function CTA({
   secondaryLabel?: string;
 }) {
   const english = language === "en";
+  const [secondaryHref, setSecondaryHref] = useState("mailto:info@gedeco.vn");
+  useEffect(() => {
+    let active = true;
+    fetch(`/api/site-chrome?area=FOOTER&lang=${language}`)
+      .then((response) => (response.ok ? response.json() : null))
+      .then((payload) => {
+        const value = payload?.values?.["contact.email"]?.url;
+        if (active && typeof value === "string" && /^mailto:[^\s@]+@[^\s@]+$/i.test(value)) setSecondaryHref(value);
+      })
+      .catch(() => undefined);
+    return () => { active = false; };
+  }, [language]);
   const body =
     text ||
     (english
@@ -809,7 +821,7 @@ export function CTA({
           </a>
           <a
             className="button button-outline light"
-            href="mailto:info@gedeco.vn"
+            href={secondaryHref}
           >
             {secondaryLabel ||
               (english ? "Send an enquiry" : "Gửi yêu cầu tư vấn")}
