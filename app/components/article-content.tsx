@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { runtimeEnv } from "@/lib/runtime-env";
 
 const imagePattern = /^!\[([^\]]*)\]\((\S+?)(?:\s+"([^"]*)")?\)$/;
 const inlinePattern = /(!?\[[^\]]+\]\([^\s)]+\)|\*\*[^*]+\*\*|`[^`]+`)/g;
@@ -19,7 +20,7 @@ export function safeArticleImageSrc(value: string) {
   if (src.startsWith("/api/media/") || src.startsWith("/assets/") || src.startsWith("/uploads/")) return src;
   try {
     const parsed = new URL(src);
-    const officialHost = new URL(process.env.SITE_URL || "https://gedeco.vn").hostname.replace(/^www\./, "");
+    const officialHost = new URL(runtimeEnv("SITE_URL") || "https://gedeco.vn").hostname.replace(/^www\./, "");
     return parsed.protocol === "https:" && parsed.hostname.replace(/^www\./, "") === officialHost && !parsed.username && !parsed.password ? src : null;
   } catch {
     return null;

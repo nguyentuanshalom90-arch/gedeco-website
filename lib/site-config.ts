@@ -1,5 +1,7 @@
+import { runtimeEnv } from "./runtime-env.ts";
+
 function resolveOfficialUrl() {
-  const configured = process.env.SITE_URL?.trim();
+  const configured = runtimeEnv("SITE_URL");
   const isBuildPhase = process.env.NEXT_PHASE === "phase-production-build";
   const isLocalPreview = process.env.LOCAL_PREVIEW === "1";
   if (!configured) {

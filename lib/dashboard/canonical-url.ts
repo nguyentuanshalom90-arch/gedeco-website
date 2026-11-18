@@ -1,4 +1,5 @@
 import { DashboardValidationError } from "./action-errors.ts";
+import { runtimeEnv } from "../runtime-env.ts";
 
 type Options = {
   fieldLabel?: string;
@@ -14,7 +15,7 @@ export function validateOfficialCanonical(value: string, options: Options = {}) 
   }
 
   let parsed: URL;
-  const officialUrl = process.env.SITE_URL || "https://gedeco.vn";
+  const officialUrl = runtimeEnv("SITE_URL") || "https://gedeco.vn";
   try {
     parsed = new URL(canonical, officialUrl);
   } catch {

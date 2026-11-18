@@ -6,6 +6,7 @@ import { chromeSeed } from "./site-chrome-seed";
 import type { SiteChromeArea, SiteChromeInput, SiteChromeItem, SiteChromeKind } from "./site-chrome-types";
 import { syncSiteChromeTranslation } from "@/lib/translation-service";
 import { requireDashboardSession } from "./auth";
+import { runtimeEnv } from "../runtime-env.ts";
 
 async function ensureChromeSeeded() {
   for (const [area, kind, sectionKey, fieldKey, label, value, url, imageUrl, altText, isVisible, sortOrder] of chromeSeed) {
@@ -36,7 +37,7 @@ function validateSharedMediaUrl(value: string) {
   if (/^\/(?:api\/media(?:\/|\?|$)|assets\/|uploads\/)/.test(input)) return input;
   try {
     const url = new URL(input);
-    const official = new URL(process.env.SITE_URL || "https://gedeco.vn");
+    const official = new URL(runtimeEnv("SITE_URL") || "https://gedeco.vn");
     if (url.protocol === "https:" && url.hostname.replace(/^www\./, "") === official.hostname.replace(/^www\./, "") && !url.username && !url.password && !url.port) return url.toString();
   } catch {}
   throw new Error("Media phải thuộc thư viện nội bộ hoặc domain chính thức.");

@@ -1,4 +1,5 @@
 import { DashboardValidationError } from "./action-errors";
+import { runtimeEnv } from "../runtime-env.ts";
 
 const allowedLocalMedia = /^(?:\/api\/media(?:\/|\?|$)|\/assets\/|\/uploads\/)/;
 
@@ -15,7 +16,7 @@ export function validateManagedMediaUrl(value: string, fieldLabel = "Media") {
   if (allowedLocalMedia.test(input)) return input;
 
   try {
-    const official = new URL(process.env.SITE_URL || "https://gedeco.vn");
+    const official = new URL(runtimeEnv("SITE_URL") || "https://gedeco.vn");
     const parsed = new URL(input);
     const officialHost = official.hostname.toLowerCase().replace(/^www\./, "");
     const hostname = parsed.hostname.toLowerCase().replace(/^www\./, "");

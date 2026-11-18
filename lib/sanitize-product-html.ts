@@ -1,4 +1,5 @@
 import sanitizeHtml from "sanitize-html";
+import { runtimeEnv } from "./runtime-env.ts";
 
 const allowedMediaPath = /^(?:\/api\/media(?:\/|\?|$)|\/assets\/|\/uploads\/)/;
 
@@ -7,7 +8,7 @@ function isAllowedImageSource(value: string | undefined) {
   if (allowedMediaPath.test(value)) return true;
   try {
     const url = new URL(value);
-    const official = new URL(process.env.SITE_URL || "https://gedeco.vn");
+    const official = new URL(runtimeEnv("SITE_URL") || "https://gedeco.vn");
     return url.protocol === "https:" && url.hostname.replace(/^www\./, "") === official.hostname.replace(/^www\./, "") && !url.username && !url.password && !url.port;
   } catch {
     return false;
