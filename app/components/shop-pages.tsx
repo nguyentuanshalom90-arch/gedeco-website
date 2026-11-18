@@ -381,12 +381,12 @@ export function ShopProductCard({
           <span
             className="shop-product-image-placeholder"
             aria-label={
-              english ? "Image is being updated" : "Hình ảnh đang được cập nhật"
+              english ? catalogText("imageAlt", "Image is being updated") : catalogText("imageAlt", "Hình ảnh đang được cập nhật")
             }
           >
             <Icon name="box" />
             <small>
-              {english ? "Image coming soon" : "Hình ảnh đang cập nhật"}
+              {english ? catalogText("imageComing", "Image coming soon") : catalogText("imageComing", "Hình ảnh đang cập nhật")}
             </small>
           </span>
         )}
@@ -883,6 +883,8 @@ export function ShopRelated({
   language?: ShopLanguage;
 }) {
   const english = language === "en";
+  const { values: chrome } = useContext(ShopChromeContext);
+  const catalogText = (key: string, fallback: string) => chrome[`shopCatalog.${key}`]?.value || fallback;
   const related = products
     .filter((product) => product.slug !== current)
     .slice(0, 8);
@@ -913,7 +915,7 @@ export function ShopRelated({
   return (
     <section className="shop-related">
       <div className="shop-related-heading">
-        <h2>{english ? "RELATED PRODUCTS" : "SẢN PHẨM LIÊN QUAN"}</h2>
+        <h2>{english ? catalogText("relatedTitle", "RELATED PRODUCTS") : catalogText("relatedTitle", "SẢN PHẨM LIÊN QUAN")}</h2>
         <div className="shop-related-arrows">
           <button
             type="button"
@@ -922,7 +924,7 @@ export function ShopRelated({
                 currentIndex <= 0 ? maxIndex : currentIndex - 1,
               )
             }
-            aria-label={english ? "Previous products" : "Sản phẩm trước"}
+            aria-label={english ? catalogText("relatedPrev", "Previous products") : catalogText("relatedPrev", "Sản phẩm trước")}
           >
             ←
           </button>
@@ -933,7 +935,7 @@ export function ShopRelated({
                 currentIndex >= maxIndex ? 0 : currentIndex + 1,
               )
             }
-            aria-label={english ? "Next products" : "Sản phẩm tiếp theo"}
+            aria-label={english ? catalogText("relatedNext", "Next products") : catalogText("relatedNext", "Sản phẩm tiếp theo")}
           >
             →
           </button>
