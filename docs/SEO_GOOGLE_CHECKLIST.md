@@ -80,6 +80,7 @@ Cập nhật: 17/11/2026. Checklist này dùng làm tiêu chuẩn nghiệm thu c
 - [x] Đổi slug bài viết, sản phẩm hoặc danh mục sản phẩm tạo redirect 308; đổi slug danh mục cập nhật cả URL chi tiết sản phẩm trong danh mục. `PASS source/local regression`.
 - [x] HTML sản phẩm VI/EN được làm sạch theo allowlist khi ghi và khi render; chặn script, event handler, URL JavaScript và ảnh ngoài media/domain chính thức. `PASS npm run test:products`.
 - [x] Regression local quét sitemap 83 URL, kiểm tra HTTP 200, `html lang`, canonical official, robots/sitemap hostname và route cũ `/doi-tac`, `/du-an`, `/en/gioi-thieu`, `/tin-tuc/chi-tiet`. `PASS npm run test:seo`; production vẫn cần crawl định kỳ.
+- [x] Regression source-compliance quét `app`, `lib`, `prisma`, `public`, chặn chuỗi nội bộ không được phép và xác nhận route thừa không quay lại source. `PASS npm run test:seo`.
 
 ## 8. Search Console và vận hành production
 
