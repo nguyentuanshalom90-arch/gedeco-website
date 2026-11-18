@@ -36,6 +36,13 @@ function emptyItem(pageKey = "home"): SiteContentInput {
     imageCaption: "",
     isVisible: true,
     sortOrder: 0,
+    englishLabel: "",
+    englishValue: "",
+    englishAltText: "",
+    englishCaption: "",
+    englishH1: "",
+    englishMetaTitle: "",
+    englishMetaDescription: "",
   };
 }
 
@@ -197,6 +204,7 @@ export function SiteContentManager() {
             <label>Thứ tự hiển thị<input type="number" value={editing.sortOrder} onChange={(event) => setField("sortOrder", Number(event.target.value))} /></label>
           </div>
 
+          <div className="site-content-seo"><div><p className="eyebrow">ENGLISH VERSION</p><h3>Bản tiếng Anh thủ công</h3><p>Nhập và duyệt English chính xác nếu translation provider không khả dụng.</p></div><div className="site-content-seo-grid"><label>Nhãn English<input value={editing.englishLabel} onChange={(event) => setField("englishLabel", event.target.value)} /></label><label>English H1<input value={editing.englishH1} onChange={(event) => setField("englishH1", event.target.value)} /></label><label className="site-content-full">English value<textarea rows={5} value={editing.englishValue} onChange={(event) => setField("englishValue", event.target.value)} /></label><label>English SEO title<input value={editing.englishMetaTitle} maxLength={60} onChange={(event) => setField("englishMetaTitle", event.target.value)} /></label><label className="site-content-full">English meta description<textarea rows={3} value={editing.englishMetaDescription} maxLength={160} onChange={(event) => setField("englishMetaDescription", event.target.value)} /></label><label>English alt text<input value={editing.englishAltText} onChange={(event) => setField("englishAltText", event.target.value)} /></label><label>English caption<input value={editing.englishCaption} onChange={(event) => setField("englishCaption", event.target.value)} /></label></div></div>
           <div className="site-content-seo">
             <div><p className="eyebrow">SEO PAGE</p><h3>Metadata và cấu trúc heading</h3><p>Thông tin SEO được lưu theo page, dùng chung cho các bản ghi của page này.</p></div>
             <div className="site-content-seo-grid">

@@ -22,6 +22,13 @@ export type SiteContentItem = {
   imageCaption: string;
   isVisible: boolean;
   sortOrder: number;
+  englishLabel: string;
+  englishValue: string;
+  englishAltText: string;
+  englishCaption: string;
+  englishH1: string;
+  englishMetaTitle: string;
+  englishMetaDescription: string;
   updatedAt: string;
 };
 

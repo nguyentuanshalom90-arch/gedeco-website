@@ -18,6 +18,11 @@ export type SitePageInput = {
   robotsIndex: boolean;
   robotsFollow: boolean;
   status: "DRAFT" | "SCHEDULED" | "PUBLISHED";
+  englishTitle?: string;
+  englishExcerpt?: string;
+  englishMetaTitle?: string;
+  englishMetaDescription?: string;
+  englishSections?: unknown;
 };
 
 export type SitePageSectionInput = {
@@ -63,7 +68,10 @@ function validateSections(value: unknown): SitePageSectionInput[] {
 
 export async function listSitePages() {
   await requireDashboardSession();
-  return prisma.sitePage.findMany({ orderBy: { updatedAt: "desc" } });
+  const pages = await prisma.sitePage.findMany({ orderBy: { updatedAt: "desc" } });
+  const translations = pages.length ? await prisma.translationEntry.findMany({ where: { entityType: "SITE_PAGE", locale: "en", entityId: { in: pages.map((page) => page.id) } } }) : [];
+  const byId = new Map(translations.map((entry) => [entry.entityId, entry]));
+  return pages.map((page) => ({ ...page, englishTranslation: byId.get(page.id)?.payload || null }));
 }
 
 export async function saveSitePage(input: SitePageInput) {
@@ -77,7 +85,15 @@ export async function saveSitePage(input: SitePageInput) {
   const row = input.id
     ? await prisma.sitePage.update({ where: { id: input.id }, data: { slug, name: input.name.trim(), title: input.title.trim(), excerpt: input.excerpt?.trim() || null, sections: sections as object, metaTitle: input.metaTitle.trim(), metaDescription: input.metaDescription.trim(), canonicalUrl, robotsIndex: input.robotsIndex, robotsFollow: input.robotsFollow, status: input.status } })
     : await prisma.sitePage.create({ data: { slug, name: input.name.trim(), title: input.title.trim(), excerpt: input.excerpt?.trim() || null, sections: sections as object, metaTitle: input.metaTitle.trim(), metaDescription: input.metaDescription.trim(), canonicalUrl, robotsIndex: input.robotsIndex, robotsFollow: input.robotsFollow, status: input.status } });
-  const translation = await syncSitePageTranslation(row);
+  const englishSections = Array.isArray(input.englishSections) ? validateSections(input.englishSections) : null;
+  const manualEnglish = Boolean(input.englishTitle?.trim() && input.englishMetaTitle?.trim() && input.englishMetaDescription?.trim() && englishSections);
+  const translation = manualEnglish
+    ? await prisma.translationEntry.upsert({
+        where: { entityType_entityId_locale: { entityType: "SITE_PAGE", entityId: row.id, locale: "en" } },
+        create: { entityType: "SITE_PAGE", entityId: row.id, locale: "en", slug, payload: { title: input.englishTitle!.trim(), excerpt: input.englishExcerpt?.trim() || "", metaTitle: input.englishMetaTitle!.trim(), metaDescription: input.englishMetaDescription!.trim(), sections: englishSections }, sourceUpdatedAt: row.updatedAt, sourceHash: `manual-${row.updatedAt.toISOString()}`, status: "TRANSLATED", provider: "manual", manualOverride: true, translatedAt: new Date(), reviewedAt: new Date() },
+        update: { slug, payload: { title: input.englishTitle!.trim(), excerpt: input.englishExcerpt?.trim() || "", metaTitle: input.englishMetaTitle!.trim(), metaDescription: input.englishMetaDescription!.trim(), sections: englishSections }, sourceUpdatedAt: row.updatedAt, sourceHash: `manual-${row.updatedAt.toISOString()}`, status: "TRANSLATED", provider: "manual", manualOverride: true, errorMessage: null, translatedAt: new Date(), reviewedAt: new Date() },
+      })
+    : await syncSitePageTranslation(row);
   return { ok: true as const, page: row, translation: { status: translation.status, errorMessage: translation.errorMessage } };
 }
 

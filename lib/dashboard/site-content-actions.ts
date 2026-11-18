@@ -14,6 +14,7 @@ const englishRoute: Record<string, string> = { "/": "/en", "/gioi-thieu": "/en/a
 function revalidateContentRoutes(route: string) { revalidatePath(route); if (englishRoute[route]) revalidatePath(englishRoute[route]); }
 
 function toItem(row: any): SiteContentItem {
+  const translation = row.translation?.payload && typeof row.translation.payload === "object" ? row.translation.payload as Record<string, unknown> : {};
   return {
     id: row.id,
     pageKey: row.pageKey,
@@ -36,6 +37,13 @@ function toItem(row: any): SiteContentItem {
     imageCaption: row.imageCaption ?? "",
     isVisible: row.isVisible,
     sortOrder: row.sortOrder,
+    englishLabel: typeof translation.label === "string" ? translation.label : "",
+    englishValue: typeof translation.value === "string" ? translation.value : "",
+    englishAltText: typeof translation.altText === "string" ? translation.altText : "",
+    englishCaption: typeof translation.imageCaption === "string" ? translation.imageCaption : "",
+    englishH1: typeof translation.h1 === "string" ? translation.h1 : "",
+    englishMetaTitle: typeof translation.metaTitle === "string" ? translation.metaTitle : "",
+    englishMetaDescription: typeof translation.metaDescription === "string" ? translation.metaDescription : "",
     updatedAt: row.updatedAt instanceof Date ? row.updatedAt.toISOString() : String(row.updatedAt),
   };
 }
@@ -44,7 +52,9 @@ export async function listSiteContent(kind: SiteContentKind): Promise<SiteConten
   await requireDashboardSession();
   await ensureSiteContentSeeded();
   const rows = await prisma.siteDynamicContent.findMany({ where: { kind: dbKind(kind) }, include: { page: true }, orderBy: [{ pageKey: "asc" }, { sortOrder: "asc" }] });
-  return rows.map(toItem);
+  const translations = rows.length ? await prisma.translationEntry.findMany({ where: { entityType: "SITE_CONTENT", locale: "en", entityId: { in: rows.map((row) => row.id) } } }) : [];
+  const byId = new Map(translations.map((entry) => [entry.entityId, entry]));
+  return rows.map((row) => toItem({ ...row, translation: byId.get(row.id) }));
 }
 
 export async function saveSiteContent(kind: SiteContentKind, input: SiteContentInput): Promise<{ ok: true; item: SiteContentItem; translation: { status: string; errorMessage: string | null } }> {
@@ -104,7 +114,14 @@ export async function saveSiteContent(kind: SiteContentKind, input: SiteContentI
   };
   const row = await prisma.siteDynamicContent.upsert({ where: { kind_pageKey_sectionKey_fieldKey: { kind: dbKind(kind), pageKey, sectionKey, fieldKey } }, update: data, create: data, include: { page: true } });
   const item = toItem({ ...row, page: page || row.page });
-  const translation = await syncSiteContentTranslation({ id: item.id, label: item.label, value: item.value, altText: item.altText, imageCaption: item.imageCaption, h1: item.h1, metaTitle: item.metaTitle, metaDescription: item.metaDescription, updatedAt: new Date(item.updatedAt) });
+  const manualEnglish = Boolean(input.englishLabel?.trim() && input.englishValue?.trim() && input.englishH1?.trim() && input.englishMetaTitle?.trim() && input.englishMetaDescription?.trim());
+  const translation = manualEnglish
+    ? await prisma.translationEntry.upsert({
+        where: { entityType_entityId_locale: { entityType: "SITE_CONTENT", entityId: item.id, locale: "en" } },
+        create: { entityType: "SITE_CONTENT", entityId: item.id, locale: "en", payload: { label: input.englishLabel!.trim(), value: input.englishValue, altText: input.englishAltText?.trim() || "", imageCaption: input.englishCaption?.trim() || "", h1: input.englishH1!.trim(), metaTitle: input.englishMetaTitle!.trim(), metaDescription: input.englishMetaDescription!.trim() }, sourceUpdatedAt: new Date(item.updatedAt), sourceHash: `manual-${item.updatedAt}`, status: "TRANSLATED", provider: "manual", manualOverride: true, translatedAt: new Date(), reviewedAt: new Date() },
+        update: { payload: { label: input.englishLabel!.trim(), value: input.englishValue, altText: input.englishAltText?.trim() || "", imageCaption: input.englishCaption?.trim() || "", h1: input.englishH1!.trim(), metaTitle: input.englishMetaTitle!.trim(), metaDescription: input.englishMetaDescription!.trim() }, sourceUpdatedAt: new Date(item.updatedAt), sourceHash: `manual-${item.updatedAt}`, status: "TRANSLATED", provider: "manual", manualOverride: true, errorMessage: null, translatedAt: new Date(), reviewedAt: new Date() },
+      })
+    : await syncSiteContentTranslation({ id: item.id, label: item.label, value: item.value, altText: item.altText, imageCaption: item.imageCaption, h1: item.h1, metaTitle: item.metaTitle, metaDescription: item.metaDescription, updatedAt: new Date(item.updatedAt) });
   revalidateContentRoutes(page.route);
   return { ok: true, item, translation: { status: translation.status, errorMessage: translation.errorMessage } };
 }
