@@ -125,6 +125,12 @@ try {
     },
   });
   articleId = article.id;
+  await prisma.newsArticle.update({ where: { id: article.id }, data: { status: "DRAFT", publishedAt: null } });
+  const hiddenArticle = await fetch(`${baseUrl}/tin-tuc/${article.slug}`, { cache: "no-store" });
+  assert.equal(hiddenArticle.status, 404, "Bài viết DRAFT phải trả 404 ở route public.");
+  const hiddenCategory = await fetch(`${baseUrl}/tin-tuc/danh-muc/${category.slug}`, { cache: "no-store" }).then((response) => response.text());
+  assert(!hiddenCategory.includes("QA SEO Article"), "Bài viết DRAFT vẫn xuất hiện trong trang danh mục.");
+  await prisma.newsArticle.update({ where: { id: article.id }, data: { status: "PUBLISHED", publishedAt: new Date() } });
   const enSlug = `qa-seo-article-en-${suffix}`;
   await prisma.translationEntry.create({
     data: {
@@ -194,7 +200,7 @@ try {
   assert(viCategoryHtml.includes("QA VI image caption"), "Danh mục VI thiếu caption ảnh bài viết.");
   assert(enCategoryHtml.includes("QA EN image caption"), "Danh mục English thiếu caption ảnh bài viết.");
   for (const expected of [category.slug, category.slugEn, article.slug, enSlug]) assert(sitemapXml.includes(expected), `Sitemap thiếu ${expected}.`);
-  console.log("NEWS_SEO_REGRESSION_PASS canonical categories legacy-redirects article-redirect markdown manual-translation hreflang captions sitemap");
+  console.log("NEWS_SEO_REGRESSION_PASS canonical visibility categories legacy-redirects article-redirect markdown manual-translation hreflang captions sitemap");
 } finally {
   if (qaRedirectSource) await prisma.urlRedirect.deleteMany({ where: { sourcePath: qaRedirectSource } });
   if (articleId) await prisma.translationEntry.deleteMany({ where: { entityType: "NEWS_ARTICLE", entityId: articleId } });
