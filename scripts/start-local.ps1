@@ -85,6 +85,7 @@ if (Test-Path -LiteralPath $localEnvPath) {
 if ([string]::IsNullOrWhiteSpace($env:MEDIA_ROOT)) {
   $env:MEDIA_ROOT = Join-Path $projectRoot '.uploads'
 }
+$env:LOCAL_PREVIEW = '1'
 $standaloneServer = Join-Path $projectRoot '.next\standalone\server.js'
 Start-Process -FilePath 'node.exe' `
   -ArgumentList @("`"$standaloneServer`"") `
