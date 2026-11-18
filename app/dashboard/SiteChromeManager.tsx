@@ -1,7 +1,6 @@
-/* eslint-disable @next/next/no-img-element */
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Icon } from "@/components/vimigo-icon";
 import { MediaPicker } from "./MediaPicker";
 import {
@@ -55,7 +54,7 @@ export function SiteChromeManager() {
   const [query, setQuery] = useState("");
   const [sectionFilter, setSectionFilter] = useState("");
 
-  async function load(nextArea = area, nextKind = kind) {
+  const load = useCallback(async (nextArea = area, nextKind = kind) => {
     setBusy(true);
     try {
       setItems(await listSiteChrome(nextArea, nextKind));
@@ -69,12 +68,12 @@ export function SiteChromeManager() {
     } finally {
       setBusy(false);
     }
-  }
+  }, [area, kind]);
   useEffect(() => {
     setQuery("");
     setSectionFilter("");
     void load(area, kind);
-  }, [area, kind]);
+  }, [area, kind, load]);
 
   const sections = useMemo(
     () =>

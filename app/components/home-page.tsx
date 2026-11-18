@@ -74,7 +74,7 @@ export default function HomePage({ language = 'vi', initialContent, initialNews 
     return () => observer.disconnect();
   }, []);
   useEffect(() => {
-    const timer = window.setInterval(() => setHeroSlide((current) => (current + 1) % heroBanners.length), 6000);
+    const timer = window.setInterval(() => setHeroSlide((current) => (current + 1) % defaultHeroBanners.length), 6000);
     return () => window.clearInterval(timer);
   }, []);
   useEffect(() => {

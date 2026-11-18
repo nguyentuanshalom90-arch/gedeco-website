@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Icon } from "@/components/vimigo-icon";
 import { deleteSiteContent, listSiteContent, saveSiteContent } from "@/lib/dashboard/site-content-actions";
 import { contentPages } from "@/lib/dashboard/site-content-seed";
@@ -54,7 +54,7 @@ export function SiteContentManager() {
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState("");
 
-  async function load(nextKind = kind) {
+  const load = useCallback(async (nextKind = kind) => {
     setBusy(true);
     try {
       const rows = await listSiteContent(nextKind);
@@ -66,9 +66,9 @@ export function SiteContentManager() {
     } finally {
       setBusy(false);
     }
-  }
+  }, [kind]);
 
-  useEffect(() => { void load(kind); }, [kind]);
+  useEffect(() => { void load(kind); }, [kind, load]);
 
   const sections = useMemo(() => [...new Set(items.filter((item) => item.pageKey === selectedPage).map((item) => item.sectionKey))].sort((a, b) => a.localeCompare(b)), [items, selectedPage]);
 

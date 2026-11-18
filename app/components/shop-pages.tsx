@@ -647,7 +647,7 @@ export function ProductCatalog({
           ? a.title.localeCompare(b.title, "vi")
           : 0,
     );
-  }, [category, items, query, sort]);
+  }, [category, english, items, query, sort]);
 
   useEffect(() => {
     const controller = new AbortController();
