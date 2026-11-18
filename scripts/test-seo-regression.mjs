@@ -26,6 +26,7 @@ async function scanSourceCompliance(directory) {
     const content = await readFile(fullPath, "utf8");
     assert(!/codex/i.test(content), `Source/content chứa chuỗi nội bộ không được phép: ${fullPath}.`);
     assert(!/(?<![A-Za-z])AI(?![A-Za-z])/.test(content), `Source/content chứa nhãn AI không được phép: ${fullPath}.`);
+    assert(!/http:\/\/(?:www\.)?gedeco\.vn(?:[/:?]|$)/i.test(content), `Source/content còn URL HTTP của domain chính thức: ${fullPath}.`);
   }
 }
 
