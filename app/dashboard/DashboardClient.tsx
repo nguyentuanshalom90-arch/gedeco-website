@@ -51,12 +51,20 @@ export function DashboardClient({
       )
       .catch(() => undefined);
   }, []);
+  useEffect(() => {
+    function restoreTab() {
+      const next = new URLSearchParams(window.location.search).get("tab");
+      setTab(next && DASHBOARD_TABS.includes(next as DashboardTab) ? next as DashboardTab : "overview");
+    }
+    window.addEventListener("popstate", restoreTab);
+    return () => window.removeEventListener("popstate", restoreTab);
+  }, []);
   function selectTab(next: DashboardTab) {
     setTab(next);
     const url = new URL(window.location.href);
     url.searchParams.set("view", "dashboard");
     url.searchParams.set("tab", next);
-    window.history.replaceState({}, "", url);
+    window.history.pushState({}, "", url);
   }
   async function logout() {
     await fetch("/api/dashboard/logout", { method: "POST" }).catch(() => undefined);

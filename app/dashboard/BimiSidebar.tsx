@@ -113,7 +113,7 @@ export function BimiSidebar({ tab, onSelectTab, onLogout }: BimiSidebarProps) {
           <span>Xem web</span>
         </a>
       </div>
-      <div className="nav-frame">
+      <div id="dashboard-navigation" className="nav-frame" role="navigation" aria-label="Các module quản trị">
         <div className="nav-sep" />
         {navItems.map((item) => (
           <button
@@ -124,6 +124,7 @@ export function BimiSidebar({ tab, onSelectTab, onLogout }: BimiSidebarProps) {
               setMobileOpen(false);
             }}
             className={`nav-item${tab === item.id ? " active" : ""}`}
+            aria-current={tab === item.id ? "page" : undefined}
           >
             <Icon name={item.icon} />
             <span>{item.label}</span>
