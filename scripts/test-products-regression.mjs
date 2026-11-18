@@ -43,6 +43,16 @@ try {
   assert(viHtml.includes("/assets/logo-new.png") && viHtml.includes("Logo hợp lệ"), "Ảnh nội bộ hợp lệ bị loại nhầm.");
   assert(viHtml.includes('alt="Ảnh giao hàng kiểm thử"') && viHtml.includes('title="Caption giao hàng kiểm thử"'), "Metadata ảnh giao hàng VI không đi tới frontend.");
 
+  const catalogResponse = await fetch(`${baseUrl}/api/products?language=vi`);
+  const catalogPayload = await catalogResponse.json();
+  assert(catalogResponse.status === 200 && catalogPayload.items?.some((item) => item.slug === viSlug), "Sản phẩm đã publish không đi vào catalog API.");
+  await prisma.product.update({ where: { id: productId }, data: { isPublished: false } });
+  const hiddenCatalog = await fetch(`${baseUrl}/api/products?language=vi`).then((response) => response.json());
+  assert(!hiddenCatalog.items?.some((item) => item.slug === viSlug), "Sản phẩm bị ẩn vẫn xuất hiện trong catalog API.");
+  const hiddenProductResponse = await fetch(`${baseUrl}${viPath}`, { redirect: "manual" });
+  assert(hiddenProductResponse.status === 404, `Sản phẩm bị ẩn phải 404, thực tế ${hiddenProductResponse.status}.`);
+  await prisma.product.update({ where: { id: productId }, data: { isPublished: true } });
+
   const now = new Date();
   await prisma.translationEntry.create({
     data: { entityType: "PRODUCT", entityId: productId, locale: "en", slug: enSlug, payload: { title: "Failed English product" }, sourceUpdatedAt: now, sourceHash: token, status: "FAILED", errorMessage: "QA" },
@@ -71,7 +81,7 @@ try {
   const redirectResponse = await fetch(`${baseUrl}${oldPath}`, { redirect: "manual" });
   assert(redirectResponse.status === 308 && redirectResponse.headers.get("location") === viPath, `Redirect sản phẩm không đúng: ${redirectResponse.status} ${redirectResponse.headers.get("location")}`);
 
-  console.log("PRODUCT_REGRESSION_PASS sanitation failed-translation manual-translation delivery-media-metadata hreflang switcher redirect");
+  console.log("PRODUCT_REGRESSION_PASS sanitation visibility failed-translation manual-translation delivery-media-metadata hreflang switcher redirect");
 } finally {
   if (productId) {
     await prisma.$transaction([
