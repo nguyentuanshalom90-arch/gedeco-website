@@ -101,7 +101,7 @@ export function IntegrationManager({
             className={`cms-switch ${master.enabled ? "on" : ""}`}
             aria-pressed={master.enabled}
             aria-label={`${master.enabled ? "Tắt" : "Bật"} ${master.name}`}
-            disabled={saving === master.provider}
+            disabled={Boolean(saving)}
             onClick={() =>
               update(master.provider, { enabled: !master.enabled })
             }
@@ -111,7 +111,7 @@ export function IntegrationManager({
           <button
             type="button"
             className="btn btn-primary"
-            disabled={saving === master.provider}
+            disabled={Boolean(saving)}
             onClick={() => void persist(master)}
           >
             {saving === master.provider ? "Đang lưu…" : "Lưu thiết lập"}
@@ -143,9 +143,10 @@ export function IntegrationManager({
                 <strong>{name}</strong>
                 <span>{description}</span>
               </div>
-              <input
+                <input
                 type="checkbox"
                 checked={Boolean(master.config[key])}
+                  disabled={Boolean(saving)}
                 onChange={(event) =>
                   config(master.provider, key, event.target.checked)
                 }
@@ -186,7 +187,7 @@ export function IntegrationManager({
                 className={`cms-switch ${item.enabled ? "on" : ""}`}
                 aria-pressed={item.enabled}
                 aria-label={`${item.enabled ? "Tắt" : "Bật"} ${item.name}`}
-                disabled={saving === item.provider}
+                disabled={Boolean(saving)}
                 onClick={() =>
                   update(item.provider, { enabled: !item.enabled })
                 }
@@ -196,7 +197,7 @@ export function IntegrationManager({
               <button
                 type="button"
                 className="btn"
-                disabled={saving === item.provider}
+                disabled={Boolean(saving)}
                 onClick={() => void persist(item)}
               >
                 {saving === item.provider ? "Đang lưu…" : "Lưu"}
@@ -222,9 +223,10 @@ export function IntegrationManager({
               <div className="integration-form-grid">
                 <label className="field">
                   <span>Ngân hàng</span>
-                  <input
+                    <input
                     className="input"
                     value={String(sepay.config.bank || "")}
+                      disabled={Boolean(saving)}
                     onChange={(event) =>
                       config("sepay", "bank", event.target.value)
                     }
@@ -232,9 +234,10 @@ export function IntegrationManager({
                 </label>
                 <label className="field">
                   <span>Số tài khoản</span>
-                  <input
+                    <input
                     className="input"
                     value={String(sepay.config.accountNumber || "")}
+                      disabled={Boolean(saving)}
                     onChange={(event) =>
                       config("sepay", "accountNumber", event.target.value)
                     }
@@ -242,9 +245,10 @@ export function IntegrationManager({
                 </label>
                 <label className="field">
                   <span>Tên chủ tài khoản</span>
-                  <input
+                    <input
                     className="input"
                     value={String(sepay.config.accountName || "")}
+                      disabled={Boolean(saving)}
                     onChange={(event) =>
                       config("sepay", "accountName", event.target.value)
                     }
@@ -252,10 +256,11 @@ export function IntegrationManager({
                 </label>
                 <label className="field">
                   <span>Khóa API mới</span>
-                  <input
+                    <input
                     className="input"
                     type="password"
                     value={String(sepay.config.apiKey || "")}
+                      disabled={Boolean(saving)}
                     onChange={(event) =>
                       config("sepay", "apiKey", event.target.value)
                     }
@@ -266,7 +271,7 @@ export function IntegrationManager({
               <button
                 type="button"
                 className="btn btn-primary"
-                disabled={saving === "sepay"}
+                disabled={Boolean(saving)}
                 onClick={() => void persist(sepay)}
               >
                 Lưu cấu hình SePay
