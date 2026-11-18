@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, useState } from "react";
+import Image from "next/image";
 import styles from "./dashboard.module.css";
 
 export function LoginForm() {
@@ -37,12 +38,12 @@ export function LoginForm() {
       <div className={styles.authStack}>
         <div className={styles.brandLogoOutside}>
           <a className={styles.brandLogoLink} href="https://vimigo.vn/" target="_blank" rel="noopener noreferrer" aria-label="Mở website Vimigo.vn trong tab mới">
-            <img className={styles.brandLogo} src="/vimigo-admin-logo.webp" alt="Vimigo.vn" width={343} height={247} />
+            <Image className={styles.brandLogo} src="/vimigo-admin-logo.webp" alt="Vimigo.vn" width={346} height={248} />
           </a>
         </div>
         <form className={styles.authCard} onSubmit={submit}>
           <div className={styles.authBrandRow}>
-            <img className={styles.authCardLogo} src="/assets/logo-new.optimized.webp" alt="GEDECO" width={120} height={120} />
+            <Image className={styles.authCardLogo} src="/assets/logo-new.optimized.webp" alt="GEDECO" width={1317} height={1194} />
             <h1><span className={styles.welcomeText}>Chào mừng</span><span className={styles.dashboardText}>Quản trị GEDECO</span></h1>
           </div>
           <label className={styles.fieldLabel}>Tên đăng nhập

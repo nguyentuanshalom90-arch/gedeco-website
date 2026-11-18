@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { Icon } from "@/components/vimigo-icon";
 import type { DashboardTab } from "./dashboard-tabs";
 
@@ -46,10 +47,12 @@ export function BimiSidebar({ tab, onSelectTab, onLogout }: BimiSidebarProps) {
           rel="noopener noreferrer"
           aria-label="Mở website Vimigo.vn trong tab mới"
         >
-          <img
+          <Image
             className="logo-image"
             src="/bimi-panel/dashboard-logo.webp"
             alt="Vimigo.vn"
+            width={616}
+            height={154}
           />
         </a>
       </div>
@@ -85,9 +88,11 @@ export function BimiSidebar({ tab, onSelectTab, onLogout }: BimiSidebarProps) {
             background: "#fff4f4",
           }}
         >
-          <img
+          <Image
             src="/assets/logo-new.optimized.webp"
             alt="GEDECO"
+            width={1317}
+            height={1194}
             style={{ width: "92%", height: "92%", objectFit: "contain" }}
           />
         </div>
@@ -227,11 +232,11 @@ export function BimiSidebar({ tab, onSelectTab, onLogout }: BimiSidebarProps) {
             0357 828 707
           </span>
         </span>
-        <img
+        <Image
           src="/bimi-panel/zalo-chat.webp"
           alt="Zalo"
-          width={42}
-          height={42}
+          width={300}
+          height={300}
           style={{ flex: "0 0 auto", display: "block", objectFit: "contain" }}
         />
       </a>
@@ -269,11 +274,11 @@ export function BimiSidebar({ tab, onSelectTab, onLogout }: BimiSidebarProps) {
         <span style={{ textAlign: "left", lineHeight: 1.3, fontWeight: 700 }}>
           Nguyễn Tuấn
         </span>
-        <img
+        <Image
           src="/bimi-panel/messenger-copy.webp"
           alt="Messenger"
-          width={48.51}
-          height={48.51}
+          width={440}
+          height={440}
           style={{ flex: "0 0 auto", display: "block", objectFit: "contain" }}
         />
       </a>
