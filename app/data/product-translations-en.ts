@@ -105,7 +105,7 @@ export const englishProductTranslations = {
     "title": "PREMIUM DINH TEA WITH POMELO BLOSSOM",
     "category": "Domestic products",
     "description": "",
-    "contentHtml": "<section class=\"wpb-content-wrapper\"><p></p>\n<div style=\"width: 480px;\" class=\"wp-video\"><video class=\"wp-video-shortcode\" id=\"video-9626-1\" width=\"480\" height=\"854\" preload=\"metadata\" controls=\"controls\"><source type=\"video/mp4\" src=\"http://gedeco.vn/wp-content/uploads/2023/03/TRA-DINH-UOP-HOA-BUOI.mp4?_=1\" /><a href=\"http://gedeco.vn/wp-content/uploads/2023/03/TRA-DINH-UOP-HOA-BUOI.mp4\">http://gedeco.vn/wp-content/uploads/2023/03/TRA-DINH-UOP-HOA-BUOI.mp4</a></video></div>\n<p></p>\n</section>",
+    "contentHtml": "<section class=\"wpb-content-wrapper\"><p></p>\n<div style=\"width: 480px;\" class=\"wp-video\"><video class=\"wp-video-shortcode\" id=\"video-9626-1\" width=\"480\" height=\"854\" preload=\"metadata\" controls=\"controls\"><source type=\"video/mp4\" src=\"https://gedeco.vn/wp-content/uploads/2023/03/TRA-DINH-UOP-HOA-BUOI.mp4?_=1\" /><a href=\"https://gedeco.vn/wp-content/uploads/2023/03/TRA-DINH-UOP-HOA-BUOI.mp4\">https://gedeco.vn/wp-content/uploads/2023/03/TRA-DINH-UOP-HOA-BUOI.mp4</a></video></div>\n<p></p>\n</section>",
     "summaryHtml": "",
     "priceText": "Contact us",
     "stockText": "In stock"
