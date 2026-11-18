@@ -100,6 +100,8 @@ export function IntegrationManager({
             type="button"
             className={`cms-switch ${master.enabled ? "on" : ""}`}
             aria-pressed={master.enabled}
+            aria-label={`${master.enabled ? "Tắt" : "Bật"} ${master.name}`}
+            disabled={saving === master.provider}
             onClick={() =>
               update(master.provider, { enabled: !master.enabled })
             }
@@ -183,6 +185,8 @@ export function IntegrationManager({
                 type="button"
                 className={`cms-switch ${item.enabled ? "on" : ""}`}
                 aria-pressed={item.enabled}
+                aria-label={`${item.enabled ? "Tắt" : "Bật"} ${item.name}`}
+                disabled={saving === item.provider}
                 onClick={() =>
                   update(item.provider, { enabled: !item.enabled })
                 }
