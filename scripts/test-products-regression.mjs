@@ -53,6 +53,13 @@ try {
   assert(hiddenProductResponse.status === 404, `Sản phẩm bị ẩn phải 404, thực tế ${hiddenProductResponse.status}.`);
   await prisma.product.update({ where: { id: productId }, data: { isPublished: true } });
 
+  await prisma.productCategory.update({ where: { id: category.id }, data: { isPublished: false } });
+  const hiddenCategoryList = await fetch(`${baseUrl}/api/product-categories`).then((response) => response.json());
+  assert(!hiddenCategoryList.items?.some((item) => item.id === category.id), "Danh mục sản phẩm bị ẩn vẫn xuất hiện trong API.");
+  const hiddenCategoryProduct = await fetch(`${baseUrl}${viPath}`, { redirect: "manual" });
+  assert(hiddenCategoryProduct.status === 404, `Product thuộc danh mục bị ẩn phải 404, thực tế ${hiddenCategoryProduct.status}.`);
+  await prisma.productCategory.update({ where: { id: category.id }, data: { isPublished: true } });
+
   const now = new Date();
   await prisma.translationEntry.create({
     data: { entityType: "PRODUCT", entityId: productId, locale: "en", slug: enSlug, payload: { title: "Failed English product" }, sourceUpdatedAt: now, sourceHash: token, status: "FAILED", errorMessage: "QA" },
