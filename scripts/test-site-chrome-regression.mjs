@@ -7,6 +7,7 @@ const baseUrl = process.env.TEST_BASE_URL || "http://localhost:3000";
 const token = Date.now().toString(36);
 let row;
 let translation;
+let contentRow;
 
 function assert(condition, message) {
   if (!condition) throw new Error(message);
@@ -50,9 +51,22 @@ try {
   const expectedNews = await prisma.newsArticle.findFirst({ where: { status: "PUBLISHED", OR: [{ publishedAt: null }, { publishedAt: { lte: new Date() } }] }, orderBy: [{ isFeatured: "desc" }, { publishedAt: "desc" }, { createdAt: "desc" }] });
   if (expectedNews) assert(featured.items?.some((item) => item.id === expectedNews.id), "Sidebar sản phẩm không lấy tin nổi bật thật từ database.");
 
+  contentRow = await prisma.siteDynamicContent.findFirst({ where: { pageKey: "home", kind: "DYNAMIC", isVisible: true }, orderBy: [{ sortOrder: "asc" }, { sectionKey: "asc" }] });
+  assert(contentRow, "Thiếu row SiteContent để kiểm tra visibility.");
+  const contentResponse = await fetch(`${baseUrl}/api/site-content?page=home&locale=vi`);
+  assert(contentResponse.status === 200, `API site-content trả ${contentResponse.status}.`);
+  const beforeHidden = await contentResponse.json();
+  const contentKey = `${contentRow.sectionKey}.${contentRow.fieldKey}`;
+  assert(beforeHidden.values?.[contentKey] === contentRow.value, "SiteContent visible không đi từ database ra API.");
+  await prisma.siteDynamicContent.update({ where: { id: contentRow.id }, data: { isVisible: false } });
+  const hiddenResponse = await fetch(`${baseUrl}/api/site-content?page=home&locale=vi`);
+  const hiddenPayload = await hiddenResponse.json();
+  assert(!(contentKey in (hiddenPayload.values || {})), "SiteContent bị ẩn vẫn bị seed fallback dựng lại.");
+
   console.log("SITE_CHROME_REGRESSION_PASS bilingual db-flow visibility seed-keys featured-news");
 } finally {
   if (row) await prisma.siteChromeContent.update({ where: { id: row.id }, data: { value: row.value, isVisible: row.isVisible } });
   if (translation) await prisma.translationEntry.update({ where: { id: translation.id }, data: { payload: translation.payload, status: translation.status, manualOverride: translation.manualOverride, provider: translation.provider, errorMessage: translation.errorMessage, sourceHash: translation.sourceHash, sourceUpdatedAt: translation.sourceUpdatedAt, translatedAt: translation.translatedAt, reviewedAt: translation.reviewedAt } });
+  if (contentRow) await prisma.siteDynamicContent.update({ where: { id: contentRow.id }, data: { isVisible: contentRow.isVisible } });
   await prisma.$disconnect();
 }
