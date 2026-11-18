@@ -351,6 +351,8 @@ export function ShopProductCard({
   onFocus?: React.FocusEventHandler<HTMLElement>;
 }) {
   const english = language === "en";
+  const { values: chrome } = useContext(ShopChromeContext);
+  const catalogText = (key: string, fallback: string) => chrome[`shopCatalog.${key}`]?.value || fallback;
   const title = english
     ? product.title
     : localizeShopProductTitle(product.title, language);
@@ -410,7 +412,7 @@ export function ShopProductCard({
           style={{ alignSelf: "flex-start", marginTop: "auto" }}
           href={href}
         >
-          {english ? "View details" : "Xem chi tiết"} <Icon name="arrow" />
+          {english ? catalogText("viewDetails", "View details") : catalogText("viewDetails", "Xem chi tiết")} <Icon name="arrow" />
         </Link>
       </div>
     </article>
@@ -559,6 +561,8 @@ export function ProductCatalog({
   language?: ShopLanguage;
 }) {
   const english = language === "en";
+  const { values: chrome } = useContext(ShopChromeContext);
+  const catalogText = (key: string, fallback: string) => chrome[`shopCatalog.${key}`]?.value || fallback;
   const router = useRouter();
   const pathname = usePathname();
   const [query, setQuery] = useState("");
@@ -687,40 +691,10 @@ export function ProductCatalog({
 
   const labels = english
     ? {
-        all: "All",
-        domestic: "Domestic",
-        export: "Export",
-        sort: "Sort by",
-        default: "Default",
-        az: "Name A–Z",
-        za: "Name Z–A",
-        search: "Search products...",
-        clear: "Reset",
-        searching: "Searching...",
-        count: "products",
-        prev: "Previous page",
-        next: "Next page",
-        empty: "No matching products found",
-        emptyHint: "Try another keyword or reset the filters.",
-        showAll: "View all products",
+        all: catalogText("all", "All"), domestic: "Domestic", export: "Export", sort: catalogText("sort", "Sort by"), default: catalogText("default", "Default"), az: catalogText("az", "Name A–Z"), za: catalogText("za", "Name Z–A"), search: catalogText("search", "Search products..."), clear: catalogText("clear", "Reset"), searching: catalogText("searching", "Searching..."), count: catalogText("count", "products"), prev: catalogText("prev", "Previous page"), next: catalogText("next", "Next page"), empty: catalogText("empty", "No matching products found"), emptyHint: catalogText("emptyHint", "Try another keyword or reset the filters."), showAll: catalogText("showAll", "View all products"),
       }
     : {
-        all: "Tất cả",
-        domestic: "Trong nước",
-        export: "Xuất khẩu",
-        sort: "Sắp xếp",
-        default: "Mặc định",
-        az: "Tên A–Z",
-        za: "Tên Z–A",
-        search: "Tìm sản phẩm...",
-        clear: "Đặt lại",
-        searching: "Đang tìm...",
-        count: "sản phẩm",
-        prev: "Trang trước",
-        next: "Trang sau",
-        empty: "Không tìm thấy sản phẩm phù hợp",
-        emptyHint: "Thử từ khóa khác hoặc đặt lại bộ lọc.",
-        showAll: "Xem tất cả sản phẩm",
+        all: catalogText("all", "Tất cả"), domestic: "Trong nước", export: "Xuất khẩu", sort: catalogText("sort", "Sắp xếp"), default: catalogText("default", "Mặc định"), az: catalogText("az", "Tên A–Z"), za: catalogText("za", "Tên Z–A"), search: catalogText("search", "Tìm sản phẩm..."), clear: catalogText("clear", "Đặt lại"), searching: catalogText("searching", "Đang tìm..."), count: catalogText("count", "sản phẩm"), prev: catalogText("prev", "Trang trước"), next: catalogText("next", "Trang sau"), empty: catalogText("empty", "Không tìm thấy sản phẩm phù hợp"), emptyHint: catalogText("emptyHint", "Thử từ khóa khác hoặc đặt lại bộ lọc."), showAll: catalogText("showAll", "Xem tất cả sản phẩm"),
       };
   return (
     <section
