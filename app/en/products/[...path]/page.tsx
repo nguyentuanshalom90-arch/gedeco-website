@@ -11,6 +11,8 @@ import {
   ShopBreadcrumb,
   ShopGuarantee,
   ShopPurchaseLink,
+  ShopProductDescriptionLabel,
+  ShopProductStatusLabel,
   ShopRelated,
   ShopShell,
   ShopSidebar,
@@ -314,7 +316,7 @@ export default async function EnglishProductOrCategoryPage({
               )}
               {product.stockText && !/Status:/i.test(product.summaryHtml) && (
                 <p className="shop-stock">
-                  Status: <strong>{product.stockText}</strong>
+                  <ShopProductStatusLabel language="en" /> <strong>{product.stockText}</strong>
                 </p>
               )}
               <img
@@ -328,7 +330,7 @@ export default async function EnglishProductOrCategoryPage({
             </article>
           </section>
           <section className="shop-description">
-            <div className="shop-description-tab">PRODUCT DESCRIPTION</div>
+            <div className="shop-description-tab"><ShopProductDescriptionLabel language="en" /></div>
             <article
               dangerouslySetInnerHTML={{ __html: product.contentHtml }}
             />

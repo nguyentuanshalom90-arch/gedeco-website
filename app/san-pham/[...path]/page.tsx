@@ -13,6 +13,8 @@ import {
   ShopBreadcrumb,
   ShopGuarantee,
   ShopPurchaseLink,
+  ShopProductDescriptionLabel,
+  ShopProductStatusLabel,
   ShopRelated,
   ShopShell,
   ShopSidebar,
@@ -332,7 +334,7 @@ export default async function ProductOrCategoryPage({
               )}
               {product.stockText && !/Tình trạng:/i.test(summary) && (
                 <p className="shop-stock">
-                  Tình trạng: <strong>{product.stockText}</strong>
+                  <ShopProductStatusLabel /> <strong>{product.stockText}</strong>
                 </p>
               )}
               <img
@@ -346,7 +348,7 @@ export default async function ProductOrCategoryPage({
             </article>
           </section>
           <section className="shop-description">
-            <div className="shop-description-tab">MÔ TẢ SẢN PHẨM</div>
+            <div className="shop-description-tab"><ShopProductDescriptionLabel /></div>
             <article
               dangerouslySetInnerHTML={{
                 __html: localize(product.contentHtml),

@@ -551,6 +551,18 @@ export function ShopPurchaseLink({
   );
 }
 
+export function ShopProductStatusLabel({ language = "vi" }: { language?: ShopLanguage }) {
+  const english = language === "en";
+  const { values: chrome } = useContext(ShopChromeContext);
+  return <>{chrome["shopDetail.status"]?.value || (english ? "Status:" : "Tình trạng:")}</>;
+}
+
+export function ShopProductDescriptionLabel({ language = "vi" }: { language?: ShopLanguage }) {
+  const english = language === "en";
+  const { values: chrome } = useContext(ShopChromeContext);
+  return <>{chrome["shopDetail.description"]?.value || (english ? "PRODUCT DESCRIPTION" : "MÔ TẢ SẢN PHẨM")}</>;
+}
+
 export function ProductCatalog({
   items,
   initialCategory,

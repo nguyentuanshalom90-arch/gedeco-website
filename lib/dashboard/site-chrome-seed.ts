@@ -54,6 +54,8 @@ export const chromeSeed = [
   ["FOOTER", "DYNAMIC", "shopCatalog", "empty", "Trạng thái không có sản phẩm", "Không tìm thấy sản phẩm phù hợp", "", "", "", true, 67],
   ["FOOTER", "DYNAMIC", "shopCatalog", "emptyHint", "Gợi ý khi không có sản phẩm", "Thử từ khóa khác hoặc đặt lại bộ lọc.", "", "", "", true, 68],
   ["FOOTER", "DYNAMIC", "shopCatalog", "showAll", "Nhãn xem toàn bộ sản phẩm", "Xem tất cả sản phẩm", "", "", "", true, 69],
+  ["FOOTER", "DYNAMIC", "shopDetail", "status", "Nhãn tình trạng sản phẩm", "Tình trạng:", "", "", "", true, 74],
+  ["FOOTER", "DYNAMIC", "shopDetail", "description", "Nhãn mô tả sản phẩm", "MÔ TẢ SẢN PHẨM", "", "", "", true, 75],
   ["FOOTER", "DYNAMIC", "floating", "quick", "Nhãn nhóm liên hệ nổi", "Liên hệ nhanh", "", "", "", true, 70],
   ["FOOTER", "DYNAMIC", "floating", "zalo", "Nhãn và URL Zalo", "Chat qua Zalo", "https://zalo.me/0914943653", "/assets/contact-icons/zalo-chat.png", "Zalo", true, 71],
   ["FOOTER", "DYNAMIC", "floating", "phone", "Nhãn và URL gọi điện", "Gọi 0914 94 3653", "tel:0914943653", "", "", true, 72],
