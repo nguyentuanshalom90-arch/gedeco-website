@@ -10,6 +10,7 @@ import { recordPermanentRedirect } from "@/lib/url-redirects";
 import type { PostInput, PostListItem } from "./post-types";
 import { requireDashboardSession } from "./auth";
 import { validateOfficialCanonical } from "./canonical-url";
+import { validateManagedMediaUrl } from "./media-url";
 import { DashboardValidationError, dashboardActionError } from "./action-errors";
 
 function slugify(value: string): string {
@@ -153,10 +154,10 @@ export async function savePost(
     categoryId: category?.id || null,
     excerpt: input.shortDesc.trim() || null,
     content: input.content.trim() || null,
-    imageUrl: input.coverImage || null,
+    imageUrl: validateManagedMediaUrl(input.coverImage || "", "Ảnh bìa bài viết"),
     imageAlt: input.coverImageAlt.trim() || null,
     imageCaption: input.coverImageCaption.trim() || null,
-    ogImageUrl: input.ogImage || input.coverImage || null,
+    ogImageUrl: validateManagedMediaUrl(input.ogImage || input.coverImage || "", "Ảnh Open Graph bài viết"),
     ogImageAlt: input.ogImageAlt.trim() || input.coverImageAlt.trim() || null,
     status: input.status,
     tags: [...new Set(input.tags.map((tag) => tag.trim()).filter(Boolean))],

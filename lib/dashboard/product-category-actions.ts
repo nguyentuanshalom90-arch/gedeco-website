@@ -5,6 +5,7 @@ import { recordPermanentRedirect } from "@/lib/url-redirects";
 import { revalidatePath } from "next/cache";
 import { requireDashboardSession } from "./auth";
 import { validateOfficialCanonical } from "./canonical-url";
+import { validateManagedMediaUrl } from "./media-url";
 import type { ProductCategoryInput, ProductCategoryListItem } from "./product-category-types";
 
 function slugify(value: string) {
@@ -61,7 +62,7 @@ export async function saveProductCategory(input: ProductCategoryInput) {
   const data = {
     name, slug, nameEn, slugEn,
     description: input.description.trim(), descriptionEn: input.descriptionEn.trim(),
-    imageUrl: input.imageUrl.trim(), imageAlt: input.imageAlt.trim(), imageCaption: input.imageCaption.trim(), imageAltEn: input.imageAltEn.trim(), imageCaptionEn: input.imageCaptionEn.trim(),
+    imageUrl: validateManagedMediaUrl(input.imageUrl, "Ảnh danh mục") || "", imageAlt: input.imageAlt.trim(), imageCaption: input.imageCaption.trim(), imageAltEn: input.imageAltEn.trim(), imageCaptionEn: input.imageCaptionEn.trim(),
     metaTitle: input.metaTitle.trim() || null, metaDescription: input.metaDescription.trim() || null,
     metaTitleEn: input.metaTitleEn.trim() || null, metaDescriptionEn: input.metaDescriptionEn.trim() || null,
     canonicalUrl: validateOfficialCanonical(input.canonicalUrl, { fieldLabel: "Canonical VI", pathPrefix: "/san-pham/" }),
