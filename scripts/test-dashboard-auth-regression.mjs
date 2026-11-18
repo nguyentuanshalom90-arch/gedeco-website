@@ -52,6 +52,22 @@ const dashboard = await fetch(`${baseUrl}/dashboard`, { headers: { Cookie: cooki
 const dashboardHtml = await dashboard.text();
 assert(dashboard.status === 200 && dashboardHtml.includes("Tổng quan"), "Session hợp lệ không mở được dashboard.");
 
+const dashboardTabs = [
+  ["posts", "Quản lý bài viết"],
+  ["products", "Sản phẩm"],
+  ["pages", "Quản lý page"],
+  ["content", "Quản lý body"],
+  ["chrome", "Nội dung dùng chung"],
+  ["media", "Quản lý ảnh gốc"],
+  ["payment", "Thanh toán"],
+  ["shipping", "Vận chuyển"],
+];
+for (const [tab, marker] of dashboardTabs) {
+  const response = await fetch(`${baseUrl}/dashboard?view=dashboard&tab=${tab}`, { headers: { Cookie: cookie } });
+  const html = await response.text();
+  assert(response.status === 200 && html.includes(marker), `Dashboard tab ${tab} không render đúng màn hình.`);
+}
+
 const unauthenticatedMedia = await fetch(`${baseUrl}/api/media`);
 assert(unauthenticatedMedia.status === 401, `Media API chưa đăng nhập phải trả 401, thực tế ${unauthenticatedMedia.status}.`);
 
@@ -62,4 +78,4 @@ assert(media.status === 200 && Array.isArray(mediaPayload.assets), "Session hợ
 const logout = await fetch(`${baseUrl}/api/dashboard/logout`, { method: "POST", headers: { Cookie: cookie } });
 assert(logout.status === 200, `Logout phải trả 200, thực tế ${logout.status}.`);
 
-console.log("DASHBOARD_AUTH_REGRESSION_PASS invalid-login login session dashboard media logout");
+console.log("DASHBOARD_AUTH_REGRESSION_PASS invalid-login login session dashboard tabs media logout");
