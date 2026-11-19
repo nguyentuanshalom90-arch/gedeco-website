@@ -118,7 +118,7 @@ export function BimiSidebar({ tab, onSelectTab, onLogout }: BimiSidebarProps) {
           aria-label="Xem website"
         >
           <Icon name="external" size={14} />
-          <span>Xem web</span>
+          <span>Xem</span>
         </Link>
       </div>
       <div id="dashboard-navigation" className="nav-frame" role="navigation" aria-label="Các module quản trị">
@@ -200,49 +200,6 @@ export function BimiSidebar({ tab, onSelectTab, onLogout }: BimiSidebarProps) {
           </span>
         </div>
       </div>
-      <a
-        href="https://zalo.me/0357828707"
-        target="_blank"
-        rel="noopener noreferrer"
-        className="btn"
-        style={{
-          justifyContent: "center",
-          gap: 12,
-          width: "100%",
-          textDecoration: "none",
-          background: "#ffffff",
-          color: "#111111",
-          fontWeight: 700,
-          border: "1px solid rgba(4,56,38,0.10)",
-          boxShadow: "0 4px 14px rgba(3,58,39,0.14)",
-        }}
-      >
-        <Icon
-          name="arrowCircle"
-          size={32}
-          style={{
-            flex: "0 0 auto",
-            width: 32,
-            height: 32,
-            animation: "lwArrowFloat 1.15s ease-in-out infinite",
-          }}
-        />
-        <span style={{ textAlign: "left", lineHeight: 1.3, fontWeight: 700 }}>
-          Nguyễn Tuấn
-          <br />
-          <span style={{ whiteSpace: "nowrap", fontWeight: 700 }}>
-            0357 828 707
-          </span>
-        </span>
-        <Image
-          src="/bimi-panel/zalo-chat.webp"
-          alt="Zalo"
-          width={300}
-          height={300}
-          unoptimized
-          style={{ flex: "0 0 auto", display: "block", objectFit: "contain" }}
-        />
-      </a>
       <a
         href="https://www.facebook.com/nguyentuan.vimigo.90"
         target="_blank"
