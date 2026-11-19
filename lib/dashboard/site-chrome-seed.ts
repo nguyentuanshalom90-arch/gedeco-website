@@ -1,5 +1,5 @@
 export const chromeSeed = [
-  ["HEADER", "DYNAMIC", "brand", "logo", "Logo Header", "", "", "/assets/logo-lockup.optimized.webp", "GEDECO", true, 1],
+  ["HEADER", "DYNAMIC", "brand", "logo", "Logo Header", "", "", "/assets/logo-new.optimized.webp", "GEDECO", true, 1],
   ["HEADER", "STATIC", "navigation", "home", "Trang chủ", "Trang chủ", "/", "", "", true, 10],
   ["HEADER", "STATIC", "navigation", "about", "Giới thiệu", "Giới thiệu", "/gioi-thieu", "", "", true, 11],
   ["HEADER", "STATIC", "navigation", "products", "Sản phẩm", "Sản phẩm", "/san-pham", "", "", true, 14],

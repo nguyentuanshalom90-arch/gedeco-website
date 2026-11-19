@@ -231,9 +231,8 @@ export function InnerHeader({
   const getUrl = (key: string, fallback: string) =>
     chromeLoaded ? chrome[key]?.url || "" : fallback;
   const show = (key: string) => !chromeLoaded || Boolean(chrome[key]);
-  // Keep every public header variant on the same horizontal GEDECO lockup.
-  // The tall mark asset is reserved for contexts that explicitly need it.
-  const logo = "/assets/logo-lockup.optimized.webp";
+  // Header uses the same official vertical GEDECO logo family as the Footer.
+  const logo = "/assets/logo-new.optimized.webp";
   const urls = english
     ? {
         home: "/en",
@@ -573,7 +572,7 @@ export function InnerFooter({ language = "vi" }: { language?: "vi" | "en" }) {
           {show("brand.logo") && (
             <img
               src={
-                chrome["brand.logo"]?.imageUrl || "/assets/logo-new-footer.optimized.webp"
+                "/assets/logo-new-footer.optimized.webp"
               }
               alt={chrome["brand.logo"]?.altText || "GEDECO"}
             />
