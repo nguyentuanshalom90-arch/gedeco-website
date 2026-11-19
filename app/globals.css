@@ -127,6 +127,11 @@
   .shop-footer-grid { gap: 44px; padding: 52px 0; }
   .shop-footer h3 { font-size: 17px; }
   .shop-footer p, .shop-footer a { font-size: 14px; }
+
+  /* Desktop readability floor: no public text content below 12px. */
+  body :where(p, li, a, button, input, textarea, select, label, small, figcaption, dt, dd, span) {
+    font-size: max(12px, 1em);
+  }
 }
 
 /* One public header logo geometry across homepage, inner pages and shop routes. */
@@ -459,7 +464,7 @@ picture{display:block}.service-card picture{width:calc(100% + 32px);margin-left:
 
 /* One navigation layer only: the header sits over the hero instead of leaving
    the legacy sticky-header strip below the navigation shell. */
-.site-header{position:absolute!important;top:0!important;height:auto!important;margin-bottom:0!important}
+.site-header{position:sticky!important;top:0!important;height:auto!important;margin-bottom:0!important}
 .shop-site-no-hero .site-header{position:sticky!important;height:auto!important;margin-bottom:0!important}
 
 /* Client-approved GEDECO navigation, typography and product presentation */
