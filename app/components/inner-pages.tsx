@@ -227,7 +227,7 @@ export function InnerHeader({
     };
   }, [pathname]);
   const get = (key: string, fallback: string) =>
-    chromeLoaded ? chrome[key]?.value || "" : fallback;
+    chromeLoaded ? chrome[key]?.value || fallback : fallback;
   const getUrl = (key: string, fallback: string) =>
     chromeLoaded ? chrome[key]?.url || fallback : fallback;
   // Navigation is structural site chrome. A missing translation/config row
