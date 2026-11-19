@@ -296,8 +296,8 @@ export function InnerHeader({
             aria-label={english ? "GEDECO home" : "GEDECO trang chủ"}
           >
             <img
-              src={chrome["brand.logo"]?.imageUrl || logo}
-              alt={chrome["brand.logo"]?.altText || "GEDECO"}
+              src={logo}
+              alt="GEDECO"
             />
             {chrome["brand.logo"]?.caption ? (
               <span className="sr-only">{chrome["brand.logo"].caption}</span>
@@ -677,9 +677,6 @@ export function InnerFooter({ language = "vi" }: { language?: "vi" | "en" }) {
       </div>
       <div className="container footer-bottom">
         {show("legal.registration") && <span>{labels.registration}</span>}
-        {show("legal.copyright") && get("legal.copyright", "") ? (
-          <span>{get("legal.copyright", "")}</span>
-        ) : null}
       </div>
     </footer>
   );

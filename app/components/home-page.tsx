@@ -130,7 +130,7 @@ export default function HomePage({ language = 'vi', initialContent, initialNews 
   const categoryLinks = productCategories.length ? productCategories.map((category) => ({ id: category.id, label: language === 'en' ? category.nameEn : category.name, slug: language === 'en' ? category.slugEn : category.slug })) : [{ id: 'domestic', label: copy.domestic, slug: language === 'en' ? 'domestic' : 'trong-nuoc' }, { id: 'export', label: copy.export, slug: language === 'en' ? 'export' : 'xuat-khau' }];
   return <>
     <header className="site-header" id="top"><div className="nav-shell">
-      <a className="brand" href="#top" aria-label={copy.ariaHome}><img src={chrome['brand.logo']?.imageUrl || '/assets/logo-new.optimized.webp'} alt={chrome['brand.logo']?.altText || 'GEDECO'} />{chrome['brand.logo']?.caption ? <span className="sr-only">{chrome['brand.logo'].caption}</span> : null}</a>
+      <a className="brand" href="#top" aria-label={copy.ariaHome}><img src="/assets/logo-lockup.optimized.webp" alt="GEDECO" />{chrome['brand.logo']?.caption ? <span className="sr-only">{chrome['brand.logo'].caption}</span> : null}</a>
       <button className="menu-toggle" aria-label={copy.menu} aria-expanded={menuOpen} onClick={() => setMenuOpen(!menuOpen)}><span /><span /><span /></button>
       <nav className={`main-nav${menuOpen ? ' open' : ''}`} aria-label={language === 'en' ? 'Main navigation' : 'Điều hướng chính'}>
         <a className="active" href="#top" onClick={closeMenu}>{chromeGet('navigation.home', copy.home)}</a>

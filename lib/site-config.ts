@@ -31,7 +31,9 @@ export const siteConfig = {
   defaultTitle: "GEDECO | Thương mại và xuất khẩu",
   defaultDescription: "GEDECO phát triển nguồn hàng Việt Nam và kết nối sản phẩm chất lượng với khách hàng, đối tác trong nước và quốc tế.",
   locale: "vi_VN",
-  logo: "/assets/logo-new.optimized.webp",
+  // Use a padded white derivative for Google/Organization metadata so the
+  // logo mark is not cropped when search surfaces render it tightly.
+  logo: "/assets/logo-og-padded.optimized.webp",
   email: "info@gedeco.vn",
   phone: "0914943653",
   address:
