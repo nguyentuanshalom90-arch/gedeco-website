@@ -229,8 +229,11 @@ export function InnerHeader({
   const get = (key: string, fallback: string) =>
     chromeLoaded ? chrome[key]?.value || "" : fallback;
   const getUrl = (key: string, fallback: string) =>
-    chromeLoaded ? chrome[key]?.url || "" : fallback;
-  const show = (key: string) => !chromeLoaded || Boolean(chrome[key]);
+    chromeLoaded ? chrome[key]?.url || fallback : fallback;
+  // Navigation is structural site chrome. A missing translation/config row
+  // must fall back to the canonical menu instead of hiding the menu item.
+  const show = (key: string) =>
+    key === "brand.logo" || key.startsWith("navigation.") || !chromeLoaded || Boolean(chrome[key]);
   // Header uses the same official vertical GEDECO logo family as the Footer.
   const logo = "/assets/logo-new.optimized.webp";
   const urls = english
