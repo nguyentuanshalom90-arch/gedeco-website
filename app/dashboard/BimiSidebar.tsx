@@ -200,49 +200,6 @@ export function BimiSidebar({ tab, onSelectTab, onLogout }: BimiSidebarProps) {
           </span>
         </div>
       </div>
-      <a
-        href="https://www.facebook.com/nguyentuan.vimigo.90"
-        target="_blank"
-        rel="noopener noreferrer"
-        className="btn"
-        style={{
-          justifyContent: "center",
-          gap: 12,
-          width: "100%",
-          height: 62,
-          boxSizing: "border-box",
-          padding: "0 12px",
-          textDecoration: "none",
-          background: "#ffffff",
-          color: "#111111",
-          fontWeight: 700,
-          border: "1px solid rgba(4,56,38,0.10)",
-          boxShadow: "0 4px 14px rgba(3,58,39,0.14)",
-        }}
-      >
-        <Icon
-          name="arrowCircle"
-          size={32}
-          style={{
-            flex: "0 0 auto",
-            width: 32,
-            height: 32,
-            animation: "lwArrowFloat 1.15s ease-in-out infinite",
-            animationDelay: "0.575s",
-          }}
-        />
-        <span style={{ textAlign: "left", lineHeight: 1.3, fontWeight: 700 }}>
-          Nguyễn Tuấn
-        </span>
-        <Image
-          src="/bimi-panel/messenger-copy.webp"
-          alt="Messenger"
-          width={440}
-          height={440}
-          unoptimized
-          style={{ flex: "0 0 auto", display: "block", objectFit: "contain" }}
-        />
-      </a>
       <button
         type="button"
         className="btn lw-logout"
