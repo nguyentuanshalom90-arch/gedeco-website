@@ -129,6 +129,21 @@
   .shop-footer p, .shop-footer a { font-size: 14px; }
 }
 
+/* One public header logo geometry across homepage, inner pages and shop routes. */
+.site-header .brand { width: 190px; flex: 0 0 190px; }
+.site-header .brand .site-logo,
+.site-header .site-logo { width: 184px; height: 62px; object-fit: contain; object-position: left center; mix-blend-mode: multiply; }
+@media (max-width: 900px) {
+  .site-header .brand { width: 128px; flex-basis: 128px; }
+  .site-header .brand .site-logo,
+  .site-header .site-logo { width: 125px; height: 46px; }
+}
+@media (max-width: 380px) {
+  .site-header .brand { width: 118px; flex-basis: 118px; }
+  .site-header .brand .site-logo,
+  .site-header .site-logo { width: 115px; height: 42px; }
+}
+
 /* Desktop-wide layout: match the reference site's full-width navigation and
    give the whole public site more breathing room without changing mobile. */
 @media (min-width: 901px) {

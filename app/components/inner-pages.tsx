@@ -231,7 +231,9 @@ export function InnerHeader({
   const getUrl = (key: string, fallback: string) =>
     chromeLoaded ? chrome[key]?.url || "" : fallback;
   const show = (key: string) => !chromeLoaded || Boolean(chrome[key]);
-  const logo = "/assets/logo-new.optimized.webp";
+  // Keep every public header variant on the same horizontal GEDECO lockup.
+  // The tall mark asset is reserved for contexts that explicitly need it.
+  const logo = "/assets/logo-lockup.optimized.webp";
   const urls = english
     ? {
         home: "/en",
@@ -295,10 +297,7 @@ export function InnerHeader({
             href={urls.home}
             aria-label={english ? "GEDECO home" : "GEDECO trang chủ"}
           >
-            <img
-              src={logo}
-              alt="GEDECO"
-            />
+            <img className="site-logo" src={logo} alt="GEDECO" />
             {chrome["brand.logo"]?.caption ? (
               <span className="sr-only">{chrome["brand.logo"].caption}</span>
             ) : null}
