@@ -444,7 +444,7 @@ export function InnerFooter({ language = "vi" }: { language?: "vi" | "en" }) {
       .catch(() => setLoaded(true));
   }, [language]);
   const get = (key: string, fallback: string) =>
-    loaded ? chrome[key]?.value || "" : fallback;
+    loaded ? chrome[key]?.value || fallback : fallback;
   const getUrl = (key: string, fallback: string) => {
     const value = loaded ? chrome[key]?.url || "" : fallback;
     if (!value) return "";
