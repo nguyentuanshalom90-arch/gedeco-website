@@ -1,5 +1,6 @@
-import { mkdir, rename, unlink, writeFile } from "node:fs/promises";
+import { mkdir, readdir, rename, unlink, writeFile } from "node:fs/promises";
 import { randomUUID } from "node:crypto";
+import path from "node:path";
 import sharp, { type Metadata } from "sharp";
 import { prisma } from "@/lib/prisma";
 import { containedMediaPath, mediaRoot } from "@/lib/media-storage";
@@ -17,8 +18,37 @@ export async function GET() {
     return Response.json({ error: error instanceof Error ? error.message : "Chưa đăng nhập." }, { status: 401 });
   }
   const assets = await prisma.mediaAsset.findMany({ where: { archivedAt: null }, orderBy: { createdAt: "desc" }, take: 100 });
+  const managed = assets.map((asset) => ({ id: asset.id, name: asset.originalName, url: `/api/media/${asset.id}`, width: asset.width, height: asset.height, altText: asset.altText, caption: asset.caption, managed: true }));
+  const staticAssets: Array<{ id: string; name: string; url: string; width: number; height: number; altText: string; caption: string; managed: false }> = [];
+  const publicAssets = path.join(process.cwd(), "public", "assets");
+  try {
+    const files = (await readdir(publicAssets, { withFileTypes: true }))
+      .filter((entry) => entry.isFile() && /\.(?:png|jpe?g|webp)$/i.test(entry.name))
+      .slice(0, 200);
+    for (const file of files) {
+      const url = `/assets/${file.name}`;
+      if (managed.some((asset) => asset.url === url)) continue;
+      try {
+        const metadata = await sharp(path.join(publicAssets, file.name)).metadata();
+        staticAssets.push({
+          id: `static-${Buffer.from(url).toString("base64url")}`,
+          name: file.name,
+          url,
+          width: metadata.width || 0,
+          height: metadata.height || 0,
+          altText: "",
+          caption: "",
+          managed: false,
+        });
+      } catch {
+        // Skip an unreadable asset without hiding the rest of the library.
+      }
+    }
+  } catch {
+    // The persistent upload library remains available even if static assets cannot be scanned.
+  }
   return Response.json({
-    assets: assets.map((asset) => ({ id: asset.id, name: asset.originalName, url: `/api/media/${asset.id}`, width: asset.width, height: asset.height, altText: asset.altText, caption: asset.caption })),
+    assets: [...managed, ...staticAssets],
   });
 }
 

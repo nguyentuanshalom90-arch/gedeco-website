@@ -5,7 +5,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Icon } from "@/components/vimigo-icon";
 import type { MediaSelection } from "./MediaPicker";
 
-type EditableMedia = MediaSelection & { altText: string; caption: string };
+type EditableMedia = MediaSelection & { altText: string; caption: string; managed?: boolean };
 
 export function MediaLibraryManager() {
   const inputRef = useRef<HTMLInputElement>(null);
@@ -77,6 +77,10 @@ export function MediaLibraryManager() {
 
   async function saveMetadata() {
     if (!selected) return;
+    if (selected.managed === false) {
+      setMessage("Ảnh này đang là static asset dùng trong nội dung website; hãy tải/chọn bản lưu trong thư viện nếu cần quản lý alt và caption.");
+      return;
+    }
     setBusy(true);
     setError("");
     setMessage("");
@@ -166,8 +170,8 @@ export function MediaLibraryManager() {
             <dl className="media-library-details"><div><dt>Kích thước</dt><dd>{selected.width} × {selected.height}px</dd></div><div><dt>ID</dt><dd>{selected.id}</dd></div></dl>
             <label className="field"><span>Alt text <small>{selected.altText.length}/300</small></span><input className="input" maxLength={300} value={selected.altText} onChange={(event) => setSelected((current) => current ? { ...current, altText: event.target.value } : current)} placeholder="Mô tả nội dung và mục đích của ảnh" /></label>
             <label className="field"><span>Caption <small>{selected.caption.length}/500</small></span><textarea className="input" maxLength={500} rows={4} value={selected.caption} onChange={(event) => setSelected((current) => current ? { ...current, caption: event.target.value } : current)} placeholder="Chú thích hiển thị khi vị trí sử dụng hỗ trợ caption" /></label>
-            <p className="cms-help">File gốc được giữ nguyên; website phân phối bản WebP tối ưu qua cùng một URL media.</p>
-            <div className="media-library-actions"><button type="button" className="btn btn-primary media-library-save" onClick={() => void saveMetadata()} disabled={busy}><Icon name="check" size={16} /> {busy ? "Đang lưu…" : "Lưu alt và caption"}</button><button type="button" className="btn cms-danger" onClick={() => void archiveSelected()} disabled={busy}>Ẩn khỏi thư viện</button></div>
+            <p className="cms-help">{selected.managed === false ? "Ảnh đang được dùng trực tiếp từ static assets của website; hệ thống vẫn cho phép chọn lại ảnh này ở các vị trí nội dung." : "File gốc được giữ nguyên; website phân phối bản WebP tối ưu qua cùng một URL media."}</p>
+            <div className="media-library-actions"><button type="button" className="btn btn-primary media-library-save" onClick={() => void saveMetadata()} disabled={busy || selected.managed === false}><Icon name="check" size={16} /> {selected.managed === false ? "Ảnh static" : busy ? "Đang lưu…" : "Lưu alt và caption"}</button>{selected.managed !== false ? <button type="button" className="btn cms-danger" onClick={() => void archiveSelected()} disabled={busy}>Ẩn khỏi thư viện</button> : null}</div>
           </> : <p className="cms-empty">Chọn một media để xem và chỉnh metadata.</p>}
         </aside>
       </div>
