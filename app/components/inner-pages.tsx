@@ -319,8 +319,7 @@ export function InnerHeader({
           className={`main-nav${open ? " open" : ""}`}
           aria-label={english ? "Main navigation" : "Điều hướng chính"}
         >
-          {show("navigation.home") && (
-            <a
+          <a
               className={
                 active === (english ? "Home" : "Trang chủ") ? "active" : ""
               }
@@ -328,10 +327,8 @@ export function InnerHeader({
               onClick={() => setOpen(false)}
             >
               {labels.home}
-            </a>
-          )}
-          {show("navigation.about") && (
-            <a
+          </a>
+          <a
               className={
                 active === (english ? "About" : "Giới thiệu") ? "active" : ""
               }
@@ -339,10 +336,8 @@ export function InnerHeader({
               onClick={() => setOpen(false)}
             >
               {labels.about}
-            </a>
-          )}
-          {show("navigation.news") && (
-            <a
+          </a>
+          <a
               className={
                 active === (english ? "News" : "Tin tức") ? "active" : ""
               }
@@ -350,10 +345,8 @@ export function InnerHeader({
               onClick={() => setOpen(false)}
             >
               {labels.news}
-            </a>
-          )}
-          {show("navigation.products") && (
-            <div className="nav-dropdown">
+          </a>
+          <div className="nav-dropdown">
               <a
                 className={
                   active === (english ? "Products" : "Sản phẩm") ||
@@ -383,10 +376,8 @@ export function InnerHeader({
                   </a>
                 ))}
               </div>
-            </div>
-          )}
-          {show("navigation.contact") && (
-            <a
+          </div>
+          <a
               className={
                 active === (english ? "Contact" : "Liên hệ") ? "active" : ""
               }
@@ -394,8 +385,7 @@ export function InnerHeader({
               onClick={() => setOpen(false)}
             >
               {labels.contact}
-            </a>
-          )}
+          </a>
         </nav>
         <div className="nav-tools">
           <button
