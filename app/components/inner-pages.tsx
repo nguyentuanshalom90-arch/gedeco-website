@@ -572,7 +572,7 @@ export function InnerFooter({ language = "vi" }: { language?: "vi" | "en" }) {
           {show("brand.logo") && (
             <img
               src={
-                "/assets/logo-new-footer.optimized.webp"
+                "/assets/logo-new.optimized.webp"
               }
               alt={chrome["brand.logo"]?.altText || "GEDECO"}
             />
@@ -786,13 +786,19 @@ export function CTA({
     (english
       ? "Connect with GEDECO today to explore new cooperation and sustainable growth opportunities."
       : "Kết nối ngay hôm nay để tìm kiếm cơ hội hợp tác và phát triển bền vững trên toàn cầu.");
+  // The legacy footer artwork contains baked-in footer copy. It must never be
+  // reused as a CTA background because that makes the footer appear to overlap
+  // the CTA on inner pages.
+  const ctaImage = image && !/footer(?:\.optimized)?\.(?:webp|jpe?g|png)$/i.test(image)
+    ? image
+    : "/assets/banner-2.optimized.webp";
   return (
     <section
       className="inner-cta"
       style={
-        image
+        ctaImage
           ? {
-              backgroundImage: `linear-gradient(90deg,rgba(3,25,53,.85),rgba(3,25,53,.4)),url('${image}')`,
+              backgroundImage: `linear-gradient(90deg,rgba(3,25,53,.85),rgba(3,25,53,.4)),url('${ctaImage}')`,
             }
           : undefined
       }

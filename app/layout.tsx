@@ -31,7 +31,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const image = media["hero.banner1"];
   const imageUrl = image?.url || siteConfig.logo;
   const imageAlt = image?.altText || siteConfig.brand;
-  return { metadataBase: new URL(siteConfig.officialUrl), title: { default: title, template: `%s | ${siteConfig.brand}` }, description, applicationName: siteConfig.brand, alternates: { canonical, languages: { vi: "/", en: "/en", "x-default": "/" } }, robots: { index: page?.robotsIndex ?? true, follow: page?.robotsFollow ?? true }, openGraph: { type: "website", locale: siteConfig.locale, siteName: siteConfig.brand, url: canonical, title, description, images: [{ url: imageUrl, alt: imageAlt }] }, twitter: { card: "summary_large_image", title, description, images: [imageUrl] } };
+  return { metadataBase: new URL(siteConfig.officialUrl), title: { default: title, template: `%s | ${siteConfig.brand}` }, description, applicationName: siteConfig.brand, icons: { icon: [{ url: "/assets/logo-new.optimized.webp", type: "image/webp" }], shortcut: ["/assets/logo-new.optimized.webp"] }, alternates: { canonical, languages: { vi: "/", en: "/en", "x-default": "/" } }, robots: { index: page?.robotsIndex ?? true, follow: page?.robotsFollow ?? true }, openGraph: { type: "website", locale: siteConfig.locale, siteName: siteConfig.brand, url: canonical, title, description, images: [{ url: imageUrl, alt: imageAlt }] }, twitter: { card: "summary_large_image", title, description, images: [imageUrl] } };
 }
 
 export default async function RootLayout({

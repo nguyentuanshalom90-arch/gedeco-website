@@ -395,16 +395,7 @@ export function ShopProductCard({
         className="shop-product-body"
         style={{ display: "flex", flexDirection: "column", flex: 1 }}
       >
-        <h3
-          style={{
-            height: "42.5px",
-            minHeight: "42.5px",
-            display: "-webkit-box",
-            WebkitBoxOrient: "vertical",
-            WebkitLineClamp: 2,
-            overflow: "hidden",
-          }}
-        >
+        <h3 className="shop-product-title">
           <Link href={href}>{title}</Link>
         </h3>
         <Link

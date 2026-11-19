@@ -90,20 +90,21 @@ export function LanguageSwitcher({ english = false, alternateEnglishPath, altern
     try {
       const { path: savedPath, x, y } = JSON.parse(savedPosition) as { path?: string; x: number; y: number };
       if (!savedPath || normalizeLanguagePath(savedPath, routeMap) !== normalizeLanguagePath(pathname, routeMap)) return;
-      sessionStorage.removeItem(scrollStorageKey);
+      const root = document.documentElement;
+      const previousScrollBehavior = root.style.scrollBehavior;
+      const previousRestoration = history.scrollRestoration;
+      history.scrollRestoration = 'manual';
+      root.style.scrollBehavior = 'auto';
+      const restore = () => window.scrollTo({ left: x, top: y, behavior: 'auto' });
+      // The translated page can hydrate and load images after the route change.
+      // Re-apply the saved position while its layout settles, then release it.
+      [0, 80, 180, 350, 650, 1000].forEach((delay) => window.setTimeout(restore, delay));
       window.setTimeout(() => {
-        requestAnimationFrame(() => {
-          const root = document.documentElement;
-          const previousScrollBehavior = root.style.scrollBehavior;
-          const restore = () => {
-            root.style.scrollBehavior = 'auto';
-            window.scrollTo({ left: x, top: y, behavior: 'auto' });
-          };
-          restore();
-          window.setTimeout(restore, 150);
-          window.setTimeout(() => { root.style.scrollBehavior = previousScrollBehavior; }, 220);
-        });
-      }, 400);
+        restore();
+        sessionStorage.removeItem(scrollStorageKey);
+        root.style.scrollBehavior = previousScrollBehavior;
+        history.scrollRestoration = previousRestoration;
+      }, 1200);
     } catch {
       sessionStorage.removeItem(scrollStorageKey);
     }
