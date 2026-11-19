@@ -11,6 +11,18 @@ export const runtime = "nodejs";
 const MAX_BYTES = 8 * 1024 * 1024;
 const allowedFormats = new Map([["jpeg", "jpg"], ["png", "png"], ["webp", "webp"]]);
 
+async function listImageFiles(root: string, relative = ""): Promise<string[]> {
+  const directory = path.join(root, relative);
+  const entries = await readdir(directory, { withFileTypes: true });
+  const files: string[] = [];
+  for (const entry of entries) {
+    const child = path.join(relative, entry.name);
+    if (entry.isDirectory()) files.push(...await listImageFiles(root, child));
+    else if (entry.isFile() && /\.(?:png|jpe?g|webp)$/i.test(entry.name)) files.push(child);
+  }
+  return files;
+}
+
 export async function GET() {
   try {
     await requireDashboardSession();
@@ -22,17 +34,15 @@ export async function GET() {
   const staticAssets: Array<{ id: string; name: string; url: string; width: number; height: number; altText: string; caption: string; managed: false }> = [];
   const publicAssets = path.join(process.cwd(), "public", "assets");
   try {
-    const files = (await readdir(publicAssets, { withFileTypes: true }))
-      .filter((entry) => entry.isFile() && /\.(?:png|jpe?g|webp)$/i.test(entry.name))
-      .slice(0, 200);
-    for (const file of files) {
-      const url = `/assets/${file.name}`;
+    const files = (await listImageFiles(publicAssets)).slice(0, 500);
+    for (const relativeFile of files) {
+      const url = `/assets/${relativeFile.replaceAll(path.sep, "/")}`;
       if (managed.some((asset) => asset.url === url)) continue;
       try {
-        const metadata = await sharp(path.join(publicAssets, file.name)).metadata();
+        const metadata = await sharp(path.join(publicAssets, relativeFile)).metadata();
         staticAssets.push({
           id: `static-${Buffer.from(url).toString("base64url")}`,
-          name: file.name,
+          name: path.basename(relativeFile),
           url,
           width: metadata.width || 0,
           height: metadata.height || 0,
