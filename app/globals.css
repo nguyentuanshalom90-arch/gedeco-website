@@ -146,6 +146,36 @@
   }
 }
 
+/* Final guard: every desktop header menu item must remain visible even when
+   optional site-chrome data is incomplete. */
+@media (min-width: 901px) {
+  .site-header .main-nav {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    flex: 1 1 auto;
+    min-width: 0;
+    justify-content: flex-end;
+  }
+  .site-header .main-nav > a,
+  .site-header .main-nav > .nav-dropdown,
+  .site-header .main-nav > .nav-dropdown > a {
+    display: inline-flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+  .site-header .main-nav > a,
+  .site-header .nav-dropdown > a {
+    color: #193558 !important;
+  }
+  .site-header .main-nav > a.active,
+  .site-header .main-nav > a:hover,
+  .site-header .nav-dropdown > a.active,
+  .site-header .nav-dropdown > a:hover {
+    color: #a2710f !important;
+  }
+}
+
 /* One public header logo geometry across homepage, inner pages and shop routes. */
 .site-header .brand { width: 140px; flex: 0 0 140px; }
 .site-header .brand .site-logo,
