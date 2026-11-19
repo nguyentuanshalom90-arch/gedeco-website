@@ -1332,6 +1332,62 @@
   line-height: 1.35;
 }
 
+/* Sidebar contact cards: constrain media so its intrinsic HTML dimensions
+   cannot make the text column collapse or overflow on narrow dashboards. */
+.lw .lw-side > a.btn[href*="zalo.me"],
+.lw .lw-side > a.btn[href*="facebook.com"] {
+  min-width: 0;
+  overflow: hidden;
+}
+.lw .lw-side > a.btn[href*="zalo.me"] img {
+  width: 118px !important;
+  height: 118px !important;
+  max-width: 118px !important;
+  flex: 0 0 118px !important;
+}
+.lw .lw-side > a.btn[href*="facebook.com"] img {
+  width: 88px !important;
+  height: 88px !important;
+  max-width: 88px !important;
+  flex: 0 0 88px !important;
+}
+.lw .lw-side > a.btn[href*="zalo.me"] > span,
+.lw .lw-side > a.btn[href*="facebook.com"] > span {
+  min-width: 0;
+  font-size: 14px;
+  line-height: 1.35;
+}
+
+@media (max-width: 640px) {
+  .lw .hosting-card { min-width: 0; }
+  .lw .hosting-card span { font-size: 13px !important; }
+  .lw .lw-side > a.btn[href*="zalo.me"] {
+    min-height: 188px;
+    height: 188px;
+    justify-content: space-between;
+    padding: 10px 12px;
+    gap: 8px;
+  }
+  .lw .lw-side > a.btn[href*="zalo.me"] img {
+    width: 112px !important;
+    height: 112px !important;
+    max-width: 112px !important;
+    flex-basis: 112px !important;
+  }
+  .lw .lw-side > a.btn[href*="facebook.com"] {
+    min-height: 82px;
+    height: 82px;
+    justify-content: space-between;
+    padding: 8px 12px;
+  }
+  .lw .lw-side > a.btn[href*="facebook.com"] img {
+    width: 76px !important;
+    height: 76px !important;
+    max-width: 76px !important;
+    flex-basis: 76px !important;
+  }
+}
+
 /* page-list row (Editor view) */
 .lw .pagerow {
   display: flex; align-items: center; gap: 14px; width: 100%; text-align: left;

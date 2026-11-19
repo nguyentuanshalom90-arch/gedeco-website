@@ -196,7 +196,7 @@ export function BimiSidebar({ tab, onSelectTab, onLogout }: BimiSidebarProps) {
               lineHeight: 1.35,
             }}
           >
-            Bắt đầu 25/09/2026 · Gia hạn 25/09/2027
+            Bắt đầu 30/10/2026 · Gia hạn 30/10/2027
           </span>
         </div>
       </div>

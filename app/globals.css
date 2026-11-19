@@ -477,6 +477,40 @@ picture{display:block}.service-card picture{width:calc(100% + 32px);margin-left:
 @media(max-width:640px){.site-header{height:58px;margin-bottom:-58px}}
 @media(max-width:640px){.nav-tools .button-small{display:none}}
 
+/* Mobile header uses the same full-bleed navigation surface as desktop. */
+@media (max-width: 640px) {
+  .site-header,
+  .inner-site .site-header {
+    width: 100%;
+    padding: 0;
+    background: #fff;
+  }
+  .site-header .nav-shell {
+    width: 100%;
+    max-width: none;
+    height: 64px;
+    min-height: 64px;
+    padding: 0 16px;
+    border-radius: 0;
+    box-shadow: 0 1px 0 rgba(9, 40, 74, .12);
+  }
+  .site-header .brand {
+    width: 112px;
+    flex-basis: 112px;
+  }
+  .site-header .brand .site-logo,
+  .site-header .site-logo {
+    width: 84px;
+    height: 58px;
+  }
+  .site-header .main-nav {
+    top: 64px;
+    left: 0;
+    right: 0;
+    border-radius: 0;
+  }
+}
+
 /* One navigation layer only: the header sits over the hero instead of leaving
    the legacy sticky-header strip below the navigation shell. */
 .site-header{position:sticky!important;top:0!important;height:auto!important;margin-bottom:0!important}
