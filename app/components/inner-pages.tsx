@@ -463,7 +463,18 @@ export function InnerFooter({ language = "vi" }: { language?: "vi" | "en" }) {
       return "";
     }
   };
-  const show = (key: string) => !loaded || Boolean(chrome[key]);
+  const show = (key: string) =>
+    !loaded ||
+    Boolean(chrome[key]) ||
+    key === "brand.logo" ||
+    key === "brand.company" ||
+    key === "brand.tagline" ||
+    key.startsWith("social.") ||
+    key.startsWith("footerLabel.") ||
+    key.startsWith("contact.") ||
+    key.startsWith("quickLink.") ||
+    key.startsWith("supportLink.") ||
+    key.startsWith("legal.");
   const address = get(
     "contact.address",
     english
