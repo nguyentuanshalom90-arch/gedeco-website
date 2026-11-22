@@ -124,7 +124,10 @@ export async function saveProduct(input: ProductInput, options?: { preserveEngli
   if (!title) throw new Error("Tên sản phẩm không được để trống.");
   const slug = slugify(input.slug || title);
   if (!slug) throw new Error("Slug sản phẩm không hợp lệ.");
-  if (input.imageUrl.trim() && !input.imageAlt.trim()) throw new Error("Ảnh chính phải có alt text.");
+  // Legacy products may already have a main image without alt text. Keep save
+  // available for unrelated edits while ensuring the persisted image is
+  // accessible with a deterministic product-title fallback.
+  if (input.imageUrl.trim() && !input.imageAlt.trim()) input.imageAlt = title;
   if (input.shipperImageUrl.trim() && !input.shipperImageAlt.trim()) throw new Error("Ảnh giao hàng phải có alt text.");
   if (input.ogImageUrl.trim() && !input.ogImageAlt.trim()) throw new Error("Ảnh Open Graph phải có alt text.");
   if (input.metaTitle.trim().length > 65) throw new Error("SEO title không vượt quá 65 ký tự.");
@@ -165,7 +168,7 @@ export async function saveProduct(input: ProductInput, options?: { preserveEngli
     priceText: input.priceText.trim() || "Liên hệ",
     stockText: input.stockText.trim() || "Còn hàng",
     imageUrl: validateManagedMediaUrl(input.imageUrl, "Ảnh chính") || "",
-    imageAlt: input.imageAlt.trim(),
+    imageAlt: input.imageAlt.trim() || title,
     imageCaption: "",
     shipperImageUrl: validateManagedMediaUrl(input.shipperImageUrl, "Ảnh giao hàng") || "",
     shipperImageAlt: input.shipperImageAlt.trim(),
