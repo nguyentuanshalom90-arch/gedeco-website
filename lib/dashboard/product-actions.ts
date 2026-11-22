@@ -116,6 +116,22 @@ export async function listDashboardProducts() {
   return rows.map((row) => toItem(row, byId.get(row.id)));
 }
 
+export async function setProductVisibility(id: string, isPublished: boolean) {
+  await requireDashboardSession();
+  const row = await prisma.product.update({
+    where: { id },
+    data: { isPublished },
+    include: { category: true, gallery: { orderBy: { sortOrder: "asc" } } },
+  });
+  const translation = await prisma.translationEntry.findUnique({
+    where: { entityType_entityId_locale: { entityType: "PRODUCT", entityId: id, locale: "en" } },
+  });
+  for (const path of ["/san-pham", "/en/products", `/san-pham/${row.category.slug}/${row.slug}`, translation?.slug ? `/en/products/${row.category.slugEn}/${translation.slug}` : null, "/sitemap.xml"]) {
+    if (path) revalidatePath(path);
+  }
+  return { ok: true as const, product: toItem(row, translation) };
+}
+
 export async function saveProduct(input: ProductInput, options?: { preserveEnglish?: boolean }) {
   await requireDashboardSession();
   const preserveEnglish = Boolean(options?.preserveEnglish);

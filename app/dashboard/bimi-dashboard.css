@@ -2161,6 +2161,8 @@ body.dashboard-page-active {
 .lw .product-status.live{background:#dff8ef;color:#1f9d79;box-shadow:0 0 0 1px rgba(31,157,121,.08),0 0 12px rgba(31,157,121,.18)}
 .lw .product-status.live::before{content:"";width:7px;height:7px;margin-right:6px;border-radius:50%;background:#20b486;box-shadow:0 0 0 3px rgba(32,180,134,.16),0 0 8px rgba(32,180,134,.55)}
 .lw .product-status.off{background:#f0eef5;color:#736d84}
+.lw .product-status-select{font:inherit;cursor:pointer;appearance:auto;border:0;outline:none;text-align:center}
+.lw .product-status-select:disabled{cursor:wait;opacity:.75}
 .lw .product-row-actions{display:flex;gap:3px;align-items:center}
 .lw .product-row-actions .btn{width:34px;height:34px;display:grid;place-items:center;padding:0;border:1px solid #cfc8ee;border-radius:10px;color:#4f467d}
 .lw .product-row-actions .btn:hover{background:#eeeafd;border-color:#8f83cf}
