@@ -482,6 +482,7 @@ export function InnerFooter({ language = "vi" }: { language?: "vi" | "en" }) {
       : "Trụ sở: Tầng 14, Tòa nhà Đa năng, số 169 Nguyễn Ngọc Vũ, P. Yên Hòa, TP. Hà Nội, Việt Nam",
   );
   const addressParts = address.split(", P. Yên Hòa");
+  const englishAddressParts = address.split(", 169 Nguyen Ngoc Vu");
   const urls = english
     ? {
         about: "/en/about",
@@ -576,7 +577,7 @@ export function InnerFooter({ language = "vi" }: { language?: "vi" | "en" }) {
           {show("brand.logo") && (
             <img
               src={
-                "/assets/logo-new.optimized.webp"
+                "/assets/logo-new-footer.optimized.webp"
               }
               alt={chrome["brand.logo"]?.altText || "GEDECO"}
             />
@@ -638,16 +639,24 @@ export function InnerFooter({ language = "vi" }: { language?: "vi" | "en" }) {
             {show("contact.address") && (
               <a href={urls.contact}>
                 <Icon name="pin" />{" "}
-                <span>
+                <span className="footer-address-text">
                   {english ? (
+                    englishAddressParts.length <= 1 ? (
+                      address
+                    ) : (
+                      <>
+                        <span className="footer-address-first-line">{englishAddressParts[0]},</span>
+                        <br />
+                        169 Nguyen Ngoc Vu{englishAddressParts.slice(1).join(", 169 Nguyen Ngoc Vu")}
+                      </>
+                    )
+                  ) : addressParts.length <= 1 ? (
                     address
-                  ) : addressParts.length > 1 ? (
+                  ) : (
                     <>
                       {addressParts[0]},<br />
                       P. Yên Hòa{addressParts.slice(1).join(", P. Yên Hòa")}
                     </>
-                  ) : (
-                    address
                   )}
                 </span>
               </a>

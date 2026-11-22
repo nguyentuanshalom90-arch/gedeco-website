@@ -48,6 +48,9 @@ const ICONS: Record<string, string> = {
   arrowLeft: "M19 12H5M12 19l-7-7 7-7",
   arrowRight: "M5 12h14M12 5l7 7-7 7",
   arrowCircle: "M12 3a9 9 0 100 18 9 9 0 000-18zM7.5 12h8M12 8l4 4-4 4",
+  maximize: "M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7",
+  minimize: "M7 2.5h10a4.5 4.5 0 014.5 4.5v10a4.5 4.5 0 01-4.5 4.5H7A4.5 4.5 0 012.5 17V7A4.5 4.5 0 017 2.5zM4.5 4.5l5 5m0-4v4h-4m14-5l-5 5m0-4v4h4m-14 10l5-5m0 4v-4h-4m14 5l-5-5m0 4v-4h4",
+  move: "M8 5h.01M16 5h.01M8 12h.01M16 12h.01M8 19h.01M16 19h.01",
 };
 
 export function Icon({

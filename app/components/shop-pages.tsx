@@ -436,9 +436,6 @@ export function ProductDetailGallery({
     <div className="shop-detail-gallery">
       <div className="shop-detail-main-image">
         <img src={selectedImage} alt={selected?.altText || title} />
-        {selected?.caption ? (
-          <p className="shop-image-caption">{selected.caption}</p>
-        ) : null}
       </div>
       <div
         className="shop-detail-thumbs"

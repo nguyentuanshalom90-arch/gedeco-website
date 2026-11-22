@@ -2,7 +2,7 @@ export type ProductMediaInput = {
   id?: string; url: string; altText: string; caption: string; altTextEn?: string; captionEn?: string; sortOrder: number; isPrimary: boolean;
 };
 export type ProductInput = {
-  id?: string | null; slug: string; title: string; categoryId: string;
+  id?: string | null; slug: string; title: string; titleHtml: string; titleColor: string; titleFontFamily: string; titleFontSize: number; titleFontWeight: number; categoryId: string;
   description: string; contentHtml: string; summaryHtml: string; priceText: string;
   stockText: string; imageUrl: string; imageAlt: string; imageCaption: string;
   shipperImageUrl: string; shipperImageAlt: string; shipperImageCaption: string;

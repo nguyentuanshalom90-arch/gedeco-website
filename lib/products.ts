@@ -4,7 +4,7 @@ import { sanitizeProductHtml } from "@/lib/sanitize-product-html";
 import { optimizedStaticMediaUrl } from "@/lib/static-media";
 
 export function toProductDetail(row: {
-  slug: string; title: string; category: { name: string; slug: string; nameEn: string; slugEn: string };
+  slug: string; title: string; titleHtml: string; titleColor: string; titleFontFamily: string; titleFontSize: number; titleFontWeight: number; category: { name: string; slug: string; nameEn: string; slugEn: string };
   description: string; contentHtml: string; summaryHtml: string;
   priceText: string; stockText: string; imageUrl: string; shipperImageUrl: string;
   shipperImageAlt: string; shipperImageCaption: string;
@@ -13,17 +13,22 @@ export function toProductDetail(row: {
   robotsIndex: boolean; robotsFollow: boolean;
   gallery: Array<{ url: string; altText: string; caption: string; sortOrder: number }>;
 }): GedecoProductDetail {
-  const galleryMedia = row.gallery.sort((a, b) => a.sortOrder - b.sortOrder).map((item) => ({ url: optimizedStaticMediaUrl(item.url), altText: item.altText, caption: item.caption }));
+  const galleryMedia = row.gallery.sort((a, b) => a.sortOrder - b.sortOrder).map((item) => ({ url: optimizedStaticMediaUrl(item.url), altText: item.altText, caption: "" }));
   return {
     slug: row.slug,
     title: row.title,
+    titleHtml: sanitizeProductHtml(row.titleHtml || `<p>${row.title}</p>`),
+    titleColor: row.titleColor,
+    titleFontFamily: "Arial",
+    titleFontSize: 28,
+    titleFontWeight: 700,
     category: row.category.name,
     categorySlug: row.category.slug,
     categorySlugEn: row.category.slugEn,
     image: optimizedStaticMediaUrl(row.imageUrl),
     imageAlt: row.imageAlt || row.title,
-    imageCaption: row.imageCaption,
-    description: row.description,
+    imageCaption: "",
+    description: sanitizeProductHtml(row.description),
     contentHtml: sanitizeProductHtml(row.contentHtml),
     gallery: galleryMedia.map((item) => item.url),
     galleryMedia,
@@ -32,7 +37,7 @@ export function toProductDetail(row: {
     stockText: row.stockText,
     shipperImage: optimizedStaticMediaUrl(row.shipperImageUrl),
     shipperImageAlt: row.shipperImageAlt || row.title,
-    shipperImageCaption: row.shipperImageCaption,
+    shipperImageCaption: "",
     ogImage: optimizedStaticMediaUrl(row.ogImageUrl || row.imageUrl),
     ogImageAlt: row.ogImageAlt || row.imageAlt || row.title,
     metaTitle: row.metaTitle || row.title,
@@ -100,22 +105,32 @@ function toEnglishView(row: any, entry?: any): EnglishProductView {
     slug: entry?.slug || row.slug,
     sourceSlug: row.slug,
     title: payloadString(payload, "title", row.title),
+    // English title is stored as plain text in the translation payload. Never
+    // render the Vietnamese title HTML on the English route.
+    titleHtml: sanitizeProductHtml(`<p><strong>${payloadString(payload, "title", row.title)}</strong></p>`),
+    titleColor: row.titleColor,
+    titleFontFamily: "Arial",
+    titleFontSize: 28,
+    titleFontWeight: 700,
     category: row.category.nameEn,
     categorySlug: row.category.slug,
     categorySlugEn: row.category.slugEn,
     image: optimizedStaticMediaUrl(row.imageUrl),
     imageAlt: payloadString(payload, "imageAlt", row.imageAlt || payloadString(payload, "title", row.title)),
-    imageCaption: payloadString(payload, "imageCaption", row.imageCaption || ""),
-    description: payloadString(payload, "description", row.description),
+    imageCaption: "",
+    description: sanitizeProductHtml(payloadString(payload, "description", row.description)),
     contentHtml: sanitizeProductHtml(payloadString(payload, "contentHtml", row.contentHtml)),
     gallery: row.gallery.sort((a: any, b: any) => a.sortOrder - b.sortOrder).map((item: any) => optimizedStaticMediaUrl(item.url)),
-    galleryMedia: row.gallery.sort((a: any, b: any) => a.sortOrder - b.sortOrder).map((item: any) => ({ url: optimizedStaticMediaUrl(item.url), altText: payloadString(payload, `galleryAlt_${item.id}`, item.altText), caption: payloadString(payload, `galleryCaption_${item.id}`, item.caption) })),
-    summaryHtml: sanitizeProductHtml(payloadString(payload, "summaryHtml", row.summaryHtml)),
+    galleryMedia: row.gallery.sort((a: any, b: any) => a.sortOrder - b.sortOrder).map((item: any) => ({ url: optimizedStaticMediaUrl(item.url), altText: payloadString(payload, `galleryAlt_${item.id}`, item.altText), caption: "" })),
+    // A product's short introduction is stored in `description`. Do not fall
+    // back to the Vietnamese source `summaryHtml` when the English summary is
+    // empty; use the already translated English description instead.
+    summaryHtml: sanitizeProductHtml(payloadString(payload, "summaryHtml", payloadString(payload, "description", ""))),
     priceText: payloadString(payload, "priceText", row.priceText),
     stockText: payloadString(payload, "stockText", row.stockText),
     shipperImage: optimizedStaticMediaUrl(row.shipperImageUrl),
     shipperImageAlt: payloadString(payload, "shipperImageAlt", row.shipperImageAlt || payloadString(payload, "title", row.title)),
-    shipperImageCaption: payloadString(payload, "shipperImageCaption", row.shipperImageCaption || ""),
+    shipperImageCaption: "",
     ogImage: optimizedStaticMediaUrl(row.ogImageUrl || row.imageUrl),
     ogImageAlt: payloadString(payload, "ogImageAlt", row.ogImageAlt || row.imageAlt || row.title),
     metaTitle: payloadString(payload, "metaTitle", row.metaTitle || row.title),

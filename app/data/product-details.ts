@@ -1,6 +1,6 @@
 export type ProductGalleryImage = { url: string; altText: string; caption: string };
 export type GedecoProductDetail = {
-  slug: string; title: string; category: string; categorySlug?: string; categorySlugEn?: string; image: string;
+  slug: string; title: string; titleHtml?: string; titleColor?: string; titleFontFamily?: string; titleFontSize?: number; titleFontWeight?: number; category: string; categorySlug?: string; categorySlugEn?: string; image: string;
   imageAlt?: string; imageCaption?: string; description: string; contentHtml: string; gallery: string[];
   galleryMedia?: ProductGalleryImage[]; summaryHtml: string; priceText: string; stockText: string; shipperImage: string;
   shipperImageAlt?: string; shipperImageCaption?: string;

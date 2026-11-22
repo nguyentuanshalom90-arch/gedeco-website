@@ -145,13 +145,19 @@ function ChipInput({
 
 function MarkdownEditor({ value, onChange, placeholder, mediaLabel, onError }: { value: string; onChange: (value: string) => void; placeholder: string; mediaLabel: string; onError: (message: string) => void }) {
   const areaRef = useRef<HTMLTextAreaElement>(null);
+  const selectionRef = useRef({ start: 0, end: 0 });
   const [mediaOpen, setMediaOpen] = useState(false);
   const [mediaAlt, setMediaAlt] = useState("");
   const [mediaCaption, setMediaCaption] = useState("");
   const words = value.trim() ? value.trim().split(/\s+/).length : 0;
+  function rememberSelection() {
+    const area = areaRef.current;
+    if (area) selectionRef.current = { start: area.selectionStart, end: area.selectionEnd };
+  }
   function insert(before: string, after = before) {
     const area = areaRef.current;
     if (!area) return;
+    rememberSelection();
     const start = area.selectionStart;
     const end = area.selectionEnd;
     onChange(`${value.slice(0, start)}${before}${value.slice(start, end)}${after}${value.slice(end)}`);
@@ -168,8 +174,8 @@ function MarkdownEditor({ value, onChange, placeholder, mediaLabel, onError }: {
       onError("Ảnh trong nội dung phải có alt text mô tả.");
       return;
     }
-    const start = area.selectionStart;
-    const end = area.selectionEnd;
+    const start = selectionRef.current.start;
+    const end = selectionRef.current.end;
     const before = value.slice(0, start);
     const after = value.slice(end);
     const syntax = `![${alt}](${asset.url}${caption ? ` "${caption}"` : ""})`;
@@ -185,7 +191,7 @@ function MarkdownEditor({ value, onChange, placeholder, mediaLabel, onError }: {
       <button type="button" onClick={() => insert("## ", "")} title="Tiêu đề"><Icon name="type" /></button>
       <button type="button" onClick={() => insert("**")} title="In đậm"><strong>B</strong></button>
       <button type="button" onClick={() => insert("[", "](https://)")} title="Liên kết"><Icon name="link" /></button>
-      <button type="button" onClick={() => setMediaOpen((current) => !current)} title="Ảnh"><Icon name="image" /></button>
+      <button type="button" onMouseDown={(event) => { event.preventDefault(); rememberSelection(); }} onClick={() => setMediaOpen((current) => !current)} title="Ảnh"><Icon name="image" /></button>
       <button type="button" onClick={() => insert("`", "`")} title="Mã"><Icon name="code" /></button>
       <button type="button" onClick={() => insert("> ", "")} title="Trích dẫn">❝</button>
     </div>
@@ -196,7 +202,7 @@ function MarkdownEditor({ value, onChange, placeholder, mediaLabel, onError }: {
       </div>
       <MediaPicker label={mediaLabel} value="" altText={mediaAlt} caption={mediaCaption} onSelect={insertMedia} />
     </div> : null}
-    <textarea ref={areaRef} className="input cms-content-area" value={value} onChange={(event) => onChange(event.target.value)} placeholder={placeholder} />
+    <textarea ref={areaRef} className="input cms-content-area" value={value} onChange={(event) => { rememberSelection(); onChange(event.target.value); }} onSelect={rememberSelection} onMouseUp={rememberSelection} onKeyUp={rememberSelection} onFocus={rememberSelection} placeholder={placeholder} />
     <small className="cms-help">Hỗ trợ Markdown · {words} từ</small>
   </div>;
 }

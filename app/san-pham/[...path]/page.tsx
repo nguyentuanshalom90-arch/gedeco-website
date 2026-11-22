@@ -20,6 +20,7 @@ import {
   ShopSidebar,
 } from "@/app/components/shop-pages";
 import { redirectDestination } from "@/lib/url-redirects";
+import { sanitizeProductHtml } from "@/lib/sanitize-product-html";
 
 export const dynamic = "force-dynamic";
 
@@ -264,7 +265,7 @@ export default async function ProductOrCategoryPage({
     {
       url: product.image,
       altText: product.imageAlt || title,
-      caption: product.imageCaption || "",
+      caption: "",
     },
     ...(
       product.galleryMedia ||
@@ -325,7 +326,7 @@ export default async function ProductOrCategoryPage({
           <section className="shop-product-detail">
             <ProductDetailGallery gallery={gallery} title={title} />
             <article className="shop-detail-summary">
-              <h1>{title}</h1>
+              <h1 className="product-detail-title" style={{ color: product.titleColor, fontFamily: "Arial, Helvetica, sans-serif", fontSize: "28px", fontWeight: 700 }} dangerouslySetInnerHTML={{ __html: sanitizeProductHtml(product.titleHtml || `<p>${title}</p>`) }} />
               {summary && (
                 <div
                   className="shop-summary-html"
@@ -341,7 +342,6 @@ export default async function ProductOrCategoryPage({
                 className="shop-shipper"
                 src={product.shipperImage}
                 alt={product.shipperImageAlt || product.title}
-                title={product.shipperImageCaption || undefined}
               />
               <ShopPurchaseLink type="buy" />
               <ShopGuarantee />

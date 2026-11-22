@@ -37,8 +37,8 @@ try {
   assert(viHtml.includes("Nội dung an toàn") && viHtml.includes("Chi tiết kiểm thử"), "Nội dung HTML hợp lệ không được render.");
   assert(!viHtml.includes("onclick=\"alert(1)\"") && !viHtml.includes("<script>alert(1)</script>"), "HTML nguy hiểm chưa bị loại.");
   assert(!viHtml.includes("evil.example") && !viHtml.includes("javascript:alert"), "URL nguy hiểm chưa bị loại.");
-  assert(viHtml.includes("/assets/logo-new.png") && viHtml.includes("Logo hợp lệ"), "Ảnh nội bộ hợp lệ bị loại nhầm.");
-  assert(viHtml.includes('alt="Ảnh giao hàng kiểm thử"') && viHtml.includes('title="Caption giao hàng kiểm thử"'), "Metadata ảnh giao hàng VI không đi tới frontend.");
+  assert(viHtml.includes("/assets/logo-new.optimized.webp") && viHtml.includes("Logo hợp lệ"), "Ảnh nội bộ hợp lệ không được phân phối bằng WebP.");
+  assert(viHtml.includes('alt="Ảnh giao hàng kiểm thử"') && !viHtml.includes('title="Caption giao hàng kiểm thử"'), "Caption ảnh giao hàng VI vẫn đi ra frontend.");
 
   const catalogResponse = await fetch(`${baseUrl}/api/products?language=vi`);
   const catalogPayload = await catalogResponse.json();
@@ -74,7 +74,7 @@ try {
   assert(translatedResponse.status === 200, `Bản English đã duyệt trả ${translatedResponse.status}.`);
   assert(translatedHtml.includes("Approved English product") && translatedHtml.includes("Approved detail"), "Bản English đã duyệt không hiển thị.");
   assert(!translatedHtml.includes("onmouseover=\"alert(1)\"") && !translatedHtml.includes("<script>alert(2)</script>"), "HTML English nguy hiểm chưa bị loại.");
-  assert(translatedHtml.includes('alt="Approved delivery image alt"') && translatedHtml.includes('title="Approved delivery caption"'), "Metadata ảnh giao hàng English không đi tới frontend.");
+  assert(translatedHtml.includes('alt="Approved delivery image alt"') && !translatedHtml.includes('title="Approved delivery caption"'), "Caption ảnh giao hàng English vẫn đi ra frontend.");
   assert(translatedHtml.includes(`hrefLang="vi" href="https://gedeco.vn${viPath}"`) && translatedHtml.includes(`href="${viPath}"`), "Hreflang hoặc language switcher English không trỏ về URL VI thực tế.");
   const viTranslatedResponse = await fetch(`${baseUrl}${viPath}`);
   const viTranslatedHtml = await viTranslatedResponse.text();

@@ -83,17 +83,20 @@ function slugify(value: string) {
 }
 
 type TranslationProviderConfig = {
-  provider: "libretranslate" | "google-cloud-translation";
+  provider: "libretranslate" | "google-cloud-translation" | "google-gtx";
   baseUrl: string;
   key?: string;
 };
 
 function getProviderConfig(): TranslationProviderConfig {
-  const provider = (process.env.TRANSLATION_PROVIDER || "libretranslate").trim().toLowerCase();
+  const provider = (process.env.TRANSLATION_PROVIDER || "google-gtx").trim().toLowerCase();
   if (provider === "google" || provider === "google-cloud" || provider === "google-cloud-translation") {
     const key = process.env.GOOGLE_TRANSLATE_API_KEY?.trim();
     if (!key) throw new Error("Google Translation chưa được cấu hình API key.");
     return { provider: "google-cloud-translation", baseUrl: "https://translation.googleapis.com/language/translate/v2", key };
+  }
+  if (provider === "google-gtx" || provider === "google-public") {
+    return { provider: "google-gtx", baseUrl: "https://translate.googleapis.com/translate_a/single" };
   }
   if (provider !== "libretranslate") throw new Error(`Translation provider không được hỗ trợ: ${provider}`);
   return {
@@ -105,6 +108,30 @@ function getProviderConfig(): TranslationProviderConfig {
 
 async function translateText(text: string, config: TranslationProviderConfig) {
   if (!text.trim()) return text;
+  if (config.provider === "google-gtx") {
+    const url = new URL(config.baseUrl);
+    url.searchParams.set("client", "gtx");
+    url.searchParams.set("sl", "vi");
+    url.searchParams.set("tl", "en");
+    url.searchParams.set("dt", "t");
+    url.searchParams.set("format", "text");
+    url.searchParams.set("q", text);
+    for (let attempt = 0; attempt < 4; attempt += 1) {
+      const response = await fetch(url, { cache: "no-store", signal: AbortSignal.timeout(30_000) });
+      if (response.ok) {
+        const payload = await response.json() as unknown;
+        const translated = Array.isArray(payload) && Array.isArray(payload[0])
+          ? payload[0].filter((part): part is unknown[] => Array.isArray(part)).map((part) => typeof part[0] === "string" ? part[0] : "").join("")
+          : "";
+        return translated || text;
+      }
+      if (![429, 500, 502, 503, 504].includes(response.status) || attempt === 3) {
+        throw new Error(`Google Translation trả về ${response.status}.`);
+      }
+      await new Promise((resolve) => setTimeout(resolve, 700 * (attempt + 1)));
+    }
+    return text;
+  }
   if (config.provider === "google-cloud-translation") {
     const response = await fetch(`${config.baseUrl}?key=${encodeURIComponent(config.key || "")}`, {
       method: "POST",
@@ -159,26 +186,25 @@ async function translateHtml(html: string, config: TranslationProviderConfig) {
 
 export async function translateProduct(source: ProductSource) {
   const config = getProviderConfig();
-  const [title, description, summaryHtml, contentHtml, priceText, stockText, imageAlt, imageCaption, shipperImageAlt, shipperImageCaption, ogImageAlt, metaTitle, metaDescription, translatedCategory] = await Promise.all([
-    translateText(source.title, config),
-    translateText(source.description, config),
-    translateHtml(source.summaryHtml, config),
-    translateHtml(source.contentHtml, config),
-    translateText(source.priceText, config),
-    translateText(source.stockText, config),
-    translateText(source.imageAlt, config),
-    translateText(source.imageCaption, config),
-    translateText(source.shipperImageAlt, config),
-    translateText(source.shipperImageCaption, config),
-    translateText(source.ogImageAlt, config),
-    translateText(source.metaTitle || source.title, config),
-    translateText(source.metaDescription || source.description, config),
-    source.categoryNameEn.trim() ? Promise.resolve(source.categoryNameEn.trim()) : translateText(source.categoryName, config),
-  ]);
-  const galleryPairs = await Promise.all(source.gallery.flatMap((item) => [
-    translateText(item.altText, config).then((value) => [`galleryAlt_${item.id}`, value] as const),
-    translateText(item.caption, config).then((value) => [`galleryCaption_${item.id}`, value] as const),
-  ]));
+  const title = await translateText(source.title, config);
+  const description = await translateText(source.description, config);
+  const summaryHtml = await translateHtml(source.summaryHtml, config);
+  const contentHtml = await translateHtml(source.contentHtml, config);
+  const priceText = await translateText(source.priceText, config);
+  const stockText = await translateText(source.stockText, config);
+  const imageAlt = await translateText(source.imageAlt, config);
+  const imageCaption = await translateText(source.imageCaption, config);
+  const shipperImageAlt = await translateText(source.shipperImageAlt, config);
+  const shipperImageCaption = await translateText(source.shipperImageCaption, config);
+  const ogImageAlt = await translateText(source.ogImageAlt, config);
+  const metaTitle = await translateText(source.metaTitle || source.title, config);
+  const metaDescription = await translateText(source.metaDescription || source.description, config);
+  const translatedCategory = source.categoryNameEn.trim() ? source.categoryNameEn.trim() : await translateText(source.categoryName, config);
+  const galleryPairs: Array<readonly [string, string]> = [];
+  for (const item of source.gallery) {
+    galleryPairs.push([`galleryAlt_${item.id}`, await translateText(item.altText, config)] as const);
+    galleryPairs.push([`galleryCaption_${item.id}`, await translateText(item.caption, config)] as const);
+  }
   return {
     provider: config.provider,
     payload: { title, description, summaryHtml, contentHtml, priceText, stockText, imageAlt, imageCaption, shipperImageAlt, shipperImageCaption, ogImageAlt, metaTitle, metaDescription, ...Object.fromEntries(galleryPairs), category: translatedCategory },
@@ -251,7 +277,10 @@ export function syncSiteChromeTranslation(source: SimpleContentSource) {
 export async function syncProductTranslation(source: ProductSource) {
   const sourceHash = hashSource({ title: source.title, description: source.description, summaryHtml: source.summaryHtml, contentHtml: source.contentHtml, priceText: source.priceText, stockText: source.stockText, imageAlt: source.imageAlt, imageCaption: source.imageCaption, shipperImageAlt: source.shipperImageAlt, shipperImageCaption: source.shipperImageCaption, ogImageAlt: source.ogImageAlt, metaTitle: source.metaTitle, metaDescription: source.metaDescription, gallery: source.gallery.map((item) => ({ id: item.id, altText: item.altText, caption: item.caption })), categoryName: source.categoryName, categoryNameEn: source.categoryNameEn });
   const current = await prisma.translationEntry.findUnique({ where: { entityType_entityId_locale: { entityType: "PRODUCT", entityId: source.id, locale: "en" } } });
-  if (current?.sourceHash === sourceHash && current.status === "TRANSLATED") return current;
+  const currentPayload = current?.payload && typeof current.payload === "object" ? current.payload as Record<string, unknown> : {};
+  const hasSummaryTranslation = !source.summaryHtml.trim() || (typeof currentPayload.summaryHtml === "string" && currentPayload.summaryHtml.trim().length > 0);
+  const hasContentTranslation = !source.contentHtml.trim() || (typeof currentPayload.contentHtml === "string" && currentPayload.contentHtml.trim().length > 0);
+  if (current?.sourceHash === sourceHash && current.status === "TRANSLATED" && hasSummaryTranslation && hasContentTranslation) return current;
   if (current?.manualOverride) return prisma.translationEntry.update({ where: { id: current.id }, data: { sourceUpdatedAt: source.updatedAt, sourceHash, status: "NEEDS_REVIEW", errorMessage: null } });
   try {
     const translated = await translateProduct(source);

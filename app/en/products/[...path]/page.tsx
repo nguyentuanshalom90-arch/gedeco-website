@@ -19,6 +19,7 @@ import {
 } from "../../../components/shop-pages";
 import { absoluteUrl, siteConfig } from "@/lib/site-config";
 import { redirectDestination } from "@/lib/url-redirects";
+import { sanitizeProductHtml } from "@/lib/sanitize-product-html";
 
 export const dynamic = "force-dynamic";
 
@@ -235,7 +236,7 @@ export default async function EnglishProductOrCategoryPage({
     {
       url: product.image,
       altText: product.imageAlt || product.title,
-      caption: product.imageCaption || "",
+      caption: "",
     },
     ...(
       product.galleryMedia ||
@@ -307,7 +308,7 @@ export default async function EnglishProductOrCategoryPage({
               language="en"
             />
             <article className="shop-detail-summary">
-              <h1>{product.title}</h1>
+              <h1 className="product-detail-title" style={{ color: product.titleColor, fontFamily: "Arial, Helvetica, sans-serif", fontSize: "28px", fontWeight: 700 }} dangerouslySetInnerHTML={{ __html: sanitizeProductHtml(product.titleHtml || `<p>${product.title}</p>`) }} />
               {product.summaryHtml && (
                 <div
                   className="shop-summary-html"
@@ -323,7 +324,6 @@ export default async function EnglishProductOrCategoryPage({
                 className="shop-shipper"
                 src={product.shipperImage}
                 alt={product.shipperImageAlt || product.title}
-                title={product.shipperImageCaption || undefined}
               />
               <ShopPurchaseLink type="buy" language="en" />
               <ShopGuarantee language="en" />

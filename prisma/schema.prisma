@@ -126,6 +126,11 @@ model Product {
   id                  String   @id @default(cuid())
   slug                String   @unique
   title               String
+  titleHtml           String   @default("") @db.Text
+  titleColor          String   @default("#243f55")
+  titleFontFamily     String   @default("Arial")
+  titleFontSize       Int      @default(24)
+  titleFontWeight     Int      @default(700)
   categoryId          String
   description         String   @default("")
   contentHtml         String   @default("") @db.Text

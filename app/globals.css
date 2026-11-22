@@ -831,3 +831,32 @@ body{overflow-x:clip}
   .shop-footer h3 { font-size: 17px; }
   .shop-footer p, .shop-footer a { font-size: 14px; }
 }
+/* GEDECO product detail title scale */
+.product-detail-title,
+.product-detail-title * {
+  font-family: Arial, Helvetica, sans-serif !important;
+  font-size: 28px !important;
+  font-weight: 700 !important;
+  line-height: 1.15;
+}
+.shop-detail-layout .shop-detail-summary .product-detail-title,
+.shop-detail-layout .shop-detail-summary .product-detail-title * {
+  font-family: Arial, Helvetica, sans-serif !important;
+  font-size: 28px !important;
+  font-weight: 700 !important;
+  line-height: 1.15 !important;
+}
+.shop-summary-html,
+.shop-description article {
+  font-family: Arial, Helvetica, sans-serif;
+}
+.shop-detail-layout .shop-detail-summary h1 > p { margin: 0; }
+
+/* Inline media display options selected at the insertion location. */
+.shop-description article figure.alignleft { width: max-content; max-width: 48%; margin: 14px auto 14px 0; }
+.shop-description article figure.aligncenter { width: max-content; max-width: 100%; margin: 14px auto; }
+.shop-description article figure.alignright { width: max-content; max-width: 48%; margin: 14px 0 14px auto; }
+.shop-description article figure.size-thumbnail img { max-width: 150px; }
+.shop-description article figure.size-medium img { max-width: 300px; }
+.shop-description article figure.size-large img { max-width: 768px; }
+ .shop-description article figure.product-rich-video{width:min(100%,760px);margin:18px auto}.shop-description article .product-rich-video-frame{position:relative;width:100%;aspect-ratio:16/9;overflow:hidden;border-radius:8px;background:#0b1c2b}.shop-description article .product-rich-video-frame iframe{display:block;width:100%;height:100%;border:0}.shop-description article figure.product-rich-video figcaption{text-align:center;font-size:12px;margin-top:6px}

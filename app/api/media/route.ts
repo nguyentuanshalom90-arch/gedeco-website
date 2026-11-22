@@ -18,9 +18,47 @@ async function listImageFiles(root: string, relative = ""): Promise<string[]> {
   for (const entry of entries) {
     const child = path.join(relative, entry.name);
     if (entry.isDirectory()) files.push(...await listImageFiles(root, child));
-    else if (entry.isFile() && /\.(?:png|jpe?g|webp)$/i.test(entry.name)) files.push(child);
+    // The library exposes only distributable WebP files. Original PNG/JPG files
+    // remain in storage but must never be offered as selectable UI assets.
+    else if (entry.isFile() && /\.webp$/i.test(entry.name)) files.push(child);
   }
   return files;
+}
+
+async function resolveStaticAssetsRoot() {
+  const candidates = [
+    process.env.LOCAL_PROJECT_ROOT ? path.join(process.env.LOCAL_PROJECT_ROOT, "public", "assets") : "",
+    path.join(process.cwd(), "public", "assets"),
+    path.join(process.cwd(), ".next", "standalone", "public", "assets"),
+    path.join(process.cwd(), "..", "public", "assets"),
+  ].filter(Boolean);
+  for (const candidate of candidates) {
+    try {
+      await readdir(candidate);
+      return candidate;
+    } catch {
+      // Try the next known runtime root.
+    }
+  }
+  return null;
+}
+
+function staticMediaLabels(relativeFile: string) {
+  const name = path.basename(relativeFile)
+    .replace(/\.(optimized|derivative)\.(?:webp|png|jpe?g)$/i, "")
+    .replace(/\.(?:webp|png|jpe?g)$/i, "")
+    .replace(/[-_]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+  const label = name ? name.charAt(0).toUpperCase() + name.slice(1) : "Hình ảnh GEDECO";
+  return { altText: label, caption: `Hình ảnh ${label}` };
+}
+
+function distributableMediaName(name: string) {
+  const base = name
+    .replace(/\.(?:optimized|derivative)\.webp$/i, "")
+    .replace(/\.(?:png|jpe?g|webp)$/i, "");
+  return `${base}.optimized.webp`;
 }
 
 export async function GET() {
@@ -30,10 +68,11 @@ export async function GET() {
     return Response.json({ error: error instanceof Error ? error.message : "Chưa đăng nhập." }, { status: 401 });
   }
   const assets = await prisma.mediaAsset.findMany({ where: { archivedAt: null }, orderBy: { createdAt: "desc" }, take: 100 });
-  const managed = assets.map((asset) => ({ id: asset.id, name: asset.originalName, url: `/api/media/${asset.id}`, width: asset.width, height: asset.height, altText: asset.altText, caption: asset.caption, managed: true }));
+  const managed = assets.map((asset) => ({ id: asset.id, name: distributableMediaName(asset.originalName), url: `/api/media/${asset.id}`, width: asset.width, height: asset.height, altText: asset.altText, caption: asset.caption, managed: true }));
   const staticAssets: Array<{ id: string; name: string; url: string; width: number; height: number; altText: string; caption: string; managed: false }> = [];
-  const publicAssets = path.join(process.cwd(), "public", "assets");
+  const publicAssets = await resolveStaticAssetsRoot();
   try {
+    if (!publicAssets) throw new Error("Không tìm thấy thư mục static assets.");
     const files = (await listImageFiles(publicAssets)).slice(0, 500);
     for (const relativeFile of files) {
       const url = `/assets/${relativeFile.replaceAll(path.sep, "/")}`;
@@ -46,8 +85,7 @@ export async function GET() {
           url,
           width: metadata.width || 0,
           height: metadata.height || 0,
-          altText: "",
-          caption: "",
+          ...staticMediaLabels(relativeFile),
           managed: false,
         });
       } catch {

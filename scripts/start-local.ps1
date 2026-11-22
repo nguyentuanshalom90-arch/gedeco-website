@@ -86,7 +86,29 @@ if ([string]::IsNullOrWhiteSpace($env:MEDIA_ROOT)) {
   $env:MEDIA_ROOT = Join-Path $projectRoot '.uploads'
 }
 $env:LOCAL_PREVIEW = '1'
+$env:LOCAL_PROJECT_ROOT = $projectRoot
 $standaloneServer = Join-Path $projectRoot '.next\standalone\server.js'
+$standaloneNextRoot = Join-Path $projectRoot '.next\standalone\.next'
+$builtStaticRoot = Join-Path $projectRoot '.next\static'
+$standaloneStaticRoot = Join-Path $standaloneNextRoot 'static'
+$publicRoot = Join-Path $projectRoot 'public'
+$standalonePublicRoot = Join-Path $projectRoot '.next\standalone\public'
+if (-not (Test-Path -LiteralPath $standaloneServer)) {
+  throw "Standalone build not found. Run npm run build:next before starting the local server."
+}
+if (Test-Path -LiteralPath $builtStaticRoot) {
+  New-Item -ItemType Directory -Force -Path $standaloneNextRoot | Out-Null
+  if (Test-Path -LiteralPath $standaloneStaticRoot) {
+    Remove-Item -LiteralPath $standaloneStaticRoot -Recurse -Force
+  }
+  Copy-Item -LiteralPath $builtStaticRoot -Destination $standaloneStaticRoot -Recurse -Force
+}
+if (Test-Path -LiteralPath $publicRoot) {
+  if (Test-Path -LiteralPath $standalonePublicRoot) {
+    Remove-Item -LiteralPath $standalonePublicRoot -Recurse -Force
+  }
+  Copy-Item -LiteralPath $publicRoot -Destination $standalonePublicRoot -Recurse -Force
+}
 Start-Process -FilePath 'node.exe' `
   -ArgumentList @("`"$standaloneServer`"") `
   -WorkingDirectory $projectRoot `
