@@ -2,8 +2,8 @@
 export const englishProductTranslations = {
   "tra-dinh-thuong-hang-uop-sen": {
     "sourceSlug": "tra-dinh-thuong-hang-uop-sen",
-    "slug": "premium-ding-tea-with-lotus",
-    "title": "SUPERIOR DINH TEA MARINATED WITH LOTUS",
+    "slug": "premium-dinh-tea-with-lotus-infusion",
+    "title": "Premium Dinh Tea with Lotus Infusion",
     "category": "Domestic products",
     "description": "🪷 Why is LOTUS TEA the drink of aristocratic connoisseurs?🌱 Lotus is an endless flower",
     "contentHtml": "<p>🪷<span style=\"font-family: 'times new roman', times, serif;\">Why is LOTUS TEA the drink of aristocratic connoisseurs?</span></p>\n<p>🌱 Lotus is an extremely pure flower, with a gentle, elegant fragrance.<br />🌱 The lotus used by #gedeco to marinate tea is the ancient pink lotus, light pink lotus, long pointed lotus petals, lots of lotus pistils and lotus rice, so the tea marinade is very cool <br />🌱 To make 1kg of finished LOTUS TEA, 1500 fresh lotus flowers are needed <br />🌱 Must pick lotus from 4am - 6am and finish it before the harvest.at sunrise, so that the lotus scent does not evaporate <br />🌱 Lotus flowers are chosen to be the flowers that have the most fragrance so that the lotus has the most fragrance <br />🌱 Lotus leaves are not picked when it's raining or sunny but must be picked when it's cool <br />👍 Lotus marinated tea must be Dinh tea that is hand-picked, selected from the most delicious and premium tea buds of the Tan Cuong Thai Nguyen tea region.<br />💯 #gedeco Lotus Tea is processed entirely by meticulous manual methods.Natural lotus marinade does not use industrial flavoring, so you can feel secure when using it.<br />\n&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;<br />#Gedeco's lotus tea</p>\n<hr />\n<p></p>\n",
