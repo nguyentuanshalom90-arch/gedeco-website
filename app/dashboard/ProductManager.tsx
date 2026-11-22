@@ -1229,6 +1229,14 @@ export function ProductManager() {
   const [items, setItems] = useState<ProductListItem[]>(() => initialUiState?.itemsSnapshot || []);
   const [categories, setCategories] = useState<ProductCategoryListItem[]>(() => initialUiState?.categoriesSnapshot || []);
   const [draft, setDraft] = useState<ProductInput>(() => cloneProductDraft(initialUiState?.draftSnapshot));
+  // Keep the latest draft synchronously available for save clicks that happen
+  // immediately after an editor mutation/blur. React may batch the state
+  // update from contentEditable, while the save handler must persist that
+  // exact HTML snapshot instead of the previous render's draft closure.
+  const draftRef = useRef<ProductInput>(draft);
+  useEffect(() => {
+    draftRef.current = draft;
+  }, [draft]);
   const [editorOpen, setEditorOpen] = useState(() => Boolean(initialUiState?.editorOpen && initialUiState?.draftSnapshot));
   const [query, setQuery] = useState(() => initialUiState?.query || "");
   const [categoryFilter, setCategoryFilter] = useState(() => initialUiState?.categoryFilter || "all");
@@ -1314,14 +1322,20 @@ export function ProductManager() {
   }, [initialUiState, items]);
 
   function set<K extends keyof ProductInput>(key: K, value: ProductInput[K]) {
-    setDraft((current) => ({ ...current, [key]: value }));
+    const next = { ...draftRef.current, [key]: value } as ProductInput;
+    draftRef.current = next;
+    setDraft(next);
   }
   function setEnglishField<K extends keyof ProductInput>(key: K, value: ProductInput[K]) {
-    setDraft((current) => ({ ...current, [key]: value, translationMode: "MANUAL" }));
+    const next = { ...draftRef.current, [key]: value, translationMode: "MANUAL" as const } as ProductInput;
+    draftRef.current = next;
+    setDraft(next);
   }
   function edit(item?: ProductListItem) {
     setEditorOpen(true);
-    setDraft(item ? cloneProductDraft(item) : { ...EMPTY, categoryId: categories[0]?.id || "", gallery: [] });
+    const next = item ? cloneProductDraft(item) : { ...EMPTY, categoryId: categories[0]?.id || "", gallery: [] };
+    draftRef.current = next;
+    setDraft(next);
     setMessage(""); setError("");
   }
   function selectMain(asset: MediaSelection) {
@@ -1354,10 +1368,13 @@ export function ProductManager() {
   async function persist(mode: "all" | "vietnamese" | "english" = "all") {
     setSaving(true); setError(""); setMessage("");
     try {
-      const payload = mode === "english" ? { ...draft, translationMode: "MANUAL" as const } : mode === "vietnamese" ? { ...draft, translationMode: "AUTO" as const } : draft;
+      const latestDraft = draftRef.current;
+      const payload = mode === "english" ? { ...latestDraft, translationMode: "MANUAL" as const } : mode === "vietnamese" ? { ...latestDraft, translationMode: "AUTO" as const } : latestDraft;
       const result = await saveProduct(payload, { preserveEnglish: mode === "vietnamese" });
       setItems((current) => [result.product, ...current.filter((item) => item.id !== result.product.id)]);
-      setDraft(cloneProductDraft(result.product));
+      const savedDraft = cloneProductDraft(result.product);
+      draftRef.current = savedDraft;
+      setDraft(savedDraft);
       setMessage(mode === "vietnamese" ? "Đã lưu sản phẩm tiếng Việt; bản English hiện tại được giữ nguyên." : mode === "english" ? "Đã lưu sản phẩm English." : `Đã lưu sản phẩm · English: ${result.translation.status === "TRANSLATED" ? "đã sinh" : result.translation.status === "FAILED" ? "dịch lỗi — bản cũ được giữ nguyên" : "cần rà soát"}.`);
     } catch (caught) { setError(caught instanceof Error ? caught.message : "Không thể lưu sản phẩm."); }
     finally { setSaving(false); }
