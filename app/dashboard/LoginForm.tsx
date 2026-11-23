@@ -54,6 +54,14 @@ export function LoginForm() {
           </label>
           {error ? <p className={styles.error} role="alert">{error}</p> : null}
           <button type="submit" className={styles.primaryButton} disabled={busy}>{busy ? "Đang đăng nhập…" : "Mở trang quản trị"}</button>
+          <div style={{ textAlign: "center", marginTop: 12 }}>
+            <a
+              href="/vmg-login/forgot-password"
+              style={{ fontSize: 13, color: "#2563eb", textDecoration: "none", fontWeight: 600 }}
+            >
+              Quên mật khẩu?
+            </a>
+          </div>
         </form>
       </div>
     </main>

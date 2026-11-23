@@ -24,6 +24,7 @@ export type EnglishArticle = {
   metaTitle: string;
   metaDescription: string;
   focusKeyword: string;
+  canonicalUrl: string;
   tags: string[];
 };
 
@@ -67,6 +68,7 @@ export function toEnglishArticle(source: NewsArticle, entry: TranslationEntry): 
     metaTitle: text(payload, "metaTitle") || title,
     metaDescription: text(payload, "metaDescription") || text(payload, "excerpt"),
     focusKeyword: text(payload, "focusKeyword"),
+    canonicalUrl: text(payload, "canonicalUrl"),
     tags: tags(payload),
   };
 }

@@ -191,7 +191,7 @@ function mixedValue(values: string[], fallback: string) {
   return unique.length === 1 ? unique[0] : unique.length > 1 ? MIXED_VALUE : fallback;
 }
 
-function RichTextEditor({
+export function RichTextEditor({
   label,
   value,
   onChange,

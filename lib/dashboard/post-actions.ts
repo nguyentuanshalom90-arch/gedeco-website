@@ -89,6 +89,7 @@ function toListItem(row: ArticleRow, translation?: TranslationEntry | null): Pos
     ogImageAltEn: payloadText(payload, "ogImageAlt"),
     metaTitleEn: payloadText(payload, "metaTitle"),
     metaDescriptionEn: payloadText(payload, "metaDescription"),
+    canonicalUrlEn: payloadText(payload, "canonicalUrl"),
     focusKeywordEn: payloadText(payload, "focusKeyword"),
     tagsEn: payloadTags(payload),
     createdAt: row.createdAt.toISOString(),
@@ -109,8 +110,10 @@ export async function listPosts(): Promise<PostListItem[]> {
 
 export async function savePost(
   input: PostInput,
+  options?: { preserveEnglish?: boolean },
 ): Promise<{ ok: true; post: PostListItem; translation: { status: string; errorMessage: string | null } } | { ok: false; error: string }> {
   await requireDashboardSession();
+  const preserveEnglish = Boolean(options?.preserveEnglish);
   try {
     const title = input.title.trim();
     if (!title) throw new DashboardValidationError("Tiêu đề bài viết không được để trống.");
@@ -140,6 +143,7 @@ export async function savePost(
       if (input.coverImage && !input.coverImageAltEn.trim()) throw new DashboardValidationError("Bản English phải có alt text cho ảnh bìa.");
       if (input.metaTitleEn.trim().length > 65) throw new DashboardValidationError("English SEO title không được vượt quá 65 ký tự.");
       if (input.metaDescriptionEn.trim().length > 160) throw new DashboardValidationError("English meta description không được vượt quá 160 ký tự.");
+      validateOfficialCanonical(input.canonicalUrlEn, { fieldLabel: "Canonical English", pathPrefix: "/en/news/" });
       const englishImageLines = input.contentEn.split(/\r?\n/).filter((line) => line.trim().startsWith("!["));
       const englishInlineImages = articleImageTokens(input.contentEn);
       if (englishImageLines.length !== englishInlineImages.length || englishInlineImages.some((image) => !image.alt || !safeArticleImageSrc(image.src))) throw new DashboardValidationError("Ảnh trong nội dung English phải có cú pháp hợp lệ, alt text và media an toàn.");
@@ -183,6 +187,7 @@ export async function savePost(
         title: input.titleEn.trim(), category: category?.nameEn || "News", excerpt: input.shortDescEn.trim(), content: input.contentEn.trim(),
         imageAlt: input.coverImageAltEn.trim(), imageCaption: input.coverImageCaptionEn.trim(), ogImageAlt: input.ogImageAltEn.trim() || input.coverImageAltEn.trim(),
         metaTitle: input.metaTitleEn.trim() || input.titleEn.trim(), metaDescription: input.metaDescriptionEn.trim() || input.shortDescEn.trim(), focusKeyword: input.focusKeywordEn.trim(),
+        canonicalUrl: validateOfficialCanonical(input.canonicalUrlEn, { fieldLabel: "Canonical English", pathPrefix: "/en/news/" }) || "",
         tags: JSON.stringify([...new Set(input.tagsEn.map((tag) => tag.trim()).filter(Boolean))]),
       };
       const saved = await prisma.$transaction(async (tx) => {
@@ -205,8 +210,12 @@ export async function savePost(
         if (previous && previous.slug !== article.slug) await recordPermanentRedirect(tx, `/tin-tuc/${previous.slug}`, `/tin-tuc/${article.slug}`);
         return article;
       });
-      if (previousTranslation?.manualOverride) await prisma.translationEntry.update({ where: { id: previousTranslation.id }, data: { manualOverride: false } });
-      translation = await syncArticleTranslation(row);
+      if (preserveEnglish && previousTranslation) {
+        translation = previousTranslation;
+      } else {
+        if (previousTranslation?.manualOverride) await prisma.translationEntry.update({ where: { id: previousTranslation.id }, data: { manualOverride: false } });
+        translation = await syncArticleTranslation(row);
+      }
       if (translation.status === "TRANSLATED" && translation.slug && previousTranslation?.status === "TRANSLATED" && previousTranslation.slug && previousTranslation.slug !== translation.slug) {
         await prisma.$transaction((tx) => recordPermanentRedirect(tx, `/en/news/${previousTranslation.slug}`, `/en/news/${translation.slug}`));
       }

@@ -338,3 +338,27 @@ model SiteChromeContent {
   @@unique([area, sectionKey, fieldKey])
   @@index([area, kind, sortOrder])
 }
+
+enum AdminRole {
+  SUPER_ADMIN
+  WEBSITE_MANAGER
+  CONTENT_MANAGER
+  PRODUCT_MANAGER
+  POST_MANAGER
+}
+
+model AdminUser {
+  id               String       @id @default(cuid())
+  username         String       @unique
+  email            String       @unique
+  passwordHash     String
+  displayName      String
+  role             AdminRole    @default(POST_MANAGER)
+  isActive         Boolean      @default(true)
+  resetToken       String?
+  resetTokenExpiry DateTime?
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+
+  @@index([role, isActive])
+}

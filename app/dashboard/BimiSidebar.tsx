@@ -5,13 +5,26 @@ import Link from "next/link";
 import Image from "next/image";
 import { Icon } from "@/components/vimigo-icon";
 import type { DashboardTab } from "./dashboard-tabs";
+import {
+  ROLE_DEFINITIONS,
+  isTabAllowedForRole,
+  type AdminRole,
+} from "@/lib/dashboard/roles";
+
+type CurrentUserSession = {
+  username: string;
+  displayName: string;
+  role: AdminRole;
+};
 
 type BimiSidebarProps = {
   tab: DashboardTab;
   onSelectTab: (tab: DashboardTab) => void;
   onLogout: () => void;
+  currentUser?: CurrentUserSession | null;
 };
-const navItems: Array<{ id: DashboardTab; label: string; icon: string }> = [
+
+const allNavItems: Array<{ id: DashboardTab; label: string; icon: string }> = [
   { id: "overview", label: "Tổng quan", icon: "home" },
   { id: "posts", label: "Quản lý bài viết", icon: "feather" },
   { id: "products", label: "Quản lý sản phẩm", icon: "box" },
@@ -21,10 +34,24 @@ const navItems: Array<{ id: DashboardTab; label: string; icon: string }> = [
   { id: "media", label: "Thư viện media", icon: "image" },
   { id: "payment", label: "Thanh toán", icon: "creditCard" },
   { id: "shipping", label: "Vận chuyển", icon: "truck" },
+  { id: "admins", label: "Quản lý admin", icon: "shield" },
 ];
 
-export function BimiSidebar({ tab, onSelectTab, onLogout }: BimiSidebarProps) {
+export function BimiSidebar({
+  tab,
+  onSelectTab,
+  onLogout,
+  currentUser,
+}: BimiSidebarProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
+
+  const role = currentUser?.role || "SUPER_ADMIN";
+  const roleDef = ROLE_DEFINITIONS[role] || ROLE_DEFINITIONS.SUPER_ADMIN;
+
+  const visibleNavItems = allNavItems.filter((item) =>
+    isTabAllowedForRole(role, item.id),
+  );
+
   return (
     <aside
       className={`lw-side dashboard-sidebar${mobileOpen ? " mobile-open" : ""}`}
@@ -121,9 +148,71 @@ export function BimiSidebar({ tab, onSelectTab, onLogout }: BimiSidebarProps) {
           <span>Xem</span>
         </Link>
       </div>
-      <div id="dashboard-navigation" className="nav-frame" role="navigation" aria-label="Các module quản trị">
+
+      {/* User Info & Role Badge in Sidebar */}
+      {currentUser && (
+        <div
+          style={{
+            background: "rgba(255, 255, 255, 0.08)",
+            border: "1px solid rgba(255, 255, 255, 0.12)",
+            borderRadius: 10,
+            padding: "8px 12px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: 8,
+          }}
+        >
+          <div style={{ minWidth: 0, flexShrink: 1 }}>
+            <div
+              style={{
+                color: "#ffffff",
+                fontSize: 13,
+                fontWeight: 700,
+                lineHeight: 1.2,
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
+              }}
+              title={`@${currentUser.username}`}
+            >
+              @{currentUser.username}
+            </div>
+          </div>
+          <div
+            title={`Vai trò: ${roleDef.label}`}
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 4,
+              padding: "4px 9px",
+              borderRadius: 6,
+              fontSize: 11.5,
+              fontWeight: 700,
+              background: roleDef.badgeSolidBg,
+              color: roleDef.badgeColor,
+              border: `1px solid ${roleDef.badgeColor}`,
+              whiteSpace: "nowrap",
+              userSelect: "none",
+              lineHeight: 1.2,
+              flexShrink: 0,
+            }}
+          >
+            {role === "SUPER_ADMIN" ? "🔒 " : null}
+            {roleDef.label}
+          </div>
+        </div>
+      )}
+
+      {/* Navigation Items (Filtered by Role Permissions) */}
+      <div
+        id="dashboard-navigation"
+        className="nav-frame"
+        role="navigation"
+        aria-label="Các module quản trị"
+      >
         <div className="nav-sep" />
-        {navItems.map((item) => (
+        {visibleNavItems.map((item) => (
           <button
             key={item.id}
             type="button"

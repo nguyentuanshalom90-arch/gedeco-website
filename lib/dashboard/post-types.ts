@@ -36,6 +36,7 @@ export type PostInput = {
   ogImageAltEn: string;
   metaTitleEn: string;
   metaDescriptionEn: string;
+  canonicalUrlEn: string;
   focusKeywordEn: string;
   tagsEn: string[];
 };

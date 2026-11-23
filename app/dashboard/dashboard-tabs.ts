@@ -8,6 +8,7 @@ export const DASHBOARD_TABS = [
   "media",
   "payment",
   "shipping",
+  "admins",
 ] as const;
 
 export type DashboardTab = (typeof DASHBOARD_TABS)[number];

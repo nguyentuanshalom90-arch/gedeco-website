@@ -14,7 +14,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const { slug } = await params;
   const article = await getEnglishArticleBySlug(slug);
   if (!article) return { title: "Article not found", robots: { index: false, follow: false } };
-  const canonical = absoluteUrl(`/en/news/${article.slug}`);
+  const canonical = absoluteUrl(article.canonicalUrl || `/en/news/${article.slug}`);
   const vi = absoluteUrl(`/tin-tuc/${article.source.slug}`);
   const image = optimizedStaticMediaUrl(article.source.ogImageUrl || article.source.imageUrl);
   return {
@@ -39,7 +39,7 @@ export default async function EnglishArticlePage({ params }: { params: Promise<{
   }
   const related = (await listEnglishArticles()).filter((item) => item.source.id !== article.source.id).slice(0, 3);
   const published = article.source.publishedAt || article.source.scheduledAt || article.source.createdAt;
-  const canonical = absoluteUrl(`/en/news/${article.slug}`);
+  const canonical = absoluteUrl(article.canonicalUrl || `/en/news/${article.slug}`);
   const vi = absoluteUrl(`/tin-tuc/${article.source.slug}`);
   const image = article.source.ogImageUrl || article.source.imageUrl;
   const jsonLd = [{ "@context": "https://schema.org", "@type": "Article", headline: article.title, description: article.metaDescription || article.excerpt || undefined, image: image ? [absoluteUrl(image)] : undefined, datePublished: published.toISOString(), dateModified: article.source.updatedAt.toISOString(), inLanguage: "en", author: { "@type": "Organization", name: article.source.authorName || siteConfig.brand }, publisher: { "@type": "Organization", name: siteConfig.brand, logo: { "@type": "ImageObject", url: absoluteUrl(siteConfig.logo) } }, mainEntityOfPage: canonical, keywords: article.tags.join(", ") }, { "@context": "https://schema.org", "@type": "BreadcrumbList", itemListElement: [{ "@type": "ListItem", position: 1, name: "Home", item: absoluteUrl("/en") }, { "@type": "ListItem", position: 2, name: "News", item: absoluteUrl("/en/news") }, { "@type": "ListItem", position: 3, name: article.title, item: canonical }] }];
