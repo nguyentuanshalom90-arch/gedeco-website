@@ -245,7 +245,10 @@ export function InnerHeader({
         contact: "/en/contact",
       }
     : {
-        home: getUrl("navigation.home", "/"),
+        home: (() => {
+          const u = getUrl("navigation.home", "/");
+          return !u || u === "#top" ? "/" : u;
+        })(),
         about: getUrl("navigation.about", "/gioi-thieu"),
         news: getUrl("navigation.news", "/tin-tuc"),
         products: getUrl("navigation.products", "/san-pham"),
@@ -296,7 +299,7 @@ export function InnerHeader({
         {show("brand.logo") && (
           <a
             className="brand"
-            href={urls.home}
+            href={english ? "/en" : "/"}
             aria-label={english ? "GEDECO home" : "GEDECO trang chủ"}
           >
             <img className="site-logo" src={logo} alt="GEDECO" />
@@ -577,7 +580,7 @@ export function InnerFooter({ language = "vi" }: { language?: "vi" | "en" }) {
           {show("brand.logo") && (
             <img
               src={
-                "/assets/logo-new-footer.optimized.webp"
+                "/assets/logo-new.optimized.webp"
               }
               alt={chrome["brand.logo"]?.altText || "GEDECO"}
             />
@@ -701,9 +704,9 @@ export function InnerHero({
   imageAlt,
   imageCaption,
 }: {
-  eyebrow: string;
-  title: string;
-  subtitle: string;
+  eyebrow?: string;
+  title?: string;
+  subtitle?: string;
   image?: string;
   imageAlt?: string;
   imageCaption?: string;
@@ -712,17 +715,19 @@ export function InnerHero({
     <section
       className="inner-hero"
       style={{
-        backgroundImage: `linear-gradient(90deg,rgba(3,25,54,.86),rgba(3,25,54,.33)),url('${image}')`,
+        backgroundImage: `url('${image}')`,
       }}
     >
       {imageAlt ? (
         <span className="sr-only" role="img" aria-label={imageAlt} />
       ) : null}
       {imageCaption ? <span className="sr-only">{imageCaption}</span> : null}
-      <div className="container">
-        <p className="eyebrow">{eyebrow}</p>
-        <h1>{title}</h1>
-        <p>{subtitle}</p>
+      <div className="inner-hero-foot-overlay">
+        <div className="container">
+          {eyebrow ? <p className="eyebrow">{eyebrow}</p> : null}
+          {title ? <h1>{title}</h1> : null}
+          {subtitle ? <p className="inner-hero-subtitle">{subtitle}</p> : null}
+        </div>
       </div>
     </section>
   );

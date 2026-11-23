@@ -128,12 +128,30 @@ export default function HomePage({ language = 'vi', initialContent, initialNews 
   const featuredProjects = projectFallbacks.map(([image, title, projectCopy], index) => ({ media: mediaGet(`projects.${index + 1}.image`, content[`projects.${index + 1}.image`] || image, title), title: contentGet(`projects.${index + 1}.title`, title), copy: contentGet(`projects.${index + 1}.copy`, projectCopy) }));
   const carouselNews = [...featuredNews, ...featuredNews];
   const categoryLinks = productCategories.length ? productCategories.map((category) => ({ id: category.id, label: language === 'en' ? category.nameEn : category.name, slug: language === 'en' ? category.slugEn : category.slug })) : [{ id: 'domestic', label: copy.domestic, slug: language === 'en' ? 'domestic' : 'trong-nuoc' }, { id: 'export', label: copy.export, slug: language === 'en' ? 'export' : 'xuat-khau' }];
+  const homeHref = language === 'en' ? '/en' : '/';
   return <>
     <header className="site-header" id="top"><div className="nav-shell">
-      <a className="brand" href="#top" aria-label={copy.ariaHome}><img className="site-logo" src="/assets/logo-new.optimized.webp" alt="GEDECO" />{chrome['brand.logo']?.caption ? <span className="sr-only">{chrome['brand.logo'].caption}</span> : null}</a>
+      <a className="brand" href={homeHref} aria-label={copy.ariaHome} onClick={(e) => {
+        if (typeof window !== 'undefined' && (window.location.pathname === homeHref || window.location.pathname === homeHref + '/')) {
+          e.preventDefault();
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+          if (window.location.hash) {
+            window.history.replaceState(null, '', homeHref);
+          }
+        }
+      }}><img className="site-logo" src="/assets/logo-new.optimized.webp" alt="GEDECO" />{chrome['brand.logo']?.caption ? <span className="sr-only">{chrome['brand.logo'].caption}</span> : null}</a>
       <button className="menu-toggle" aria-label={copy.menu} aria-expanded={menuOpen} onClick={() => setMenuOpen(!menuOpen)}><span /><span /><span /></button>
       <nav className={`main-nav${menuOpen ? ' open' : ''}`} aria-label={language === 'en' ? 'Main navigation' : 'Điều hướng chính'}>
-        <a className="active" href="#top" onClick={closeMenu}>{chromeGet('navigation.home', copy.home)}</a>
+        <a className="active" href={homeHref} onClick={(e) => {
+          closeMenu();
+          if (typeof window !== 'undefined' && (window.location.pathname === homeHref || window.location.pathname === homeHref + '/')) {
+            e.preventDefault();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            if (window.location.hash) {
+              window.history.replaceState(null, '', homeHref);
+            }
+          }
+        }}>{chromeGet('navigation.home', copy.home)}</a>
         <a href={language === 'en' ? '/en/about' : '/gioi-thieu'} onClick={closeMenu}>{chromeGet('navigation.about', copy.about)}</a>
         <a href={language === 'en' ? '/en/news' : '/tin-tuc'} onClick={closeMenu}>{chromeGet('navigation.news', copy.news)}</a>
         <div className="nav-dropdown"><a href={language === 'en' ? '/en/products' : '/san-pham'} onClick={closeMenu}>{chromeGet('navigation.products', copy.products)} <span className="nav-chevron" aria-hidden="true"><Icon name="chevron" /></span></a><div className="nav-submenu">{categoryLinks.map((category) => <a key={category.id} href={`${language === 'en' ? '/en/products' : '/san-pham'}?category=${category.slug}`} onClick={closeMenu}>{category.label}</a>)}</div></div>
