@@ -210,7 +210,7 @@ export async function savePost(
         if (previous && previous.slug !== article.slug) await recordPermanentRedirect(tx, `/tin-tuc/${previous.slug}`, `/tin-tuc/${article.slug}`);
         return article;
       });
-      if (preserveEnglish && previousTranslation) {
+      if (preserveEnglish && previousTranslation?.manualOverride) {
         translation = previousTranslation;
       } else {
         if (previousTranslation?.manualOverride) await prisma.translationEntry.update({ where: { id: previousTranslation.id }, data: { manualOverride: false } });

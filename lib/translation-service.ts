@@ -123,7 +123,8 @@ async function translateText(text: string, config: TranslationProviderConfig) {
         const translated = Array.isArray(payload) && Array.isArray(payload[0])
           ? payload[0].filter((part): part is unknown[] => Array.isArray(part)).map((part) => typeof part[0] === "string" ? part[0] : "").join("")
           : "";
-        return translated || text;
+        if (!translated.trim()) throw new Error("Google Translation không trả về bản dịch English.");
+        return translated;
       }
       if (![429, 500, 502, 503, 504].includes(response.status) || attempt === 3) {
         throw new Error(`Google Translation trả về ${response.status}.`);
@@ -142,7 +143,9 @@ async function translateText(text: string, config: TranslationProviderConfig) {
     });
     const payload = (await response.json().catch(() => ({}))) as { data?: { translations?: Array<{ translatedText?: string }> }; error?: { message?: string } };
     if (!response.ok) throw new Error(payload.error?.message || `Google Translation trả về ${response.status}.`);
-    return payload.data?.translations?.[0]?.translatedText || text;
+    const translated = payload.data?.translations?.[0]?.translatedText?.trim();
+    if (!translated) throw new Error("Google Translation không trả về bản dịch English.");
+    return translated;
   }
 
   const form = new URLSearchParams({ q: text, source: "vi", target: "en", format: "text" });
@@ -156,7 +159,9 @@ async function translateText(text: string, config: TranslationProviderConfig) {
   });
   const payload = (await response.json().catch(() => ({}))) as { translatedText?: string; error?: string };
   if (!response.ok) throw new Error(payload.error || `LibreTranslate trả về ${response.status}.`);
-  return payload.translatedText || text;
+  const translated = payload.translatedText?.trim();
+  if (!translated) throw new Error("LibreTranslate không trả về bản dịch English.");
+  return translated;
 }
 
 async function translateHtml(html: string, config: TranslationProviderConfig) {
@@ -173,7 +178,9 @@ async function translateHtml(html: string, config: TranslationProviderConfig) {
     });
     const payload = (await response.json().catch(() => ({}))) as { translatedText?: string; error?: string };
     if (!response.ok) throw new Error(payload.error || `LibreTranslate trả về ${response.status}.`);
-    return payload.translatedText || html;
+    const translated = payload.translatedText?.trim();
+    if (!translated) throw new Error("LibreTranslate không trả về bản dịch HTML English.");
+    return translated;
   }
   const parts = html.split(/(<[^>]+>)/g);
   const translated: string[] = [];
@@ -274,14 +281,15 @@ export function syncSiteChromeTranslation(source: SimpleContentSource) {
   return syncSimpleContentTranslation("SITE_CHROME", source);
 }
 
-export async function syncProductTranslation(source: ProductSource) {
+export async function syncProductTranslation(source: ProductSource, options?: { force?: boolean }) {
+  const force = Boolean(options?.force);
   const sourceHash = hashSource({ title: source.title, description: source.description, summaryHtml: source.summaryHtml, contentHtml: source.contentHtml, priceText: source.priceText, stockText: source.stockText, imageAlt: source.imageAlt, imageCaption: source.imageCaption, shipperImageAlt: source.shipperImageAlt, shipperImageCaption: source.shipperImageCaption, ogImageAlt: source.ogImageAlt, metaTitle: source.metaTitle, metaDescription: source.metaDescription, gallery: source.gallery.map((item) => ({ id: item.id, altText: item.altText, caption: item.caption })), categoryName: source.categoryName, categoryNameEn: source.categoryNameEn });
   const current = await prisma.translationEntry.findUnique({ where: { entityType_entityId_locale: { entityType: "PRODUCT", entityId: source.id, locale: "en" } } });
   const currentPayload = current?.payload && typeof current.payload === "object" ? current.payload as Record<string, unknown> : {};
   const hasSummaryTranslation = !source.summaryHtml.trim() || (typeof currentPayload.summaryHtml === "string" && currentPayload.summaryHtml.trim().length > 0);
   const hasContentTranslation = !source.contentHtml.trim() || (typeof currentPayload.contentHtml === "string" && currentPayload.contentHtml.trim().length > 0);
-  if (current?.sourceHash === sourceHash && current.status === "TRANSLATED" && hasSummaryTranslation && hasContentTranslation) return current;
-  if (current?.manualOverride) return prisma.translationEntry.update({ where: { id: current.id }, data: { sourceUpdatedAt: source.updatedAt, sourceHash, status: "NEEDS_REVIEW", errorMessage: null } });
+  if (!force && current?.sourceHash === sourceHash && current.status === "TRANSLATED" && hasSummaryTranslation && hasContentTranslation) return current;
+  if (!force && current?.manualOverride) return prisma.translationEntry.update({ where: { id: current.id }, data: { sourceUpdatedAt: source.updatedAt, sourceHash, status: "NEEDS_REVIEW", errorMessage: null } });
   try {
     const translated = await translateProduct(source);
     return prisma.translationEntry.upsert({

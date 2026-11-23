@@ -74,6 +74,12 @@ function readPostUiState(): PostUiState | null {
   }
 }
 
+function normalizePostMedia(value: PostInput): PostInput {
+  const image = value.coverImage || value.ogImage || null;
+  const alt = value.coverImageAlt || value.ogImageAlt;
+  return { ...value, coverImage: image, ogImage: image, coverImageAlt: alt, ogImageAlt: alt };
+}
+
 function seoAudit(post: PostInput) {
   const keyword = post.focusKeyword.trim().toLocaleLowerCase("vi");
   const title = (post.metaTitle || post.title).trim();
@@ -303,6 +309,7 @@ export function PostComposer() {
   const [posts, setPosts] = useState<PostListItem[]>([]);
   const [categories, setCategories] = useState<CategoryListItem[]>([]);
   const [post, setPost] = useState<PostInput>(EMPTY_POST);
+  const postRef = useRef<PostInput>(EMPTY_POST);
   const [mode, setMode] = useState<"list" | "editor">("list");
   const [filter, setFilter] = useState<"ALL" | PostStatus>("ALL");
   const [query, setQuery] = useState("");
@@ -313,10 +320,11 @@ export function PostComposer() {
   const [error, setError] = useState("");
   const [hydrated, setHydrated] = useState(false);
   const seo = useMemo(() => seoAudit(post), [post]);
+  useEffect(() => { postRef.current = post; }, [post]);
 
   useEffect(() => {
     const savedUi = readPostUiState();
-    if (savedUi?.mode === "editor" && savedUi.post) setPost({ ...EMPTY_POST, ...savedUi.post });
+    if (savedUi?.mode === "editor" && savedUi.post) setPost(normalizePostMedia({ ...EMPTY_POST, ...savedUi.post }));
     if (savedUi?.mode === "editor" || savedUi?.mode === "list") setMode(savedUi.mode);
     if (savedUi?.filter === "ALL" || savedUi?.filter === "DRAFT" || savedUi?.filter === "SCHEDULED" || savedUi?.filter === "PUBLISHED") setFilter(savedUi.filter);
     if (typeof savedUi?.query === "string") setQuery(savedUi.query);
@@ -335,12 +343,16 @@ export function PostComposer() {
     }
   }, [hydrated, mode, filter, query, post]);
   const set = <K extends keyof PostInput>(key: K, value: PostInput[K]) => {
-    setPost((current) => ({ ...current, [key]: value }));
+    const next = { ...postRef.current, [key]: value } as PostInput;
+    postRef.current = next;
+    setPost(next);
     setMessage("");
     setError("");
   };
   const setEnglish = <K extends keyof PostInput>(key: K, value: PostInput[K]) => {
-    setPost((current) => ({ ...current, [key]: value, translationMode: "MANUAL" }));
+    const next = { ...postRef.current, [key]: value, translationMode: "MANUAL" as const } as PostInput;
+    postRef.current = next;
+    setPost(next);
     setMessage("");
     setError("");
   };
@@ -358,7 +370,7 @@ export function PostComposer() {
         setMode("editor");
         const draftId = params.get("draft");
         const savedPost = draftId ? postItems.find((item) => item.id === draftId) : null;
-        if (savedPost) setPost(savedPost);
+        if (savedPost) setPost(normalizePostMedia(savedPost));
       }
     } catch (reason) {
       setError(
@@ -375,7 +387,7 @@ export function PostComposer() {
   function edit(item?: PostListItem) {
     setPost(
       item
-        ? { ...item }
+        ? normalizePostMedia({ ...item })
         : {
             ...EMPTY_POST,
             tags: [],
@@ -403,17 +415,21 @@ export function PostComposer() {
     setSaving(true);
     setError("");
     try {
-      const payload = mode === "english" ? { ...post, translationMode: "MANUAL" as const } : { ...post, translationMode: "AUTO" as const };
+      const payload = mode === "english" ? { ...postRef.current, translationMode: "MANUAL" as const } : { ...postRef.current, translationMode: "AUTO" as const };
       const result = await savePost(payload, { preserveEnglish: mode === "vietnamese" });
       if (!result.ok) {
         setError(result.error);
         return;
       }
-      setPost((current) => ({
-        ...current,
+      const savedPost = {
+        ...postRef.current,
         ...result.post,
-        content: current.content,
-        contentEn: current.contentEn,
+        content: postRef.current.content,
+        contentEn: postRef.current.contentEn,
+      };
+      postRef.current = savedPost;
+      setPost(() => ({
+        ...savedPost,
       }));
       setPosts((current) => [
         result.post,
@@ -433,12 +449,14 @@ export function PostComposer() {
     setError("");
     setMessage("");
     try {
-      const result = await savePost({ ...post, translationMode: "AUTO" });
+      const result = await savePost({ ...postRef.current, translationMode: "AUTO" });
       if (!result.ok) {
         setError(result.error);
         return;
       }
-      setPost((current) => ({ ...current, ...result.post }));
+      const restoredPost = { ...postRef.current, ...result.post };
+      postRef.current = restoredPost;
+      setPost(restoredPost);
       setPosts((current) => [result.post, ...current.filter((item) => item.id !== result.post.id)]);
       setMessage("Đã khôi phục bản dịch English tự động.");
     } catch (reason) {
@@ -563,7 +581,6 @@ export function PostComposer() {
         <div>
           <p className="eyebrow">{post.id ? "CHỈNH SỬA" : "TẠO MỚI"}</p>
           <h2>{post.title || "Bài viết mới"}</h2>
-          <p>{wordCount} từ · SEO {seo.score}/100</p>
         </div>
         <div className="product-editor-head-actions">
           {post.status === "PUBLISHED" && post.slug ? <a className="btn btn-ghost" href={`/tin-tuc/${post.slug}`} target="_blank" rel="noreferrer"><Icon name="external" size={15} />Xem</a> : <button className="btn btn-ghost" type="button" disabled title="Lưu bài viết trước khi xem live"><Icon name="external" size={15} />Xem</button>}
@@ -620,7 +637,7 @@ export function PostComposer() {
                 ))}
               </select>
             </label>
-            <div className="site-content-full">
+            <div className="site-content-full post-short-excerpt">
               <PostRichTextEditor label="Mô tả ngắn" value={post.shortDesc} onChange={(value) => set("shortDesc", value.slice(0, 160))} placeholder="Tóm tắt nội dung bài viết…" />
             </div>
             <div className="site-content-full">
@@ -707,10 +724,16 @@ export function PostComposer() {
               ))}
             </div>
           </section>
+          <div className="product-editor-save-actions product-editor-locale-save post-locale-save-vietnamese">
+            <button className="btn btn-primary" type="button" disabled={saving} onClick={() => void persist("vietnamese")}>
+              <Icon name="check" size={16} /> {saving ? "Đang lưu…" : "Lưu bài viết tiếng Việt"}
+            </button>
+          </div>
+        </main>
           <section className="panel cms-card cms-english-editor">
             <div className="cms-section-head">
               <div><p className="eyebrow">NỘI DUNG SONG NGỮ</p><h2>English version</h2><p>Trạng thái hiện tại: <strong>{post.translationStatus}</strong></p></div>
-              <label className="field"><span>Chế độ English</span><select className="input" value={post.translationMode} onChange={(event) => set("translationMode", event.target.value as "AUTO" | "MANUAL")}><option value="AUTO">Dịch tự động</option><option value="MANUAL">Tự nhập và duyệt</option></select></label>
+              <label className="field"><span>Chế độ English</span><select className="input" value={post.translationMode} onChange={(event) => set("translationMode", event.target.value as "AUTO" | "MANUAL")}><option value="AUTO">Khôi phục bản dịch tự động</option><option value="MANUAL">Tự nhập và duyệt</option></select></label>
             </div>
             <div className="cms-english-fields">
               <div className="site-content-form-grid">
@@ -725,14 +748,12 @@ export function PostComposer() {
                 </div>
                 <label className="field"><span>English slug</span><input className="input" value={post.slugEn} onChange={(event) => setEnglish("slugEn", event.target.value)} placeholder="generated-from-title" /></label>
                 <label className="field"><span>English category</span><input className="input" value={categories.find((item) => item.id === post.categoryId)?.nameEn || "News"} readOnly /></label>
-                <div className="site-content-full"><PostRichTextEditor label="English excerpt" value={post.shortDescEn} onChange={(value) => setEnglish("shortDescEn", value.slice(0, 160))} placeholder="Write a short English article description…" /></div>
+                <div className="site-content-full post-short-excerpt"><PostRichTextEditor label="English excerpt" value={post.shortDescEn} onChange={(value) => setEnglish("shortDescEn", value.slice(0, 160))} placeholder="Write a short English article description…" /></div>
                 <div className="site-content-full"><PostRichTextEditor label="English content" value={post.contentEn} onChange={(value) => setEnglish("contentEn", value)} placeholder="Write English article content…" mediaLabel="English article image" /></div>
               </div>
               <div className="cms-seo-grid">
                 <label className="field"><span>English tags</span><ChipInput items={post.tagsEn} onChange={(value) => setEnglish("tagsEn", value)} /></label>
                 <label className="field"><span>English focus keyword</span><input className="input" value={post.focusKeywordEn} onChange={(event) => setEnglish("focusKeywordEn", event.target.value)} /></label>
-                <label className="field"><span>Cover image alt (EN)</span><input className="input" value={post.coverImageAltEn} onChange={(event) => setEnglish("coverImageAltEn", event.target.value)} /></label>
-                <label className="field"><span>Cover image caption (EN)</span><input className="input" value={post.coverImageCaptionEn} onChange={(event) => setEnglish("coverImageCaptionEn", event.target.value)} /></label>
                 <label className="field"><span>Open Graph image alt (EN)</span><input className="input" value={post.ogImageAltEn} onChange={(event) => setEnglish("ogImageAltEn", event.target.value)} /></label>
                 <div className="site-content-seo site-content-full">
                   <div><p className="eyebrow">ENGLISH SEO</p><h3>Metadata and indexing</h3></div>
@@ -744,10 +765,30 @@ export function PostComposer() {
                   </div>
                 </div>
               </div>
-              <p className="cms-help">English được hiển thị và chỉnh sửa đầy đủ như module Sản phẩm. Chọn “Dịch tự động” để khôi phục bản dịch tự động cho lần lưu tiếng Việt tiếp theo.</p>
+              <aside className="post-locale-media-card">
+                <div className="product-editor-media-head"><strong>Ảnh bìa English</strong><span>Ảnh dùng cho bản English, alt và caption chỉnh sửa độc lập.</span></div>
+                <div className="product-editor-media-main"><MediaPicker
+                  value={post.coverImage || ""}
+                  altText={post.coverImageAltEn}
+                  caption={post.coverImageCaptionEn}
+                  onSelect={(asset) => {
+                    const current = postRef.current;
+                    const next = {
+                      ...current,
+                      ...(current.coverImage ? {} : { coverImage: asset.url, ogImage: asset.url }),
+                      coverImageAltEn: asset.altText || current.coverImageAltEn || current.titleEn,
+                      coverImageCaptionEn: asset.caption || current.coverImageCaptionEn,
+                    };
+                    postRef.current = next;
+                    setPost(next);
+                  }}
+                  label="Ảnh bìa English"
+                /></div>
+                <div className="product-editor-media-fields"><label>Cover image alt (EN)<input value={post.coverImageAltEn} onChange={(event) => setEnglish("coverImageAltEn", event.target.value)} /></label><label>Cover image caption (EN)<textarea rows={2} value={post.coverImageCaptionEn} onChange={(event) => setEnglish("coverImageCaptionEn", event.target.value)} /></label></div>
+              </aside>
+              <p className="cms-help">English được hiển thị và chỉnh sửa đầy đủ như module Sản phẩm. Chọn “Khôi phục bản dịch tự động” để tái sinh bản dịch English từ tiếng Việt.</p>
             </div>
           </section>
-        </main>
         <aside className="cms-editor-aside product-editor-media">
           <section className="panel cms-card">
             <h3>Xuất bản</h3>
@@ -824,31 +865,16 @@ export function PostComposer() {
                 value={post.coverImage || ""}
                 altText={post.coverImageAlt}
                 caption={post.coverImageCaption}
-                onClear={() => setPost((current) => ({ ...current, coverImage: null, coverImageAlt: "", coverImageCaption: "" }))}
-                onSelect={(asset) => setPost((current) => ({ ...current, coverImage: asset.url, coverImageAlt: asset.altText || current.coverImageAlt || current.title, coverImageCaption: asset.caption || current.coverImageCaption }))}
+                onClear={() => { const next = { ...postRef.current, coverImage: null, ogImage: null, coverImageAlt: "", ogImageAlt: "", coverImageCaption: "" }; postRef.current = next; setPost(next); }}
+                onSelect={(asset) => { const current = postRef.current; const next = { ...current, coverImage: asset.url, ogImage: asset.url, coverImageAlt: asset.altText || current.coverImageAlt || current.title, ogImageAlt: asset.altText || current.ogImageAlt || current.title, coverImageCaption: asset.caption || current.coverImageCaption }; postRef.current = next; setPost(next); }}
                 label="Ảnh bìa"
               /></div>
             <div className="product-editor-media-fields"><label>Alt ảnh bìa<input value={post.coverImageAlt} onChange={(event) => set("coverImageAlt", event.target.value)} placeholder="Mô tả ngắn, đúng nội dung ảnh" /></label><label>Chú thích ảnh<textarea rows={2} value={post.coverImageCaption} onChange={(event) => set("coverImageCaption", event.target.value)} /></label></div>
             <small className="cms-help">Khuyến nghị 1200 × 630 px.</small>
           </section>
-          <section className="panel cms-card">
-            <div className="product-editor-media-head"><strong>Ảnh chia sẻ mạng xã hội</strong><span>Dùng cho Open Graph</span></div>
-            <div className="product-editor-media-main"><MediaPicker
-                value={post.ogImage || ""}
-                altText={post.ogImageAlt}
-                onClear={() => setPost((current) => ({ ...current, ogImage: null, ogImageAlt: "" }))}
-                onSelect={(asset) => setPost((current) => ({ ...current, ogImage: asset.url, ogImageAlt: asset.altText || current.ogImageAlt || current.title }))}
-                label="Ảnh mạng xã hội"
-              /></div>
-            <div className="product-editor-media-fields"><label>Alt ảnh chia sẻ<input value={post.ogImageAlt} onChange={(event) => set("ogImageAlt", event.target.value)} /></label></div>
-            <small className="cms-help">Nếu để trống sẽ dùng ảnh bìa.</small>
-          </section>
         </aside>
       </div>
-      <div className="product-editor-save-actions product-editor-locale-save">
-        <button className="btn btn-primary" type="button" disabled={saving} onClick={() => void persist("vietnamese")}>
-          <Icon name="check" size={16} /> {saving ? "Đang lưu…" : "Lưu bài viết tiếng Việt"}
-        </button>
+      <div className="product-editor-save-actions product-editor-locale-save post-locale-save-english">
         <button className="btn btn-primary" type="button" disabled={saving} onClick={() => void persist("english")}>
           <Icon name="check" size={16} /> {saving ? "Đang lưu…" : "Lưu bài viết English"}
         </button>

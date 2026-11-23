@@ -96,7 +96,7 @@ export function MediaPicker({ label, value, altText = "", caption = "", onSelect
   return (
     <div className="cms-image-picker product-media-picker">
       <input ref={inputRef} hidden type="file" accept="image/png,image/jpeg,image/webp" onChange={upload} />
-      {!triggerOnly && value ? <div className="cms-image-preview"><img src={value} alt={altText || label} /><button type="button" onClick={onClear} aria-label={`Bỏ ${label}`}><Icon name="trash" size={15} /></button></div> : null}
+      {!triggerOnly ? (value ? <div className="cms-image-preview"><img src={value} alt={altText || label} /><button type="button" onClick={onClear} aria-label={`Bỏ ${label}`}><Icon name="trash" size={15} /></button></div> : <div className="cms-image-empty" aria-label={`Chưa chọn ${label}`}>Chưa chọn ảnh<br />Hãy chọn từ thư viện hoặc tải ảnh lên</div>) : null}
       {!triggerOnly ? <div className="cms-image-actions">
         <button type="button" className="drop" onClick={() => void openLibrary()} disabled={busy}><Icon name="image" size={20} /><strong>Chọn từ thư viện</strong></button>
         <button type="button" className="drop" onClick={() => inputRef.current?.click()} disabled={busy}><Icon name="upload" size={20} /><strong>{busy ? "Đang xử lý…" : "Tải ảnh lên"}</strong></button>

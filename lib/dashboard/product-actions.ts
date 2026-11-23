@@ -29,11 +29,11 @@ function normalizeProductInput(value: ProductInput): ProductInput {
     ...input,
     slug: text(input.slug), title: text(input.title), titleHtml: text(input.titleHtml), titleColor: text(input.titleColor, "#243f55"), titleFontFamily: text(input.titleFontFamily, "Arial"),
     description: text(input.description), contentHtml: text(input.contentHtml), summaryHtml: text(input.summaryHtml), priceText: text(input.priceText), stockText: text(input.stockText),
-    imageUrl: text(input.imageUrl), imageAlt: text(input.imageAlt), imageCaption: "", shipperImageUrl: text(input.shipperImageUrl), shipperImageAlt: text(input.shipperImageAlt), shipperImageCaption: "", ogImageUrl: text(input.ogImageUrl), ogImageAlt: text(input.ogImageAlt),
-    gallery: Array.isArray(input.gallery) ? input.gallery.map((item) => ({ ...item, url: text(item?.url), altText: text(item?.altText), caption: "", altTextEn: text(item?.altTextEn), captionEn: "" })) : [],
+    imageUrl: text(input.imageUrl), imageAlt: text(input.imageAlt), imageCaption: text(input.imageCaption), shipperImageUrl: text(input.shipperImageUrl), shipperImageAlt: text(input.shipperImageAlt), shipperImageCaption: text(input.shipperImageCaption), ogImageUrl: text(input.ogImageUrl), ogImageAlt: text(input.ogImageAlt),
+    gallery: Array.isArray(input.gallery) ? input.gallery.map((item) => ({ ...item, url: text(item?.url), altText: text(item?.altText), caption: text(item?.caption), altTextEn: text(item?.altTextEn), captionEn: text(item?.captionEn) })) : [],
     metaTitle: text(input.metaTitle), metaDescription: text(input.metaDescription), canonicalUrl: text(input.canonicalUrl),
     translationMode: input.translationMode === "MANUAL" ? "MANUAL" : "AUTO", slugEn: text(input.slugEn), titleEn: text(input.titleEn), descriptionEn: text(input.descriptionEn), contentHtmlEn: text(input.contentHtmlEn), summaryHtmlEn: text(input.summaryHtmlEn),
-    priceTextEn: text(input.priceTextEn), stockTextEn: text(input.stockTextEn), imageAltEn: text(input.imageAltEn), imageCaptionEn: "", shipperImageAltEn: text(input.shipperImageAltEn), shipperImageCaptionEn: "", ogImageAltEn: text(input.ogImageAltEn), metaTitleEn: text(input.metaTitleEn), metaDescriptionEn: text(input.metaDescriptionEn), canonicalUrlEn: text(input.canonicalUrlEn),
+    priceTextEn: text(input.priceTextEn), stockTextEn: text(input.stockTextEn), imageAltEn: text(input.imageAltEn), imageCaptionEn: text(input.imageCaptionEn), shipperImageAltEn: text(input.shipperImageAltEn), shipperImageCaptionEn: text(input.shipperImageCaptionEn), ogImageAltEn: text(input.ogImageAltEn), metaTitleEn: text(input.metaTitleEn), metaDescriptionEn: text(input.metaDescriptionEn), canonicalUrlEn: text(input.canonicalUrlEn),
   };
 }
 
@@ -72,13 +72,13 @@ function toItem(row: any, translation?: any): ProductListItem {
     stockText: text(row.stockText, "Còn hàng"),
     imageUrl: text(row.imageUrl),
     imageAlt: text(row.imageAlt),
-    imageCaption: "",
+    imageCaption: text(row.imageCaption),
     shipperImageUrl: text(row.shipperImageUrl),
     shipperImageAlt: text(row.shipperImageAlt),
-    shipperImageCaption: "",
+    shipperImageCaption: text(row.shipperImageCaption),
     ogImageUrl: text(row.ogImageUrl),
     ogImageAlt: text(row.ogImageAlt),
-    gallery: Array.isArray(row.gallery) ? row.gallery.map((item: any) => ({ id: item.id, url: text(item.url), altText: text(item.altText), caption: "", altTextEn: translationString(payload, `galleryAlt_${item.id}`), captionEn: "", sortOrder: Number(item.sortOrder) || 0, isPrimary: Boolean(item.isPrimary) })) : [],
+    gallery: Array.isArray(row.gallery) ? row.gallery.map((item: any) => ({ id: item.id, url: text(item.url), altText: text(item.altText), caption: text(item.caption), altTextEn: translationString(payload, `galleryAlt_${item.id}`), captionEn: translationString(payload, `galleryCaption_${item.id}`), sortOrder: Number(item.sortOrder) || 0, isPrimary: Boolean(item.isPrimary) })) : [],
     metaTitle: text(row.metaTitle),
     metaDescription: text(row.metaDescription),
     canonicalUrl: text(row.canonicalUrl),
@@ -97,9 +97,9 @@ function toItem(row: any, translation?: any): ProductListItem {
     priceTextEn: translationString(payload, "priceText"),
     stockTextEn: translationString(payload, "stockText"),
     imageAltEn: translationString(payload, "imageAlt"),
-    imageCaptionEn: "",
+    imageCaptionEn: translationString(payload, "imageCaption"),
     shipperImageAltEn: translationString(payload, "shipperImageAlt"),
-    shipperImageCaptionEn: "",
+    shipperImageCaptionEn: translationString(payload, "shipperImageCaption"),
     ogImageAltEn: translationString(payload, "ogImageAlt"),
     metaTitleEn: translationString(payload, "metaTitle"),
     metaDescriptionEn: translationString(payload, "metaDescription"),
@@ -161,7 +161,7 @@ export async function saveProduct(input: ProductInput, options?: { preserveEngli
   const gallery = input.gallery.filter((item) => item.url.trim()).map((item, index) => ({
     url: validateManagedMediaUrl(item.url, `Ảnh album ${index + 1}`) || "",
     altText: item.altText.trim() || title,
-    caption: "",
+    caption: item.caption.trim(),
     sortOrder: index,
     isPrimary: index === 0,
   }));
@@ -185,10 +185,10 @@ export async function saveProduct(input: ProductInput, options?: { preserveEngli
     stockText: input.stockText.trim() || "Còn hàng",
     imageUrl: validateManagedMediaUrl(input.imageUrl, "Ảnh chính") || "",
     imageAlt: input.imageAlt.trim() || title,
-    imageCaption: "",
+    imageCaption: input.imageCaption.trim(),
     shipperImageUrl: validateManagedMediaUrl(input.shipperImageUrl, "Ảnh giao hàng") || "",
     shipperImageAlt: input.shipperImageAlt.trim(),
-    shipperImageCaption: "",
+    shipperImageCaption: input.shipperImageCaption.trim(),
     ogImageUrl: validateManagedMediaUrl(input.ogImageUrl, "Ảnh Open Graph") || "",
     ogImageAlt: input.ogImageAlt.trim(),
     metaTitle: optional(input.metaTitle || defaultMetaTitle),
@@ -220,12 +220,12 @@ export async function saveProduct(input: ProductInput, options?: { preserveEngli
         title: input.titleEn.trim(), description: sanitizeProductHtml(input.descriptionEn),
         summaryHtml: sanitizeProductHtml(input.summaryHtmlEn), contentHtml: sanitizeProductHtml(input.contentHtmlEn),
         priceText: input.priceTextEn.trim() || "Contact us", stockText: input.stockTextEn.trim() || "In stock",
-        imageAlt: input.imageAltEn.trim(),
-        shipperImageAlt: input.shipperImageAltEn.trim(),
+        imageAlt: input.imageAltEn.trim(), imageCaption: input.imageCaptionEn.trim(),
+        shipperImageAlt: input.shipperImageAltEn.trim(), shipperImageCaption: input.shipperImageCaptionEn.trim(),
         ogImageAlt: input.ogImageAltEn.trim(),
         metaTitle: input.metaTitleEn.trim(), metaDescription: input.metaDescriptionEn.trim(),
         canonicalUrl: validateOfficialCanonical(input.canonicalUrlEn, { fieldLabel: "Canonical English", pathPrefix: "/en/products/" }) || "",
-        ...Object.fromEntries(saved.gallery.flatMap((item: any, index: number) => [[`galleryAlt_${item.id}`, input.gallery[index]?.altTextEn?.trim() || input.titleEn.trim()]])),
+        ...Object.fromEntries(saved.gallery.flatMap((item: any, index: number) => [[`galleryAlt_${item.id}`, input.gallery[index]?.altTextEn?.trim() || input.titleEn.trim()], [`galleryCaption_${item.id}`, input.gallery[index]?.captionEn?.trim() || ""]])),
       };
       const sourceHash = crypto.createHash("sha256").update(JSON.stringify({ title: saved.title, description: saved.description, summaryHtml: saved.summaryHtml, contentHtml: saved.contentHtml, priceText: saved.priceText, stockText: saved.stockText, imageAlt: saved.imageAlt, imageCaption: saved.imageCaption, shipperImageAlt: saved.shipperImageAlt, shipperImageCaption: saved.shipperImageCaption, ogImageAlt: saved.ogImageAlt, metaTitle: saved.metaTitle, metaDescription: saved.metaDescription, gallery: saved.gallery.map((item: any) => ({ id: item.id, altText: item.altText, caption: item.caption })), categoryName: saved.category.name, categoryNameEn: saved.category.nameEn })).digest("hex");
       manualTranslation = await tx.translationEntry.upsert({
@@ -242,11 +242,11 @@ export async function saveProduct(input: ProductInput, options?: { preserveEngli
   const fresh = transactionResult.saved;
   let translation = transactionResult.manualTranslation;
   if (!translation) {
-    if (preserveEnglish && transactionResult.previousTranslation) {
+    if (preserveEnglish && transactionResult.previousTranslation?.manualOverride) {
       translation = transactionResult.previousTranslation;
     } else {
       if (transactionResult.previousTranslation?.manualOverride) await prisma.translationEntry.update({ where: { id: transactionResult.previousTranslation.id }, data: { manualOverride: false } });
-      translation = await syncProductTranslation({ ...fresh, categoryName: fresh.category.name, categoryNameEn: fresh.category.nameEn });
+      translation = await syncProductTranslation({ ...fresh, categoryName: fresh.category.name, categoryNameEn: fresh.category.nameEn }, { force: input.translationMode === "AUTO" });
     }
     if (translation.status === "TRANSLATED" && translation.slug && transactionResult.previousTranslation?.status === "TRANSLATED" && transactionResult.previousTranslation.slug && (translation.slug !== transactionResult.previousTranslation.slug || fresh.category.slugEn !== transactionResult.previous?.category.slugEn)) {
       await prisma.$transaction((tx) => recordPermanentRedirect(tx, `/en/products/${transactionResult.previous?.category.slugEn || fresh.category.slugEn}/${transactionResult.previousTranslation!.slug}`, `/en/products/${fresh.category.slugEn}/${translation!.slug}`));
@@ -309,10 +309,10 @@ export async function duplicateProduct(id: string) {
         stockText: source.stockText,
         imageUrl: source.imageUrl,
         imageAlt: source.imageAlt,
-        imageCaption: "",
+        imageCaption: source.imageCaption,
         shipperImageUrl: source.shipperImageUrl,
         shipperImageAlt: source.shipperImageAlt,
-        shipperImageCaption: "",
+        shipperImageCaption: source.shipperImageCaption,
         ogImageUrl: source.ogImageUrl,
         ogImageAlt: source.ogImageAlt,
         metaTitle: source.metaTitle,
@@ -330,7 +330,7 @@ export async function duplicateProduct(id: string) {
           productId: product.id,
           url: media.url,
           altText: media.altText,
-          caption: "",
+          caption: media.caption,
           sortOrder: media.sortOrder,
           isPrimary: media.isPrimary,
         })),

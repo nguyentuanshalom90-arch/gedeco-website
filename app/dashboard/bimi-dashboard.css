@@ -2628,3 +2628,108 @@ body.dashboard-page-active {
 }
 .lw.vimigo .post-content-manager .site-content-form-grid > .site-content-full { grid-column: 1 / -1; }
 .lw.vimigo .product-editor .cms-english-fields .site-content-form-grid > .site-content-full { grid-column: 1 / -1; }
+
+/* Final editorial spacing and media polish: keep controls away from card edges. */
+.lw.vimigo .cms-card { padding: 22px; }
+.lw.vimigo .cms-card .field { gap: 8px; margin-bottom: 17px; }
+.lw.vimigo .cms-check { gap: 10px; min-height: 34px; margin: 8px -4px 0; padding: 6px 4px; border-radius: 8px; line-height: 1.35; }
+.lw.vimigo .cms-check input { flex: 0 0 16px; width: 16px; height: 16px; margin: 0; }
+.lw.vimigo .cms-chip-input { padding: 8px; }
+.lw.vimigo .product-editor-media-main { min-width: 0; }
+.lw.vimigo .product-editor-media .cms-card { padding: 20px; }
+.lw.vimigo .product-editor-media .cms-image-preview { margin-bottom: 10px; padding: 6px; border: 1px solid #d8d2ef; border-radius: 12px; background: #fff; }
+.lw.vimigo .product-editor-media .cms-image-preview img { display: block; width: 100%; aspect-ratio: 1200 / 630; object-fit: cover; border-radius: 8px; }
+.lw.vimigo .product-editor-media .cms-image-empty { display: grid; place-items: center; min-height: 150px; padding: 20px; border: 1px dashed #b9b0ee; border-radius: 10px; background: #fff; color: #8293a0; text-align: center; font-size: 12px; line-height: 1.45; }
+.lw.vimigo .product-rich-clear-highlight-icon { position: relative; overflow: visible; }
+.lw.vimigo .product-rich-clear-highlight-break { display: block; flex: 0 0 100%; width: 100%; height: 0; }
+.lw.vimigo .product-rich-toolbar .product-rich-top-actions { flex-wrap: wrap; overflow: visible; }
+@media(max-width:1100px) {
+  .lw.vimigo .product-rich-toolbar button.product-rich-clear-highlight { min-width: 156px; flex: 0 0 156px; }
+  .lw.vimigo .product-rich-clear-highlight-icon { flex: 0 0 22px; }
+}
+
+/* Article editor parity with ProductManager: each locale owns its save action. */
+.lw.vimigo .post-locale-save-vietnamese,
+.lw.vimigo .post-locale-save-english { justify-content: flex-start; margin: 0; padding: 0 4px; }
+.lw.vimigo .post-locale-save-vietnamese { margin-top: -2px; margin-bottom: 2px; }
+.lw.vimigo .post-locale-save-english { margin-top: 0; }
+.lw.vimigo .cms-english-fields > .cms-seo-grid { grid-template-columns: 1fr 1fr; gap: 14px; align-items: start; }
+.lw.vimigo .cms-english-fields > .cms-seo-grid > .site-content-seo { grid-column: 1 / -1; min-width: 0; padding: 18px; border-radius: 14px; }
+.lw.vimigo .cms-english-fields .site-content-seo-grid { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 14px; align-items: start; }
+.lw.vimigo .cms-english-fields .site-content-seo-grid > label { min-width: 0; gap: 7px; line-height: 1.35; }
+.lw.vimigo .cms-english-fields .site-content-seo-grid > label.site-content-full { grid-column: 1 / -1; }
+.lw.vimigo .cms-english-fields .site-content-seo-grid input,
+.lw.vimigo .cms-english-fields .site-content-seo-grid textarea { min-width: 0; box-sizing: border-box; }
+.lw.vimigo .cms-english-fields .site-content-seo-grid .site-content-checks { align-self: end; min-height: 42px; padding-top: 0; }
+.lw.vimigo .cms-english-editor { min-width: 0; }
+.lw.vimigo .post-locale-media-card,
+.lw.vimigo .product-locale-media-card { display: grid; gap: 12px; min-width: 0; padding: 16px; border: 1px solid #d8d2ef; border-radius: 14px; background: #fff; box-shadow: 0 8px 24px rgba(36,20,104,.08); }
+.lw.vimigo .cms-english-editor,
+.lw.vimigo .product-locale-section-english { border-color: #d8d2ef; box-shadow: 0 8px 24px rgba(36,20,104,.08); }
+.lw.vimigo .post-locale-media-card { margin-top: 16px; }
+.lw.vimigo .cms-english-fields { display: grid; grid-template-columns: minmax(0, 1fr) minmax(300px, 360px); gap: 16px; align-items: start; }
+.lw.vimigo .cms-english-fields > .site-content-form-grid,
+.lw.vimigo .cms-english-fields > .cms-seo-grid,
+.lw.vimigo .cms-english-fields > .cms-help { grid-column: 1; min-width: 0; }
+.lw.vimigo .cms-english-fields > .post-locale-media-card { grid-column: 2; grid-row: 1 / span 3; margin-top: 0; }
+.lw.vimigo .cms-editor-grid.product-editor-columns { grid-template-columns: minmax(0, 1fr) 360px; gap: 0; }
+.lw.vimigo .cms-editor-grid.product-editor-columns > .cms-english-editor { grid-column: 1 / -1; grid-row: 2; width: auto; min-width: 0; }
+.lw.vimigo .cms-editor-grid.product-editor-columns > .cms-editor-aside { grid-column: 2; grid-row: 1; }
+.lw.vimigo .post-content-manager .cms-editor-grid.product-editor-columns > .cms-editor-aside { position: static; }
+.lw.vimigo .product-editor-columns > .product-editor-primary { border-radius: 16px 0 0 16px; border-right: 0; }
+.lw.vimigo .product-editor-columns > .product-editor-media { border-radius: 0 16px 16px 0; }
+.lw.vimigo .product-editor-columns > .product-editor-primary + .product-editor-media { margin-left: 0; }
+.lw.vimigo .product-editor-columns > .product-editor-primary + .product-editor-media { box-shadow: 8px 8px 24px rgba(36,20,104,.08); }
+.lw.vimigo .product-editor-columns > .product-editor-primary + .product-editor-media,
+.lw.vimigo .product-editor-columns > .product-editor-primary { border-color: #d8d2ef; }
+.lw.vimigo .product-locale-section-english { min-width: 0; }
+.lw.vimigo .product-locale-layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(300px, 360px); gap: 18px; align-items: start; }
+.lw.vimigo .product-locale-fields { min-width: 0; }
+.lw.vimigo .product-locale-media-card .product-editor-gallery { max-height: 620px; overflow: auto; }
+.lw.vimigo .product-locale-media-card .product-gallery-editor { grid-template-columns: 68px minmax(0, 1fr); }
+.lw.vimigo .product-locale-media-card .product-gallery-editor > div:nth-child(2) { display: grid; gap: 8px; }
+@media (max-width: 980px) {
+  .lw.vimigo .cms-editor-grid.product-editor-columns { grid-template-columns: 1fr; gap: 16px; }
+  .lw.vimigo .cms-editor-grid.product-editor-columns > .cms-english-editor { grid-column: 1; grid-row: auto; }
+  .lw.vimigo .cms-editor-grid.product-editor-columns > .cms-editor-aside { grid-column: 1; grid-row: auto; }
+  .lw.vimigo .product-editor-columns > .product-editor-primary,
+  .lw.vimigo .product-editor-columns > .product-editor-media { border-radius: 16px; border-right: 1px solid #d8d2ef; }
+  .lw.vimigo .cms-english-fields { grid-template-columns: 1fr; }
+  .lw.vimigo .cms-english-fields > .post-locale-media-card { grid-column: 1; grid-row: auto; }
+  .lw.vimigo .product-locale-layout { grid-template-columns: 1fr; }
+}
+.lw.vimigo .post-content-manager .cms-editor-aside .cms-card { min-width: 0; }
+.lw.vimigo .post-content-manager .cms-editor-aside .cms-check { padding-inline: 8px; }
+.lw.vimigo .post-content-manager .cms-editor-aside .cms-card h3,
+.lw.vimigo .post-content-manager .cms-editor-aside .product-editor-media-head { padding-inline: 2px; }
+@media(max-width:760px) {
+  .lw.vimigo .cms-english-fields > .cms-seo-grid,
+  .lw.vimigo .cms-english-fields .site-content-seo-grid { grid-template-columns: 1fr; }
+  .lw.vimigo .cms-english-fields .site-content-seo-grid > label.site-content-full { grid-column: auto; }
+  .lw.vimigo .post-locale-save-vietnamese,
+  .lw.vimigo .post-locale-save-english { padding-inline: 0; }
+}
+
+/* Article toolbar: keep all primary controls visible on one row. */
+.lw.vimigo .post-content-manager .product-rich-toolbar .product-rich-top-actions {
+  flex-wrap: nowrap !important;
+  gap: 4px;
+  overflow: visible;
+}
+.lw.vimigo .post-content-manager .product-rich-toolbar .product-rich-block { width: 104px; min-width: 104px; }
+.lw.vimigo .post-content-manager .product-rich-toolbar .product-rich-font { width: 112px; min-width: 112px; }
+.lw.vimigo .post-content-manager .product-rich-toolbar .product-rich-size { width: 72px; min-width: 72px; }
+.lw.vimigo .post-content-manager .product-rich-toolbar .product-rich-color { margin-right: 0; padding-inline: 4px; }
+.lw.vimigo .post-content-manager .product-rich-toolbar .product-rich-color:first-of-type { width: 82px; }
+.lw.vimigo .post-content-manager .product-rich-toolbar .product-rich-background-color { width: 96px; }
+.lw.vimigo .post-content-manager .product-rich-toolbar button.product-rich-clear-highlight { width: 124px; min-width: 124px; margin-right: 0; padding-inline: 4px; }
+.lw.vimigo .post-content-manager .product-rich-toolbar .product-rich-clear-highlight-icon { flex: 0 0 20px; width: 20px; }
+
+/* Short excerpts are intentionally compact; full article bodies keep the long editor. */
+.lw.vimigo .post-content-manager .post-short-excerpt .product-rich-content { min-height: 239px; height: 239px; }
+
+/* Keep editable content and helper/count text away from the lower frame edge. */
+.lw.vimigo .post-content-manager .product-rich-content { padding-bottom: 30px !important; }
+.lw.vimigo .post-content-manager .cms-content-area { padding-bottom: 30px !important; }
+.lw.vimigo .post-content-manager .product-rich-word-count { margin: 7px 2px 0; }
+.lw.vimigo .post-content-manager .cms-help { margin-top: 8px; padding-inline: 2px; line-height: 1.4; }
