@@ -62,6 +62,24 @@ export function LoginForm() {
               Quên mật khẩu?
             </a>
           </div>
+          <div style={{ textAlign: "center", marginTop: 14, paddingTop: 12, borderTop: "1px dashed #e2e8f0" }}>
+            <a
+              href="/api/dashboard/quick-login?user=chucnguyen&redirectTo=/dashboard?view=dashboard%26tab=site-content%26area=body%26page=home"
+              style={{
+                display: "inline-block",
+                padding: "8px 16px",
+                background: "#0f7040",
+                color: "#fff",
+                borderRadius: "8px",
+                fontSize: 13,
+                fontWeight: 700,
+                textDecoration: "none",
+                boxShadow: "0 2px 6px rgba(15,112,64,.25)"
+              }}
+            >
+              ⚡ Đăng nhập nhanh @chucnguyen (Local Admin)
+            </a>
+          </div>
         </form>
       </div>
     </main>

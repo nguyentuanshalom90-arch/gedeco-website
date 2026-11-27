@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import type { Metadata } from "next";
 import { headers } from "next/headers";
 import { Be_Vietnam_Pro, Playfair_Display } from "next/font/google";
@@ -8,6 +9,7 @@ import "./dashboard/bimi-dashboard.css";
 import { siteConfig } from "@/lib/site-config";
 import { getPublicSiteContent } from "@/lib/site-content-public";
 import { LanguageAwareSkipLink } from "./components/language-aware-skip-link";
+import { CmsOverlayLoader } from "./components/CmsOverlayLoader";
 
 const bodyFont = Be_Vietnam_Pro({
   subsets: ["latin", "vietnamese"],
@@ -37,7 +39,11 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
-  const language = (await headers()).get("x-gedeco-language") === "en" ? "en" : "vi";
+  const headersList = await headers();
+  const language = headersList.get("x-gedeco-language") === "en" ? "en" : "vi";
+  // Detect CMS preview mode from the Referer or a special header set by middleware.
+  // We read x-cms-preview injected by middleware when ?cmsPreview=1 is in the URL.
+  const isCmsPreview = headersList.get("x-cms-preview") === "1";
   const organization = {
     "@context": "https://schema.org",
     "@type": "Organization",
@@ -63,6 +69,9 @@ export default async function RootLayout({
             __html: JSON.stringify(organization).replace(/</g, "\\u003c"),
           }}
         />
+        <Suspense fallback={null}>
+          <CmsOverlayLoader />
+        </Suspense>
       </body>
     </html>
   );

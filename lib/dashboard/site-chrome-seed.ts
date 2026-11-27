@@ -7,7 +7,7 @@ export const chromeSeed = [
   ["HEADER", "STATIC", "navigation", "contact", "Liên hệ", "Liên hệ", "/lien-he", "", "", true, 16],
   ["HEADER", "DYNAMIC", "cta", "label", "Nhãn nút liên hệ", "Liên hệ ngay", "/lien-he", "", "", true, 20],
   ["HEADER", "STATIC", "language", "label", "Ngôn ngữ", "VI | EN", "", "", "", true, 21],
-  ["FOOTER", "DYNAMIC", "brand", "logo", "Logo Footer", "", "", "/assets/logo-new-footer.optimized.webp", "GEDECO", true, 1],
+  ["FOOTER", "DYNAMIC", "brand", "logo", "Logo Footer", "", "", "/assets/logo-new.optimized.webp", "GEDECO", true, 1],
   ["FOOTER", "DYNAMIC", "brand", "company", "Tên công ty", "CÔNG TY CỔ PHẦN GEDECO", "", "", "", true, 2],
   ["FOOTER", "STATIC", "brand", "tagline", "Tên tiếng Anh", "GEDECO CORPORATION", "", "", "", true, 3],
   ["FOOTER", "DYNAMIC", "contact", "phone", "Số điện thoại", "0914 94 3653", "tel:0914943653", "", "", true, 10],

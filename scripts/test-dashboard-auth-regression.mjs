@@ -60,10 +60,7 @@ assert(dashboard.status === 200 && dashboardHtml.includes("Tổng quan"), "Sessi
 const dashboardTabs = [
   ["posts", "Quản lý bài viết"],
   ["products", "Sản phẩm"],
-  ["pages", "Quản lý page"],
-  ["content", "Quản lý body"],
-  ["chrome", "Nội dung dùng chung"],
-  ["media", "Quản lý ảnh gốc"],
+  ["site-content", "Quản lý nội dung"],
   ["payment", "Thanh toán"],
   ["shipping", "Vận chuyển"],
 ];
@@ -71,6 +68,12 @@ for (const [tab, marker] of dashboardTabs) {
   const response = await fetch(`${baseUrl}/dashboard?view=dashboard&tab=${tab}`, { headers: { Cookie: cookie } });
   const html = await response.text();
   assert(response.status === 200 && html.includes(marker), `Dashboard tab ${tab} không render đúng màn hình.`);
+}
+
+for (const legacyTab of ["pages", "content", "chrome", "media"]) {
+  const response = await fetch(`${baseUrl}/dashboard?view=dashboard&tab=${legacyTab}`, { headers: { Cookie: cookie } });
+  const html = await response.text();
+  assert(response.status === 200 && html.includes("Tổng quan") && !html.includes("Quản lý page"), `Legacy dashboard tab ${legacyTab} chưa được đưa về màn hình mặc định.`);
 }
 
 const unauthenticatedMedia = await fetch(`${baseUrl}/api/media`);

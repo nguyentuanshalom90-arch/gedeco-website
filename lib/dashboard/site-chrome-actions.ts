@@ -12,7 +12,11 @@ async function ensureChromeSeeded() {
   for (const [area, kind, sectionKey, fieldKey, label, value, url, imageUrl, altText, isVisible, sortOrder] of chromeSeed) {
     await prisma.siteChromeContent.upsert({
       where: { area_sectionKey_fieldKey: { area: area as SiteChromeArea, sectionKey, fieldKey } },
-      update: { kind: kind as SiteChromeKind },
+      update: {
+        kind: kind as SiteChromeKind,
+        imageUrl: imageUrl || null,
+        altText: altText || null,
+      },
       create: { area: area as SiteChromeArea, kind: kind as SiteChromeKind, sectionKey, fieldKey, label, value, url: url || null, imageUrl: imageUrl || null, altText: altText || null, isVisible, sortOrder },
     });
   }

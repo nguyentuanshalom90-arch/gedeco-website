@@ -11,6 +11,13 @@ import { validateOfficialCanonical } from "./canonical-url";
 
 const dbKind = (kind: SiteContentKind) => kind === "static" ? "STATIC" as const : "DYNAMIC" as const;
 const englishRoute: Record<string, string> = { "/": "/en", "/gioi-thieu": "/en/about", "/tin-tuc": "/en/news", "/san-pham": "/en/products", "/lien-he": "/en/contact" };
+const excludedSectionKeys = new Set(["news", "products"]);
+function assertContentManagerScope(pageKey: string, sectionKey?: string, fieldKey?: string) {
+  const isComponentHeading = Boolean(sectionKey && excludedSectionKeys.has(sectionKey) && fieldKey && ["title", "heading", "eyebrow"].includes(fieldKey));
+  if (sectionKey && excludedSectionKeys.has(sectionKey) && !isComponentHeading) {
+    throw new Error("Nội dung Tin tức và Sản phẩm được quản lý ở module riêng.");
+  }
+}
 function revalidateContentRoutes(route: string) { revalidatePath(route); if (englishRoute[route]) revalidatePath(englishRoute[route]); }
 
 function toItem(row: any): SiteContentItem {
@@ -62,6 +69,7 @@ export async function saveSiteContent(kind: SiteContentKind, input: SiteContentI
   const pageKey = input.pageKey.trim();
   const sectionKey = input.sectionKey.trim();
   const fieldKey = input.fieldKey.trim();
+  assertContentManagerScope(pageKey, sectionKey, fieldKey);
   if (!pageKey || !sectionKey || !fieldKey || !input.label.trim()) throw new Error("Vui lòng nhập đủ page key, section key, field key và nhãn nội dung.");
   if (!input.h1.trim()) throw new Error("Mỗi page phải có đúng một H1 page để đảm bảo cấu trúc SEO.");
   if (!input.metaTitle.trim() || input.metaTitle.trim().length > 60) throw new Error("SEO title bắt buộc và không vượt quá 60 ký tự.");
@@ -128,8 +136,9 @@ export async function saveSiteContent(kind: SiteContentKind, input: SiteContentI
 
 export async function deleteSiteContent(kind: SiteContentKind, id: string): Promise<{ ok: true }> {
   await requireDashboardSession();
-  const row = await prisma.siteDynamicContent.findUnique({ where: { id }, select: { kind: true, page: { select: { route: true } } } });
+  const row = await prisma.siteDynamicContent.findUnique({ where: { id }, select: { kind: true, pageKey: true, sectionKey: true, fieldKey: true, page: { select: { route: true } } } });
   if (!row || row.kind !== dbKind(kind)) return { ok: true };
+  assertContentManagerScope(row.pageKey, row.sectionKey, row.fieldKey);
   await prisma.$transaction([
     prisma.translationEntry.deleteMany({ where: { entityType: "SITE_CONTENT", entityId: id } }),
     prisma.siteDynamicContent.delete({ where: { id } }),

@@ -26,7 +26,8 @@ export async function GET(request: Request) {
     role: dbUser.role as AdminRole,
   });
 
-  const response = NextResponse.redirect(new URL("/dashboard", request.url));
+  const redirectTo = searchParams.get("redirectTo") || "/dashboard";
+  const response = NextResponse.redirect(new URL(redirectTo, request.url));
   response.cookies.set(DASHBOARD_COOKIE, session.value, {
     httpOnly: true,
     secure: false,

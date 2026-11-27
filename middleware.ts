@@ -9,6 +9,10 @@ export function middleware(request: NextRequest) {
     if (value?.includes(",")) requestHeaders.set(header, value.split(",", 1)[0].trim());
   }
   requestHeaders.set("x-gedeco-language", request.nextUrl.pathname === "/en" || request.nextUrl.pathname.startsWith("/en/") ? "en" : "vi");
+  // Propagate CMS preview mode as a server header so layout.tsx can inject the overlay script.
+  if (request.nextUrl.searchParams.get("cmsPreview") === "1") {
+    requestHeaders.set("x-cms-preview", "1");
+  }
   const continueRequest = () => NextResponse.next({ request: { headers: requestHeaders } });
 
   if (process.env.NODE_ENV !== "production") return continueRequest();

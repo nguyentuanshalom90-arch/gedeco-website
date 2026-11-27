@@ -1,0 +1,55 @@
+{
+  "name": "gedeco-homepage",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "next dev",
+    "local": "powershell -ExecutionPolicy Bypass -File ./scripts/start-local.ps1",
+    "build": "powershell -ExecutionPolicy Bypass -File ./scripts/build-safe.ps1",
+    "build:next": "next build",
+    "start": "next start",
+    "lint": "eslint .",
+    "prisma:generate": "prisma generate",
+    "prisma:validate": "prisma validate",
+    "test:media": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/test-media-regression.mjs",
+    "test:news": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/test-news-seo-regression.mjs",
+    "test:products": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/test-products-regression.mjs",
+    "test:product-editor": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/test-product-editor-regression.mjs",
+    "test:chrome": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/test-site-chrome-regression.mjs",
+    "test:seo": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/test-seo-regression.mjs",
+    "test:dashboard": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/test-dashboard-auth-regression.mjs",
+    "test:dashboard-actions": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/test-dashboard-action-security.mjs",
+    "test:all": "npm run test:media && npm run test:news && npm run test:products && npm run test:chrome && npm run test:seo && npm run test:dashboard && npm run test:dashboard-actions && npm run test:static-webp",
+    "media:static-webp": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/generate-static-webp.mjs",
+    "test:static-webp": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/test-static-webp-regression.mjs",
+    "verify:production": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/verify-production-config.mjs"
+  },
+  "dependencies": {
+    "@prisma/adapter-pg": "7.10.1",
+    "@prisma/client": "7.10.1",
+    "dotenv": "^16.6.1",
+    "next": "^15.5.29",
+    "nodemailer": "^10.6.0",
+    "pg": "^8.16.3",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "sanitize-html": "^2.18.2",
+    "sharp": "^0.35.5"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "3.3.7",
+    "@types/node": "^22.15.0",
+    "@types/nodemailer": "^8.0.2",
+    "@types/pg": "^8.15.5",
+    "@types/react": "^19.1.0",
+    "@types/react-dom": "^19.1.0",
+    "@types/sanitize-html": "^2.16.2",
+    "eslint": "9.39.5",
+    "eslint-config-next": "15.5.29",
+    "prisma": "7.10.1",
+    "typescript": "^5.8.0"
+  },
+  "overrides": {
+    "postcss": "8.5.33"
+  }
+}

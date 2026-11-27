@@ -6,7 +6,7 @@ import { redirect } from 'next/navigation';
 
 export const dynamic = 'force-dynamic';
 
-export default async function DashboardPage({ searchParams }: { searchParams: Promise<{ view?: string; tab?: string }> }) {
+export default async function DashboardPage({ searchParams }: { searchParams: Promise<{ view?: string; tab?: string; area?: string; page?: string }> }) {
   const params = await searchParams;
   const session = await getDashboardSession();
   if (!session) redirect('/vmg-login');
@@ -22,6 +22,8 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
   if (requestedTab && !isTabAllowedForRole(session.role, requestedTab)) {
     initialTab = getDefaultTabForRole(session.role);
   }
+  const requestedArea = (params.area || "").toUpperCase();
+  const initialSiteArea = ["HEADER", "FOOTER", "BODY"].includes(requestedArea) ? requestedArea as "HEADER" | "FOOTER" | "BODY" : "HEADER";
 
   return (
     <DashboardClient
@@ -31,6 +33,8 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
         displayName: session.displayName || session.username,
         role: session.role,
       }}
+      initialSiteArea={initialSiteArea}
+      initialSitePageKey={params.page || "home"}
     />
   );
 }

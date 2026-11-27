@@ -4,14 +4,11 @@ import { useEffect, useState } from "react";
 import styles from "./dashboard.module.css";
 import { BimiSidebar } from "./BimiSidebar";
 import { ContentManager } from "./ContentManager";
-import { SiteContentManager } from "./SiteContentManager";
-import { SiteChromeManager } from "./SiteChromeManager";
 import { IntegrationManager } from "./IntegrationManager";
 import { ProductContentManager } from "./ProductContentManager";
 import { listPosts } from "@/lib/dashboard/post-actions";
 import { listIntegrations } from "@/lib/dashboard/integration-actions";
-import { SitePageManager } from "./SitePageManager";
-import { MediaLibraryManager } from "./MediaLibraryManager";
+import { BimiContentManager } from "./BimiContentManager";
 import { AdminUserManager } from "./AdminUserManager";
 import { DASHBOARD_TABS, type DashboardTab } from "./dashboard-tabs";
 import {
@@ -27,13 +24,18 @@ type CurrentUserSession = {
   displayName: string;
   role: AdminRole;
 };
+type SiteContentArea = "HEADER" | "FOOTER" | "BODY";
 
 export function DashboardClient({
   initialTab = "overview",
   currentUser,
+  initialSiteArea = "HEADER",
+  initialSitePageKey = "home",
 }: {
   initialTab?: DashboardTab;
   currentUser?: CurrentUserSession | null;
+  initialSiteArea?: SiteContentArea;
+  initialSitePageKey?: string;
 }) {
   const [user, setUser] = useState<CurrentUserSession | null | undefined>(currentUser);
   const role = user?.role || "SUPER_ADMIN";
@@ -214,48 +216,15 @@ export function DashboardClient({
                   <p>Chỉnh nội dung, danh mục, media, song ngữ và SEO sản phẩm.</p>
                 </button>
               )}
-              {isTabAllowedForRole(role, "content") && (
+              {isTabAllowedForRole(role, "site-content") && (
                 <button
                   type="button"
                   className="panel"
-                  onClick={() => selectTab("content")}
+                  onClick={() => selectTab("site-content")}
                 >
                   <span>03</span>
-                  <strong>Quản lý body</strong>
-                  <p>Quản lý body theo page, nội dung động, nội dung tĩnh và metadata SEO.</p>
-                </button>
-              )}
-              {isTabAllowedForRole(role, "chrome") && (
-                <button
-                  type="button"
-                  className="panel"
-                  onClick={() => selectTab("chrome")}
-                >
-                  <span>04</span>
-                  <strong>Quản lý header &amp; footer</strong>
-                  <p>Quản lý header/footer, menu, liên hệ và bản quyền dùng chung.</p>
-                </button>
-              )}
-              {isTabAllowedForRole(role, "pages") && (
-                <button
-                  type="button"
-                  className="panel"
-                  onClick={() => selectTab("pages")}
-                >
-                  <span>05</span>
                   <strong>Quản lý page</strong>
-                  <p>Soạn section, bản dịch và metadata cho các page trong menu.</p>
-                </button>
-              )}
-              {isTabAllowedForRole(role, "media") && (
-                <button
-                  type="button"
-                  className="panel"
-                  onClick={() => selectTab("media")}
-                >
-                  <span>06</span>
-                  <strong>Thư viện media</strong>
-                  <p>Tìm ảnh, tải lên và quản lý alt text/caption dùng toàn website.</p>
+                  <p>Tùy biến giao diện và quản lý nội dung các page theo luồng trực quan thống nhất.</p>
                 </button>
               )}
               {isTabAllowedForRole(role, "payment") && (
@@ -305,24 +274,9 @@ export function DashboardClient({
             <ProductContentManager />
           </section>
         )}
-        {tab === "pages" && (
+        {tab === "site-content" && (
           <section className={styles.content}>
-            <SitePageManager />
-          </section>
-        )}
-        {tab === "content" && (
-          <section className={styles.content}>
-            <SiteContentManager />
-          </section>
-        )}
-        {tab === "chrome" && (
-          <section className={styles.content}>
-            <SiteChromeManager />
-          </section>
-        )}
-        {tab === "media" && (
-          <section className={styles.content}>
-            <MediaLibraryManager />
+            <BimiContentManager initialArea={initialSiteArea} initialPageKey={initialSitePageKey} />
           </section>
         )}
         {tab === "payment" && (

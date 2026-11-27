@@ -7,6 +7,8 @@ import { ProductCarousel } from './product-carousel';
 import { InnerFooter } from './inner-pages';
 import type { FeaturedNewsItem } from '@/lib/featured-news';
 
+import { HomeHighlights } from './HomeHighlights';
+
 type IconName = 'globe' | 'handshake' | 'chart' | 'people' | 'box' | 'ship' | 'truck' | 'building' | 'globeAlt' | 'handshakeAlt' | 'team' | 'search' | 'phone' | 'mail' | 'pin' | 'arrow' | 'chevron' | 'facebook' | 'music' | 'youtube' | 'linkedin';
 
 type ChromeValue = { value: string; url: string; imageUrl: string; altText: string; caption: string };
@@ -14,7 +16,7 @@ export type ContentMedia = { url: string; altText: string; caption: string };
 export type HomeInitialContent = { values: Record<string, string>; staticValues: Record<string, string>; media: Record<string, ContentMedia>; translatedKeys: string[] };
 type HomeCategory = { id: string; name: string; slug: string; nameEn: string; slugEn: string };
 
-function Icon({ name, className = '' }: { name: IconName; className?: string }) {
+export function Icon({ name, className = '' }: { name: IconName; className?: string }) {
   const common = { className: `icon-svg ${className}`, viewBox: '0 0 48 48', fill: 'none', stroke: 'currentColor', strokeWidth: 2.2, strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const, 'aria-hidden': true };
   const paths: Record<IconName, React.ReactNode> = {
     globe: <><circle cx="24" cy="24" r="17" /><path d="M7 24h34M24 7c5 5 7 10 7 17s-2 12-7 17c-5-5-7-10-7-17s2-12 7-17ZM12 13c3 2 7 3 12 3s9-1 12-3M12 35c3-2 7-3 12-3s9 1 12 3" /></>,
@@ -110,6 +112,23 @@ export default function HomePage({ language = 'vi', initialContent, initialNews 
     ]).then(([header, footer]) => setChrome({ ...(header?.values || {}), ...(footer?.values || {}) })).catch(() => undefined);
   }, [language]);
 
+  useEffect(() => {
+    if (!menuOpen) return;
+    const handleOutside = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      if (!target.closest('.site-header')) setMenuOpen(false);
+    };
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setMenuOpen(false);
+    };
+    document.addEventListener('click', handleOutside);
+    document.addEventListener('keydown', handleKey);
+    return () => {
+      document.removeEventListener('click', handleOutside);
+      document.removeEventListener('keydown', handleKey);
+    };
+  }, [menuOpen]);
+
   const closeMenu = () => setMenuOpen(false);
   const chromeGet = (key: string, fallback: string) => chrome[key]?.value || fallback;
   const chromeUrl = (key: string, fallback: string) => chrome[key]?.url || fallback;
@@ -161,7 +180,8 @@ export default function HomePage({ language = 'vi', initialContent, initialNews 
     </div></header>
 
     <main id="main-content">
-      <section className="hero section-dark" style={{ backgroundImage: `url('${heroBanners[heroSlide]}')` }}><span className="sr-only" role="img" aria-label={heroMedia[heroSlide]?.altText} /><div className="hero-overlay" /><div className="hero-slide-controls" aria-label={contentGet('hero.controlsLabel', copy.newsTitle)}><button type="button" aria-label={copy.prev} onClick={() => setHeroSlide((current) => (current - 1 + heroBanners.length) % heroBanners.length)}>‹</button><button type="button" aria-label={copy.next} onClick={() => setHeroSlide((current) => (current + 1) % heroBanners.length)}>›</button></div><div className="hero-slide-dots" aria-label={contentGet('hero.controlsLabel', copy.newsTitle)}>{heroBanners.map((banner, index) => <button key={`${banner}-${index}`} type="button" className={heroSlide === index ? 'active' : ''} aria-label={`${contentGet('hero.bannerLabel', language === 'en' ? 'Banner' : 'Ảnh banner')} ${index + 1}`} aria-pressed={heroSlide === index} onClick={() => setHeroSlide(index)} />)}</div><div className="container hero-content"><p className="eyebrow">{contentGet('hero.eyebrow', copy.heroEyebrow)}</p><h1>{heroLead}<br /><em>{heroAccent}</em></h1><p className="hero-copy">{contentGet('hero.copy', copy.heroCopy)}</p><div className="hero-actions"><a className="button button-gold" href={language === 'en' ? '/en/products' : '/san-pham'}>{contentGet('hero.exploreLabel', copy.explore)} <Icon name="arrow" /></a><a className="button button-outline" href={language === 'en' ? '/en/contact' : '/lien-he'}>{contentGet('hero.consultLabel', copy.consult)}</a></div><div className="hero-highlights">{highlights.map(([title, description], index) => <div key={`${title}-${index}`}><span className="highlight-icon"><Icon name={(['globe','handshake','chart','people'] as const)[index]} /></span><div><strong>{title}</strong><small>{description}</small></div></div>)}</div></div></section>
+      <section className="hero section-dark" style={{ backgroundImage: `url('${heroBanners[heroSlide]}')` }}><span className="sr-only" role="img" aria-label={heroMedia[heroSlide]?.altText} /><div className="hero-overlay" /><div className="hero-slide-controls" aria-label={contentGet('hero.controlsLabel', copy.newsTitle)}><button type="button" aria-label={copy.prev} onClick={() => setHeroSlide((current) => (current - 1 + heroBanners.length) % heroBanners.length)}>‹</button><button type="button" aria-label={copy.next} onClick={() => setHeroSlide((current) => (current + 1) % heroBanners.length)}>›</button></div><div className="hero-slide-dots" aria-label={contentGet('hero.controlsLabel', copy.newsTitle)}>{heroBanners.map((banner, index) => <button key={`${banner}-${index}`} type="button" className={heroSlide === index ? 'active' : ''} aria-label={`${contentGet('hero.bannerLabel', language === 'en' ? 'Banner' : 'Ảnh banner')} ${index + 1}`} aria-pressed={heroSlide === index} onClick={() => setHeroSlide(index)} />)}</div><div className="container hero-content"><p className="eyebrow">{contentGet('hero.eyebrow', copy.heroEyebrow)}</p><h1>{heroLead}<br /><em>{heroAccent}</em></h1><p className="hero-copy">{contentGet('hero.copy', copy.heroCopy)}</p><div className="hero-actions"><a className="button button-gold" href={language === 'en' ? '/en/products' : '/san-pham'}>{contentGet('hero.exploreLabel', copy.explore)} <Icon name="arrow" /></a><a className="button button-outline" href={language === 'en' ? '/en/contact' : '/lien-he'}>{contentGet('hero.consultLabel', copy.consult)}</a></div></div></section>
+      <HomeHighlights highlights={highlights} />
       <section className="about" id="about"><div className="container about-grid"><div className="about-image">{(() => { const image = mediaGet('about.image', '/assets/banner-2.optimized.webp', contentGet('about.title', copy.aboutTitle)); return <figure><img src={image.url} alt={image.altText} />{image.caption ? <figcaption>{image.caption}</figcaption> : null}</figure>; })()}</div><div className="about-copy"><h2>{contentGet('about.title', copy.aboutTitle)}</h2><p>{contentGet('about.copy', copy.aboutBody[0])}</p><p>{contentGet('about.copy2', copy.aboutBody[1])}</p><a className="button button-gold" href={language === 'en' ? '/en/about' : '/gioi-thieu'}>{contentGet('about.buttonLabel', copy.learn)} <Icon name="arrow" /></a></div></div></section>
       <section className="home-projects"><div className="container"><div className="partner-head"><div><h2>{contentGet('projects.title', copy.projectsTitle)}</h2></div></div><div className="home-project-grid">{featuredProjects.map(({ media, title, copy: projectCopy }, index)=><article key={`${title}-${index}`}><figure><img src={media.url} alt={media.altText}/>{media.caption ? <figcaption>{media.caption}</figcaption> : null}</figure><div><h3>{title}</h3><p>{projectCopy}</p></div></article>)}</div></div></section>
       <section className="home-products" id="products"><div className="container"><div className="partner-head"><div><h2>{contentGet('products.title', copy.productsTitle)}</h2></div><a href={language === 'en' ? '/en/products' : '/san-pham'}>{contentGet('products.allLabel', copy.productsAll)}</a></div><ProductCarousel compact language={language} /></div></section>
