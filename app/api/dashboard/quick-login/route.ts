@@ -5,7 +5,7 @@ import type { AdminRole } from "@/lib/dashboard/roles";
 import { runtimeEnv } from "@/lib/runtime-env";
 
 function dashboardUrl(path: string, request: Request) {
-  const baseUrl = runtimeEnv("SITE_URL") || new URL(request.url).origin;
+  const baseUrl = runtimeEnv("SITE_URL") || (process.env.NODE_ENV === "production" ? "https://gedeco.vn" : new URL(request.url).origin);
   const safePath = path.startsWith("/") ? path : "/dashboard";
   return new URL(safePath, baseUrl);
 }
