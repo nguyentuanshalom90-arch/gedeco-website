@@ -13,8 +13,8 @@ const dbKind = (kind: SiteContentKind) => kind === "static" ? "STATIC" as const 
 const englishRoute: Record<string, string> = { "/": "/en", "/gioi-thieu": "/en/about", "/tin-tuc": "/en/news", "/san-pham": "/en/products", "/lien-he": "/en/contact" };
 const excludedSectionKeys = new Set(["news", "products"]);
 function assertContentManagerScope(pageKey: string, sectionKey?: string, fieldKey?: string) {
-  const isComponentHeading = Boolean(sectionKey && excludedSectionKeys.has(sectionKey) && fieldKey && ["title", "heading", "eyebrow"].includes(fieldKey));
-  if (sectionKey && excludedSectionKeys.has(sectionKey) && !isComponentHeading) {
+  const isComponentField = Boolean(sectionKey && excludedSectionKeys.has(sectionKey) && fieldKey && ["title", "heading", "eyebrow", "allLabel"].includes(fieldKey));
+  if (sectionKey && excludedSectionKeys.has(sectionKey) && !isComponentField) {
     throw new Error("Nội dung Tin tức và Sản phẩm được quản lý ở module riêng.");
   }
 }

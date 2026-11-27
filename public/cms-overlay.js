@@ -418,6 +418,21 @@
     rows.forEach(function (row) {
       var matched = false;
 
+      // Stable binding supplied by redesigned frontend components. This is
+      // checked before selector/value heuristics so duplicate text and DOM
+      // changes cannot attach a row to the wrong element.
+      var cmsKey = row.sectionKey + '.' + row.fieldKey;
+      var exact = allEls.find(function (el) { return el.getAttribute('data-cms-key') === cmsKey; });
+      if (exact) {
+        if (row.contentType === 'IMAGE' || exact.tagName === 'IMG') {
+          markImgEl(exact.tagName === 'IMG' ? exact : exact.querySelector('img'), row);
+        } else {
+          markTextEl(exact, row);
+        }
+        matched = true;
+      }
+      if (matched) return;
+
       // Hero Section Elements
       if (row.sectionKey === 'hero') {
         if (row.fieldKey === 'welcome') {

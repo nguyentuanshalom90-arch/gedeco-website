@@ -13,7 +13,7 @@ function isLocked(row: Pick<ContentRow, "sectionKey" | "fieldKey"> | undefined) 
   return Boolean(
     row &&
       (row.sectionKey === "news" || row.sectionKey === "products") &&
-      !["title", "heading", "eyebrow"].includes(row.fieldKey)
+      !["title", "heading", "eyebrow", "allLabel"].includes(row.fieldKey)
   );
 }
 

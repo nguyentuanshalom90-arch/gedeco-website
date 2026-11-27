@@ -125,6 +125,13 @@ const BimiFrontendPreviewInner = forwardRef<BimiFrontendPreviewHandle, Props>(
         setDirtyCount(0);
         setToast({ msg: "Đã lưu tất cả thay đổi thành công!", type: "ok" });
         setTimeout(() => setToast(null), 3000);
+        // Re-read the saved content from the database so newly bound
+        // redesign fields cannot remain visible only in the iframe's
+        // temporary DOM state.
+        setTimeout(() => {
+          const win = iframeRef.current?.contentWindow;
+          if (win) win.postMessage({ type: "gedeco-cms-refresh" }, "*");
+        }, 250);
       }
 
       if (event.data.type === "gedeco-cms-mode-changed") {
