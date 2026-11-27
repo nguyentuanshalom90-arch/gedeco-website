@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound, permanentRedirect } from "next/navigation";
+import { unstable_noStore } from "next/cache";
 import {
   Icon,
   InnerPage,
@@ -14,6 +15,11 @@ import { optimizedStaticMediaUrl } from "@/lib/static-media";
 export const dynamic = "force-dynamic";
 
 async function articleBySlug(slug: string) {
+  // Article detail pages must always reflect the latest CMS save. The route is
+  // already dynamic, but explicitly opting out of any request/data cache also
+  // protects production when a reverse proxy or a future framework change
+  // applies caching defaults to a dynamic segment.
+  unstable_noStore();
   const article = await prisma.newsArticle.findUnique({ where: { slug } });
   if (!article) return null;
   const visible =
