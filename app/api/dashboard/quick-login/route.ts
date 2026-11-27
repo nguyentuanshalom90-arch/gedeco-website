@@ -2,12 +2,9 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { createDashboardSession, DASHBOARD_COOKIE } from "@/lib/dashboard/auth";
 import type { AdminRole } from "@/lib/dashboard/roles";
-import { runtimeEnv } from "@/lib/runtime-env";
 
-function dashboardUrl(path: string, request: Request) {
-  const baseUrl = runtimeEnv("SITE_URL") || (process.env.NODE_ENV === "production" ? "https://gedeco.vn" : new URL(request.url).origin);
-  const safePath = path.startsWith("/") ? path : "/dashboard";
-  return new URL(safePath, baseUrl);
+function safeDashboardPath(path: string) {
+  return path.startsWith("/") ? path : "/dashboard";
 }
 
 export async function GET(request: Request) {
@@ -15,7 +12,7 @@ export async function GET(request: Request) {
   const username = searchParams.get("user")?.trim() || "";
 
   if (!username) {
-    return NextResponse.redirect(dashboardUrl("/vmg-login", request));
+    return NextResponse.redirect(new URL("/vmg-login", request.url));
   }
 
   const dbUser = await prisma.adminUser.findFirst({
@@ -34,7 +31,12 @@ export async function GET(request: Request) {
   });
 
   const redirectTo = searchParams.get("redirectTo") || "/dashboard";
-  const response = NextResponse.redirect(dashboardUrl(redirectTo, request));
+  const safePath = safeDashboardPath(redirectTo);
+  const response = NextResponse.redirect(new URL(safePath, request.url));
+  // Keep the redirect same-origin. The reverse proxy may expose an internal
+  // request origin such as localhost:3010 to Next.js, which must never leak
+  // into the browser's Location header.
+  response.headers.set("Location", safePath);
   response.cookies.set(DASHBOARD_COOKIE, session.value, {
     httpOnly: true,
     secure: false,
