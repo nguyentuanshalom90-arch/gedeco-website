@@ -408,6 +408,29 @@ picture{display:block}.service-card picture{width:calc(100% + 32px);margin-left:
 
 @media(min-width:641px){.contact-card-grid b{font-size:16px}.contact-card-grid .contact-card-address b{white-space:nowrap}}
 
+/* About/contact layout refresh: wide, balanced sections with readable content. */
+.about-intro-wide{padding:72px 0;background:linear-gradient(105deg,#eff8ff,#fff 66%,#eff7ff)}
+.about-intro-content{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(340px,.85fr);gap:58px;align-items:center}
+.about-intro-copy h2{font-size:40px;margin-bottom:22px}
+.about-intro-columns{display:block}
+.about-intro-copy p:not(.eyebrow){font-size:14px;line-height:1.85;color:#365270;margin:0 0 16px}
+.about-intro-copy .button{margin-top:8px}
+.about-intro-image{margin:0}.about-intro-image img{width:100%;height:430px;object-fit:cover;border-radius:16px;box-shadow:0 18px 38px rgba(16,49,82,.16)}
+.about-activities{background:#f7fafc;padding-top:72px;padding-bottom:78px}
+.about-activity-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px}
+.about-activity-grid article{background:#fff;border-radius:14px;overflow:hidden;box-shadow:0 12px 28px rgba(16,49,82,.1);border:1px solid #e0e8f0;transition:transform .25s ease,box-shadow .25s ease}
+.about-activity-grid article:hover{transform:translateY(-6px);box-shadow:0 18px 34px rgba(16,49,82,.16)}
+.about-activity-grid article>img{width:100%;height:260px;object-fit:cover}.about-activity-grid article>div{padding:24px 25px 28px}
+.about-activity-grid .activity-kicker{margin:0 0 7px;color:#b7861c;font-size:12px;font-weight:800;letter-spacing:1.2px}
+.about-activity-grid h3{font-family:var(--font-display),'Playfair Display',serif;font-size:25px;margin:0 0 10px;color:var(--ink)}
+.about-activity-grid article>div>p:last-child{font-size:16px;line-height:1.7;color:#60748a;margin:0}
+.about-network{padding:74px 0;background:linear-gradient(145deg,#06366c,#051d43);color:#fff}
+.about-network-grid{display:grid;grid-template-columns:1.15fr .85fr;gap:70px;align-items:center}.about-network h2{font-family:var(--font-display),'Playfair Display',serif;font-size:38px;line-height:1.2;margin:0 0 16px;color:#fff}.about-network p:not(.eyebrow){font-size:17px;line-height:1.8;color:#e7f0fa;margin:0}
+.about-network-steps{display:grid;gap:14px}.about-network-steps>div{display:flex;align-items:center;gap:18px;padding:20px 22px;border:1px solid rgba(230,185,77,.65);border-radius:12px;background:rgba(3,35,72,.5)}.about-network-steps b{font-family:var(--font-display),'Playfair Display',serif;font-size:27px;color:var(--gold)}.about-network-steps span{font-size:16px;font-weight:700}
+.contact-intro-wide{padding:68px 0;background:linear-gradient(105deg,#eff8ff,#fff 66%,#eff7ff)}.contact-intro-copy{max-width:900px;margin:0 auto;text-align:center}.contact-intro-copy h2{font-family:var(--font-display),'Playfair Display',serif;font-size:40px;line-height:1.2;margin:0 0 20px}.contact-intro-copy p:not(.eyebrow){font-size:18px;line-height:1.8;color:#365270;margin:0 0 14px}.contact-intro-copy .preserve-lines{white-space:pre-line;font-weight:700;color:var(--ink)}
+@media(max-width:900px){.about-intro-content,.about-network-grid{grid-template-columns:1fr;gap:28px}.about-intro-image img{height:320px}.about-activity-grid{gap:14px}.about-activity-grid article>img{height:210px}.about-network-grid{gap:30px}}
+@media(max-width:640px){.about-intro-wide,.about-activities,.about-network,.contact-intro-wide{padding:42px 0}.about-intro-copy h2,.contact-intro-copy h2{font-size:28px}.about-intro-columns{display:block}.about-intro-copy p:not(.eyebrow),.contact-intro-copy p:not(.eyebrow){font-size:14px;line-height:1.7}.about-intro-image img{height:220px;border-radius:10px}.about-activity-grid{grid-template-columns:1fr}.about-activity-grid article>img{height:220px}.about-activity-grid h3{font-size:22px}.about-activity-grid article>div>p:last-child{font-size:15px}.about-network h2{font-size:29px}.about-network p:not(.eyebrow){font-size:16px}.about-network-steps span{font-size:15px}.contact-intro-copy{text-align:left}.contact-intro-copy .eyebrow{text-align:left}}
+
 /* Responsive quality pass: keep compact card grids readable on phones and tablets. */
 @media (max-width: 640px) {
   .container, .nav-shell { width: calc(100% - 30px); }
@@ -438,6 +461,177 @@ picture{display:block}.service-card picture{width:calc(100% + 32px);margin-left:
   .form-two { grid-template-columns: 1fr; }
   .project-overview-grid { grid-template-columns: 1fr; }
   .project-overview-grid aside { grid-column: auto; }
+}
+
+/* Requested intro copy treatment: one column and 14px text at every breakpoint. */
+.about-intro-columns{display:block!important}
+.about-intro-copy p:not(.eyebrow){font-size:14px!important}
+
+/* Match the light background language used by the other About sections. */
+.about-design .inner-dark-cards{background:#f5f9fc;color:var(--ink)}
+.about-design .inner-dark-cards .inner-title h2{color:var(--ink)}
+.about-design .value-grid article{background:#fff;border-color:#dfe7f0;box-shadow:0 10px 24px rgba(16,49,82,.08)}
+.about-design .value-grid h3{color:var(--ink)}
+.about-design .value-grid p{color:#60748a}
+.about-design .about-network{background:linear-gradient(105deg,#eff8ff,#fff 66%,#eff7ff);color:var(--ink)}
+.about-design .about-network h2{color:var(--ink)}
+.about-design .about-network p:not(.eyebrow){color:#365270}
+.about-design .about-network-steps>div{background:#fff;border-color:#dfe7f0;box-shadow:0 8px 18px rgba(16,49,82,.06)}
+.about-design .about-network-steps span{color:var(--ink)}
+.about-design .inner-cta{display:block!important;margin-top:0;padding:76px 0;background-image:linear-gradient(90deg,rgba(3,25,53,.9),rgba(3,25,53,.48)),url('/assets/banner-2.optimized.webp')}
+.about-design .inner-cta h2{color:#fff}
+.about-design .inner-cta>div>p:not(.eyebrow){color:#f3f7fc;font-size:17px}
+
+/* Contact information cards follow the light section treatment. */
+.contact-design .contact-card-band{background:#f5f9fc;color:var(--ink)}
+.contact-design .contact-card-grid article{background:#fff;border-color:#dfe7f0;box-shadow:0 10px 24px rgba(16,49,82,.08)}
+.contact-design .contact-card-grid h3{color:var(--ink)}
+.contact-design .contact-card-grid b{color:#b7861c}
+.contact-design .contact-card-grid p{color:#60748a}
+
+/* Desktop body-copy scale: keep descriptive paragraphs consistent across the site. */
+@media (min-width:901px){
+  main p:not(.eyebrow),
+  main li,
+  main .about-intro-copy p:not(.eyebrow),
+  main .home-project-grid p:not(.eyebrow),
+  main .contact-info-list span span,
+  main .quick-contact-grid>a>span:not(.chat-badge),
+  main .contact-form label,
+  main .contact-form input,
+  main .contact-form textarea,
+  main .contact-form select,
+  main .contact-form .check-line{font-size:18px!important;line-height:1.75!important}
+  main .contact-card-grid h3,
+  main .quick-contact-grid b{font-size:20px!important}
+  main .contact-card-grid b,
+  main .contact-info-list b{font-size:18px!important}
+  main .quick-contact h2{font-size:20px!important}
+  main .faq-grid summary{font-size:18px!important;line-height:1.6!important}
+  main .contact-form label{font-size:18px!important;line-height:1.5!important;color:#6b7280!important}
+  main .contact-form .check-line{font-size:16px!important;line-height:1.5!important;color:#6b7280!important}
+  main .contact-form input,
+  main .contact-form textarea,
+  main .contact-form select{font-size:14px!important;color:rgba(107,114,128,.78)!important}
+  main .contact-form textarea{height:60.8px!important;min-height:0!important}
+  main .contact-form input::placeholder,
+  main .contact-form textarea::placeholder{font-size:14px!important;color:rgba(107,114,128,.62)!important;opacity:1}
+}
+
+/* Final homepage news layout overrides. */
+main#main-content > .news{padding:17px 0 66px}
+main#main-content > .news .news-carousel{overflow-x:clip;overflow-y:visible}
+main#main-content > .news .news-intro{display:flex;justify-content:space-between;align-items:flex-end;gap:18px;padding:0 0 18px}
+main#main-content > .home-products .partner-head>a,
+main#main-content > .news .news-all-link{font-size:14px}
+
+/* Final homepage layout overrides (kept last so responsive legacy rules cannot override them). */
+.hero-welcome { max-width: 1120px; margin: 0 auto; }
+.about-wide { padding: 76px 0 82px; }
+.about-wide .container { width: min(1440px, calc(100% - 48px)); }
+.about-wide .about-copy { max-width: 1160px; margin: 0 auto; padding: 0; text-align: center; }
+.about-wide .about-copy p:not(.eyebrow) { font-size: 16px; line-height: 1.85; }
+.about-wide .about-copy .button { margin-top: 12px; }
+.home-projects .container { width: min(1440px, calc(100% - 48px)); }
+.home-project-grid { gap: 24px; }
+.home-project-grid img { height: 300px; }
+.news-grid { grid-template-columns: 1fr !important; }
+.news-intro { padding: 0 0 16px; }
+.news-carousel { grid-column: 1; width: 100%; }
+
+/* Keep the vertical shadow area visible after the legacy carousel rules. */
+main#main-content > .news .news-carousel{overflow-x:clip;overflow-y:visible;padding:14px 0 22px}
+@media (max-width: 640px) {
+  .about-wide { padding: 48px 0 54px; }
+  .about-wide .container { width: calc(100% - 30px); }
+  .about-wide .about-copy p:not(.eyebrow) { font-size: 14px; line-height: 1.7; }
+  .home-projects .container { width: calc(100% - 30px); }
+  .home-project-grid img { height: 220px; }
+}
+
+/* Final homepage news layout overrides. */
+main#main-content > .news .news-carousel{overflow-x:clip;overflow-y:visible}
+main#main-content > .news .news-intro{display:flex;justify-content:space-between;align-items:flex-end;gap:18px;padding:0 0 18px}
+
+/* Homepage welcome marquee, news cards and scoped media captions. */
+.home-welcome-marquee{height:50px;display:flex;align-items:center;overflow:hidden;background:#062b58;color:#f5cd66;padding:10px 0;border-top:1px solid rgba(255,255,255,.18);border-bottom:1px solid rgba(255,255,255,.18)}
+main#main-content > .home-welcome-marquee{order:2!important}
+.home-welcome-marquee-track{display:flex;width:max-content;animation:gedeco-marquee 26s linear infinite}
+.home-welcome-marquee span{flex:none;padding-right:64px;font-size:13px;font-weight:800;letter-spacing:.02em;white-space:nowrap}
+@keyframes gedeco-marquee{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+.news{background:#fff;color:var(--ink);padding:9px 0 39px}
+.news .container{width:min(1320px,calc(100% - 96px))}
+.news-grid{grid-template-columns:1fr!important;gap:0}
+.news-intro{display:flex;justify-content:space-between;align-items:flex-end;gap:18px;padding:0 0 18px;margin:0}
+.news-intro h2{color:var(--ink);font-family:'Times New Roman',Times,serif;font-size:23px;margin:0}
+.news-all-link{display:inline-flex;align-items:center;gap:5px;color:var(--ink);font-size:11px;font-weight:700;white-space:nowrap}
+.news-all-link .icon-svg{width:15px;height:15px;transition:transform .25s ease}
+.news-all-link:hover .icon-svg{transform:translateX(3px)}
+.news-carousel{width:100%;overflow-x:clip;overflow-y:visible;padding:14px 0 22px}
+.news-cards-track{display:flex!important;width:max-content!important;min-width:max-content!important;gap:0;animation:gedeco-news-marquee 17s linear infinite;will-change:transform;transition:none}
+main#main-content > .news .news-cards-track{display:flex!important;grid-template-columns:none!important;gap:0!important;transition:none!important}
+.news-cards-track .news-card{flex:0 0 calc((min(1320px, 100vw - 96px) - 48px)/4);margin:0 16px 0 0;min-width:0;overflow:hidden;background:#f5f9fc;border:1px solid #dce5ee;border-radius:10px;display:flex;flex-direction:column;transition:opacity .35s ease,transform .45s cubic-bezier(.22,.61,.36,1),box-shadow .35s ease;transform-origin:center bottom}
+.news-card figure{margin:0}
+.news-card figure img{width:100%;height:150px;object-fit:cover}
+.news-card small{display:flex;justify-content:space-between;gap:10px;padding:12px 16px 0;color:#60748b;font-size:10px;letter-spacing:.06em;font-weight:700}
+.news-card h3{margin:8px 16px 14px;min-height:52px;color:var(--ink);font-size:17px;line-height:1.35}
+.news-card>a{margin:auto 16px 16px;color:var(--brand);font-weight:700;text-decoration:none}
+.news-controls{display:none!important}
+figcaption{display:none!important}
+.product-source-content figcaption,.shop-description article figcaption,.article-main figcaption,.article-inline-media figcaption{display:block!important}
+@keyframes gedeco-news-marquee{from{transform:translateX(0)}to{transform:translateX(-33.333333%)}}
+@media (max-width:900px){.news-cards-track .news-card{flex-basis:calc((100vw - 42px)/2)}}
+@media (max-width:640px){.news .container{width:calc(100% - 32px)}.news-cards-track .news-card{flex-basis:calc((100vw - 42px)/2);margin-right:10px}.news-card figure img{height:140px}.news-card h3{margin-left:12px;margin-right:12px;font-size:14px;min-height:58px}.news-card small{padding-left:12px;padding-right:12px}.news-card>a{margin-left:12px;margin-right:12px}.home-welcome-marquee span{font-size:12px}}
+@media (max-width:640px){.news-intro{align-items:flex-start;flex-direction:column;gap:8px;padding-bottom:14px}.news-all-link{font-size:10px}}
+@media (prefers-reduced-motion:reduce){.home-welcome-marquee-track{animation:none;transform:none}}
+@media (prefers-reduced-motion:reduce){.news-cards-track{animation:none;transform:none!important}}
+
+/* News cards use the same hover focus treatment as the homepage product carousel. */
+.news-cards-track.is-paused{animation-play-state:paused}
+.news.has-hover .news-card:not(.is-hovered){opacity:.25}
+.news-card.is-hovered{z-index:2;transform:scale(1.035);box-shadow:0 14px 28px rgba(9,42,79,.18)}
+
+/* Homepage refresh: centered welcome message, wide introduction and larger project imagery. */
+.hero-welcome {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 0 24px;
+  max-width: 1120px;
+  margin: 0 auto;
+  color: #fff;
+  text-align: center;
+  font-family: 'Times New Roman', Times, serif;
+  font-size: clamp(24px, 3.2vw, 50px);
+  font-weight: 700;
+  line-height: 1.18;
+  letter-spacing: .03em;
+  text-shadow: 0 4px 20px rgba(0,0,0,.42);
+  white-space: pre-line;
+  animation: gedeco-welcome-in 1.2s cubic-bezier(.22,.61,.36,1) both;
+  z-index: 1;
+}
+@keyframes gedeco-welcome-in {
+  from { opacity: 0; transform: scale(.88); }
+  to { opacity: 1; transform: scale(1); }
+}
+.about-wide { padding: 76px 0 82px; }
+.about-wide .about-copy { max-width: 1160px; margin: 0 auto; padding: 0; text-align: center; }
+.about-wide .about-copy p:not(.eyebrow) { font-size: 16px; line-height: 1.85; }
+.about-wide .about-copy .button { margin-top: 12px; }
+.home-projects .container { width: min(1440px, calc(100% - 48px)); }
+.home-project-grid { gap: 24px; }
+.home-project-grid img { height: 300px; }
+.news-grid { grid-template-columns: 1fr; }
+.news-intro { padding: 0 0 16px; }
+.news-carousel { grid-column: 1; }
+@media (max-width: 640px) {
+  .hero-welcome { font-size: clamp(22px, 7vw, 32px); padding: 0 22px; }
+  .about-wide { padding: 48px 0 54px; }
+  .about-wide .about-copy p:not(.eyebrow) { font-size: 14px; line-height: 1.7; }
+  .home-projects .container { width: calc(100% - 30px); }
+  .home-project-grid img { height: 220px; }
 }
 
 @media (max-width: 900px) {
@@ -627,7 +821,7 @@ main#main-content > .contact-cta { order: 9; }
 .product-marquee-track.is-paused{animation-play-state:paused}
 .product-marquee-set{display:flex;gap:16px;flex:none}
 .product-carousel-compact .shop-product-card{width:calc((min(1160px, 100vw - 80px) - 48px)/4);flex:0 0 calc((min(1160px, 100vw - 80px) - 48px)/4)}
-.product-carousel-compact .shop-product-title{display:-webkit-box;height:54px;min-height:54px;overflow:hidden;margin:0 0 17px;line-height:1.25;-webkit-box-orient:vertical;-webkit-line-clamp:2}
+.product-carousel-compact .shop-product-title{display:-webkit-box;height:2.5em;min-height:2.5em;overflow:hidden;margin:0 0 17px;line-height:1.25;-webkit-box-orient:vertical;-webkit-line-clamp:2}
 .product-carousel{padding:12px 0 18px}
 .product-carousel-viewport{overflow-x:clip;overflow-y:visible;padding:10px 0 16px}
 .product-carousel-compact .product-carousel-viewport{padding:12px 0 20px}
@@ -644,6 +838,9 @@ main#main-content > .contact-cta { order: 9; }
 .news-carousel .news-controls{position:absolute;top:10px;right:10px;z-index:2}
 @media(max-width:900px){.news-grid{grid-template-columns:1fr}.news-intro{padding-bottom:4px}.news-carousel{grid-column:1}}
 @media(prefers-reduced-motion:reduce){.news-card{animation:none}}
+main#main-content > .news .news-cards-track .news-card{flex:0 0 calc((min(1320px, calc(100vw - 96px)) - 48px)/4)!important;width:calc((min(1320px, calc(100vw - 96px)) - 48px)/4)!important}
+@media(max-width:900px){main#main-content > .news .news-cards-track .news-card{flex-basis:calc((100vw - 42px)/2)!important;width:calc((100vw - 42px)/2)!important}}
+@media(max-width:640px){main#main-content > .news .news-cards-track .news-card{flex-basis:calc((100vw - 42px)/2)!important;width:calc((100vw - 42px)/2)!important}}
 /* Product commerce components mirrored from the source shop */
 .product-purchase-summary{color:#536c84;font-size:14px;line-height:1.65}.product-purchase-summary p{margin:0 0 7px}.product-price-line,.product-stock-line{margin:8px 0;color:#536c84;font-size:15px}.product-price-line strong{color:#f04444;font-size:20px;font-weight:500}.product-stock-line strong{color:#339966;font-weight:600}.product-shipper{width:300px;max-width:100%;height:auto;margin:14px 0 10px}.product-buy-button{border:0;text-transform:uppercase}.product-guarantee{margin-top:18px;border-radius:4px;overflow:hidden;background:#fff;border:1px solid #1e73be}.product-guarantee h3{margin:0;padding:13px 14px;background:#1e73be;color:#fff;text-align:center;font-size:15px}.product-guarantee ul{margin:0;padding:12px 18px 12px 34px;color:#263c52;font-size:13px;line-height:1.6}.product-guarantee li::marker{color:#1e9fe3}.product-guarantee a{color:#e33e3e;font-weight:700}.product-detail-contact{display:inline-flex;margin-top:14px;color:#a87516;font-size:13px;font-weight:700}
 html{overflow-x:hidden}
@@ -657,9 +854,11 @@ body{overflow-x:clip}
 .hero h1,.hero-copy,.hero .eyebrow{position:relative;text-shadow:0 2px 5px rgba(0,0,0,.45)}
 .hero::after{display:none!important;content:none!important}
 @media(max-width:640px){.hero-overlay{display:none}.hero-highlights{position:relative}.hero .button-gold{background:linear-gradient(110deg,#ffe18b,#e5a52d);box-shadow:0 6px 14px rgba(3,25,54,.28)}.hero .button-outline{background:rgba(3,25,54,.42);text-shadow:0 1px 3px rgba(0,0,0,.55)}}
+@media(max-width:640px){.hero-overlay{display:block!important;background:rgba(3,25,54,.36)!important}.hero-welcome{color:#fff;text-shadow:0 2px 8px rgba(0,0,0,.7)}}
 @media(max-width:640px){.about{padding-top:0}.about-grid{align-items:start}}
 /* Mobile: end the hero exactly after the highlights; do not leave an image strip below it. */
 @media(max-width:640px){.hero{min-height:0!important}.hero-content{padding-bottom:0}.hero-highlights{bottom:auto!important}.hero-highlights::before{bottom:0}.about{margin-top:0!important;padding-top:16px!important}}
+@media(max-width:640px){.hero{min-height:220px!important}.hero-welcome{font-size:clamp(17px,5vw,24px);line-height:1.25;padding:0 18px}}
 /* Footer uses the same standard black GEDECO logo asset as the header. */
 
 /* WooCommerce-style shop surfaces matching the source store pages. */
@@ -924,5 +1123,24 @@ body{overflow-x:clip}
     border-right: 0 !important;
     padding: 0 4px;
   }
+}
+
+/* Final homepage layout overrides. */
+.hero-welcome { max-width: 1120px; margin: 0 auto; }
+.about-wide { padding: 76px 0 82px; }
+.about-wide .about-copy { max-width: 1160px; margin: 0 auto; padding: 0; text-align: center; }
+.about-wide .about-copy p:not(.eyebrow) { font-size: 16px; line-height: 1.85; }
+.about-wide .about-copy .button { margin-top: 12px; }
+.home-projects .container { width: min(1440px, calc(100% - 48px)); }
+.home-project-grid { gap: 24px; }
+.home-project-grid img { height: 300px; }
+.news-grid { grid-template-columns: 1fr !important; }
+.news-intro { padding: 0 0 16px; }
+.news-carousel { grid-column: 1; width: 100%; }
+@media (max-width: 640px) {
+  .about-wide { padding: 48px 0 54px; }
+  .about-wide .about-copy p:not(.eyebrow) { font-size: 14px; line-height: 1.7; }
+  .home-projects .container { width: calc(100% - 30px); }
+  .home-project-grid img { height: 220px; }
 }
 

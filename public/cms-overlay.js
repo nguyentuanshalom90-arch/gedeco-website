@@ -42,7 +42,7 @@
   }
 
   var LOCKED_SECTIONS = ['news', 'products'];
-  var LOCKED_OK_FIELDS = ['title', 'heading', 'eyebrow'];
+  var LOCKED_OK_FIELDS = ['title', 'heading', 'eyebrow', 'allLabel'];
   function isLocked(row) {
     if (!LOCKED_SECTIONS.includes(row.sectionKey)) return false;
     return !LOCKED_OK_FIELDS.includes(row.fieldKey);
@@ -420,7 +420,13 @@
 
       // Hero Section Elements
       if (row.sectionKey === 'hero') {
-        if (row.fieldKey === 'title') {
+        if (row.fieldKey === 'welcome') {
+          var welcome = document.querySelector('.hero-welcome');
+          if (welcome) { markTextEl(welcome, row); matched = true; }
+        } else if (row.fieldKey === 'marqueeText') {
+          var marquee = document.querySelector('.home-welcome-marquee span');
+          if (marquee) { markTextEl(marquee, row); matched = true; }
+        } else if (row.fieldKey === 'title') {
           var h1 = document.querySelector('.hero h1, .hero-content h1, main h1');
           if (h1) { markTextEl(h1, row); matched = true; }
         } else if (row.fieldKey === 'eyebrow') {
@@ -451,7 +457,19 @@
 
       // About Section
       if (row.sectionKey === 'about') {
-        if (row.fieldKey === 'title') {
+        if (row.fieldKey === 'homeTitle') {
+          var homeAbH2 = document.querySelector('.about-wide h2');
+          if (homeAbH2) { markTextEl(homeAbH2, row); matched = true; }
+        } else if (row.fieldKey === 'homeCopy') {
+          var homeAbP1 = document.querySelector('.about-wide .about-copy p:nth-of-type(2)');
+          if (homeAbP1) { markTextEl(homeAbP1, row); matched = true; }
+        } else if (row.fieldKey === 'homeCopy2') {
+          var homeAbP2 = document.querySelector('.about-wide .about-copy p:nth-of-type(3)');
+          if (homeAbP2) { markTextEl(homeAbP2, row); matched = true; }
+        } else if (row.fieldKey === 'homeButtonLabel') {
+          var homeAbBtn = document.querySelector('.about-wide a.button');
+          if (homeAbBtn) { markTextEl(homeAbBtn, row); matched = true; }
+        } else if (row.fieldKey === 'title') {
           var abH2 = document.querySelector('.about h2');
           if (abH2) { markTextEl(abH2, row); matched = true; }
         } else if (row.fieldKey === 'copy') {
@@ -512,7 +530,34 @@
         if (row.fieldKey === 'title') {
           var newsH2 = document.querySelector('.news .news-intro h2');
           if (newsH2) { markTextEl(newsH2, row); matched = true; }
+        } else if (row.fieldKey === 'allLabel') {
+          var newsAll = document.querySelector('.news .news-all-link');
+          if (newsAll) { markTextEl(newsAll, row); matched = true; }
         }
+      }
+
+      // About page redesign: activities and partner/supply network fields.
+      if (row.sectionKey === 'activities' && row.fieldKey === 'eyebrow') {
+        var actEyebrow = document.querySelector('.about-activities .eyebrow');
+        if (actEyebrow) { markTextEl(actEyebrow, row); matched = true; }
+      } else if (row.sectionKey === 'activities' && row.fieldKey === 'title') {
+        var actTitle = document.querySelector('.about-activities h2');
+        if (actTitle) { markTextEl(actTitle, row); matched = true; }
+      } else {
+        var actMatch = row.sectionKey === 'activities' && row.fieldKey.match(/^(\d+)\.(title|body|image)$/);
+        if (actMatch) {
+          var actArticle = document.querySelector('.about-activity-grid article:nth-child(' + parseInt(actMatch[1], 10) + ')');
+          if (actArticle) {
+            if (actMatch[2] === 'title') { var actH3 = actArticle.querySelector('h3'); if (actH3) { markTextEl(actH3, row); matched = true; } }
+            if (actMatch[2] === 'body') { var actBody = actArticle.querySelector('div > p:last-child'); if (actBody) { markTextEl(actBody, row); matched = true; } }
+            if (actMatch[2] === 'image') { var actImg = actArticle.querySelector('img'); if (actImg) { markImgEl(actImg, row); matched = true; } }
+          }
+        }
+      }
+      if (row.sectionKey === 'network') {
+        var networkSelector = { eyebrow: '.about-network .eyebrow', title: '.about-network h2', body: '.about-network-grid > div:first-child > p:not(.eyebrow)', step1: '.about-network-steps > div:nth-child(1) span', step2: '.about-network-steps > div:nth-child(2) span', step3: '.about-network-steps > div:nth-child(3) span' }[row.fieldKey];
+        var networkEl = networkSelector && document.querySelector(networkSelector);
+        if (networkEl) { markTextEl(networkEl, row); matched = true; }
       }
 
       if (matched) return;
