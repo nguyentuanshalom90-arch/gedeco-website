@@ -32,11 +32,11 @@ export async function GET(request: Request) {
 
   const redirectTo = searchParams.get("redirectTo") || "/dashboard";
   const safePath = safeDashboardPath(redirectTo);
-  const response = NextResponse.redirect(new URL(safePath, request.url));
-  // Keep the redirect same-origin. The reverse proxy may expose an internal
-  // request origin such as localhost:3010 to Next.js, which must never leak
-  // into the browser's Location header.
-  response.headers.set("Location", safePath);
+  const scriptPath = JSON.stringify(safePath).replace(/</g, "\\u003c").replace(/>/g, "\\u003e");
+  const response = new NextResponse(`<!doctype html><meta charset="utf-8"><title>Đang chuyển hướng…</title><script>location.replace(${scriptPath})</script>`, {
+    status: 200,
+    headers: { "Cache-Control": "no-store, max-age=0" },
+  });
   response.cookies.set(DASHBOARD_COOKIE, session.value, {
     httpOnly: true,
     secure: false,
