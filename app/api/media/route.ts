@@ -1,7 +1,7 @@
 import { mkdir, readdir, rename, unlink, writeFile } from "node:fs/promises";
 import { randomUUID } from "node:crypto";
 import path from "node:path";
-import sharp, { type Metadata } from "sharp";
+import type { Metadata } from "sharp";
 import { prisma } from "@/lib/prisma";
 import { containedMediaPath, mediaRoot } from "@/lib/media-storage";
 import { mediaStorageErrorMessage } from "@/lib/media-errors";
@@ -78,13 +78,12 @@ export async function GET() {
       const url = `/assets/${relativeFile.replaceAll(path.sep, "/")}`;
       if (managed.some((asset) => asset.url === url)) continue;
       try {
-        const metadata = await sharp(path.join(publicAssets, relativeFile)).metadata();
         staticAssets.push({
           id: `static-${Buffer.from(url).toString("base64url")}`,
           name: path.basename(relativeFile),
           url,
-          width: metadata.width || 0,
-          height: metadata.height || 0,
+          width: 0,
+          height: 0,
           ...staticMediaLabels(relativeFile),
           managed: false,
         });
@@ -116,6 +115,7 @@ export async function POST(request: Request) {
   const input = Buffer.from(await file.arrayBuffer());
   let metadata: Metadata;
   try {
+    const { default: sharp } = await import("sharp");
     metadata = await sharp(input).metadata();
   } catch {
     return Response.json({ error: "File không phải ảnh hợp lệ." }, { status: 422 });
@@ -133,6 +133,7 @@ export async function POST(request: Request) {
   try {
     await writeFile(containedMediaPath(originalTmp), input, { flag: "wx" });
     await rename(containedMediaPath(originalTmp), containedMediaPath(originalFile));
+    const { default: sharp } = await import("sharp");
     const optimized = await sharp(input).rotate().resize({ width: 2000, withoutEnlargement: true }).webp({ quality: 82, alphaQuality: 90 }).toBuffer({ resolveWithObject: true });
     if (!optimized.data.length || !optimized.info.width || !optimized.info.height) throw new Error("Ảnh WebP tối ưu không hợp lệ.");
     await writeFile(containedMediaPath(optimizedTmp), optimized.data, { flag: "wx" });
