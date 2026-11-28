@@ -2,6 +2,7 @@ import sanitizeHtml from "sanitize-html";
 import { runtimeEnv } from "./runtime-env.ts";
 
 const allowedMediaPath = /^(?:\/api\/media(?:\/|\?|$)|\/assets\/|\/uploads\/)/;
+const allowedCssColor = /^(?:#[0-9a-f]{6}|rgba?\(\s*\d{1,3}\s*,\s*\d{1,3}\s*,\s*\d{1,3}(?:\s*,\s*(?:0|1|0?\.\d+))?\s*\))$/i;
 
 // Older product records can contain mathematical-script Unicode characters
 // copied from social posts. They look like a font but are actually different
@@ -85,8 +86,8 @@ export function sanitizeProductHtml(value: string) {
         "font-weight": [/^(?:normal|bold|[1-9]00)$/],
         "font-style": [/^(?:normal|italic|oblique)$/],
         "text-decoration": [/^(?:none|underline|line-through|overline)(?:\s+(?:none|underline|line-through|overline))*$/],
-        color: [/^#[0-9a-f]{6}$/i],
-        "background-color": [/^(?:#[0-9a-f]{6}|transparent)$/i],
+        color: [allowedCssColor],
+        "background-color": [/^(?:#[0-9a-f]{6}|transparent|rgba?\(\s*\d{1,3}\s*,\s*\d{1,3}\s*,\s*\d{1,3}(?:\s*,\s*(?:0|1|0?\.\d+))?\s*\))$/i],
       },
       p: {
         "text-align": [/^(?:left|center|right|justify)$/],
