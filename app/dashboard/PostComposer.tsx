@@ -323,8 +323,10 @@ export function PostComposer() {
 
   useEffect(() => {
     const savedUi = readPostUiState();
-    if (savedUi?.mode === "editor" && savedUi.post) setPost(normalizePostMedia({ ...EMPTY_POST, ...savedUi.post }));
-    if (savedUi?.mode === "editor" || savedUi?.mode === "list") setMode(savedUi.mode);
+    const params = new URLSearchParams(window.location.search);
+    const routeWantsEditor = params.get("mode") === "editor" && Boolean(params.get("draft"));
+    if (routeWantsEditor && savedUi?.mode === "editor" && savedUi.post) setPost(normalizePostMedia({ ...EMPTY_POST, ...savedUi.post }));
+    setMode(routeWantsEditor ? "editor" : "list");
     if (savedUi?.filter === "ALL" || savedUi?.filter === "DRAFT" || savedUi?.filter === "SCHEDULED" || savedUi?.filter === "PUBLISHED") setFilter(savedUi.filter);
     if (typeof savedUi?.query === "string") setQuery(savedUi.query);
     setHydrated(true);

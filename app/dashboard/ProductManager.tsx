@@ -1250,6 +1250,11 @@ export function RichTextEditor({
 
 export function ProductManager() {
   const [initialUiState] = useState<ProductUiState | null>(() => readProductUiState());
+  const [routeEditorState] = useState(() => {
+    if (typeof window === "undefined") return { open: false, draftId: "" };
+    const params = new URLSearchParams(window.location.search);
+    return { open: params.get("mode") === "editor" && Boolean(params.get("draft")), draftId: params.get("draft") || "" };
+  });
   const [items, setItems] = useState<ProductListItem[]>(() => initialUiState?.itemsSnapshot || []);
   const [categories, setCategories] = useState<ProductCategoryListItem[]>(() => initialUiState?.categoriesSnapshot || []);
   const [draft, setDraft] = useState<ProductInput>(() => cloneProductDraft(initialUiState?.draftSnapshot));
@@ -1261,7 +1266,7 @@ export function ProductManager() {
   useEffect(() => {
     draftRef.current = draft;
   }, [draft]);
-  const [editorOpen, setEditorOpen] = useState(() => Boolean(initialUiState?.editorOpen && initialUiState?.draftSnapshot));
+  const [editorOpen, setEditorOpen] = useState(() => routeEditorState.open);
   const [query, setQuery] = useState(() => initialUiState?.query || "");
   const [categoryFilter, setCategoryFilter] = useState(() => initialUiState?.categoryFilter || "all");
   const [statusFilter, setStatusFilter] = useState<"all" | "published" | "draft">(() => initialUiState?.statusFilter || "all");
@@ -1329,21 +1334,21 @@ export function ProductManager() {
       if (typeof saved.categoryFilter === "string") setCategoryFilter(saved.categoryFilter);
       if (saved.statusFilter === "all" || saved.statusFilter === "published" || saved.statusFilter === "draft") setStatusFilter(saved.statusFilter);
       if (typeof saved.page === "number" && Number.isFinite(saved.page)) setPage(Math.max(1, Math.floor(saved.page)));
-      if (saved.editorOpen && saved.draftSnapshot && typeof saved.draftSnapshot === "object") {
+      if (routeEditorState.open && saved.editorOpen && saved.draftSnapshot && typeof saved.draftSnapshot === "object") {
         const restoredDraft = cloneProductDraft(saved.draftSnapshot);
         const freshItem = saved.draftId ? items.find((product) => product.id === saved.draftId) : undefined;
         const staleIncompleteManualTranslation = Boolean(freshItem?.translationMode === "AUTO" && restoredDraft.translationMode === "MANUAL" && !restoredDraft.summaryHtmlEn.trim());
         setDraft(staleIncompleteManualTranslation ? cloneProductDraft(freshItem) : restoredDraft);
         setEditorOpen(true);
         setMessage(""); setError("");
-      } else if (saved.editorOpen && saved.draftId && items.length) {
-        const item = items.find((product) => product.id === saved.draftId);
+      } else if (routeEditorState.open && routeEditorState.draftId && items.length) {
+        const item = items.find((product) => product.id === routeEditorState.draftId);
         if (item) edit(item);
       }
     } catch {
       window.localStorage.removeItem(PRODUCT_UI_STATE_KEY);
     }
-  }, [initialUiState, items]);
+  }, [initialUiState, items, routeEditorState]);
 
   function set<K extends keyof ProductInput>(key: K, value: ProductInput[K]) {
     const next = { ...draftRef.current, [key]: value } as ProductInput;
@@ -1355,24 +1360,40 @@ export function ProductManager() {
     draftRef.current = next;
     setDraft(next);
   }
+  function updateDraft(updater: (current: ProductInput) => ProductInput) {
+    const next = updater(draftRef.current);
+    draftRef.current = next;
+    setDraft(next);
+  }
   function edit(item?: ProductListItem) {
     setEditorOpen(true);
     const next = item ? cloneProductDraft(item) : { ...EMPTY, categoryId: categories[0]?.id || "", gallery: [] };
     draftRef.current = next;
     setDraft(next);
     setMessage(""); setError("");
+    const params = new URLSearchParams(window.location.search);
+    params.set("mode", "editor");
+    params.set("draft", item?.id || "new");
+    window.history.replaceState(null, "", `${window.location.pathname}?${params.toString()}`);
+  }
+  function closeEditor() {
+    setEditorOpen(false);
+    const params = new URLSearchParams(window.location.search);
+    params.delete("mode");
+    params.delete("draft");
+    window.history.replaceState(null, "", `${window.location.pathname}?${params.toString()}`);
   }
   function selectMain(asset: MediaSelection) {
-    setDraft((current) => ({ ...current, imageUrl: asset.url, imageAlt: asset.altText || current.imageAlt || current.title, imageCaption: asset.caption || current.imageCaption }));
+    updateDraft((current) => ({ ...current, imageUrl: asset.url, imageAlt: asset.altText || current.imageAlt || current.title, imageCaption: asset.caption || current.imageCaption }));
   }
   function addGallery(asset: MediaSelection) {
-    setDraft((current) => ({ ...current, gallery: [...current.gallery, { id: asset.id, url: asset.url, altText: asset.altText || current.title, caption: "", sortOrder: current.gallery.length, isPrimary: current.gallery.length === 0 }] }));
+    updateDraft((current) => ({ ...current, gallery: [...current.gallery, { id: asset.id, url: asset.url, altText: asset.altText || current.title, caption: "", sortOrder: current.gallery.length, isPrimary: current.gallery.length === 0 }] }));
   }
   function updateGallery(index: number, patch: Partial<ProductMediaInput>) {
-    setDraft((current) => ({ ...current, gallery: current.gallery.map((item, position) => position === index ? { ...item, ...patch } : item) }));
+    updateDraft((current) => ({ ...current, gallery: current.gallery.map((item, position) => position === index ? { ...item, ...patch } : item) }));
   }
   function moveGallery(index: number, direction: -1 | 1) {
-    setDraft((current) => {
+    updateDraft((current) => {
       const next = [...current.gallery]; const target = index + direction;
       if (target < 0 || target >= next.length) return current;
       [next[index], next[target]] = [next[target], next[index]];
@@ -1381,7 +1402,7 @@ export function ProductManager() {
   }
   function reorderGallery(fromIndex: number, toIndex: number) {
     if (fromIndex === toIndex) return;
-    setDraft((current) => {
+    updateDraft((current) => {
       if (fromIndex < 0 || toIndex < 0 || fromIndex >= current.gallery.length || toIndex >= current.gallery.length) return current;
       const next = [...current.gallery];
       const [moved] = next.splice(fromIndex, 1);
@@ -1433,7 +1454,7 @@ export function ProductManager() {
   async function remove(item: ProductListItem) {
     if (!window.confirm(`Xóa sản phẩm “${item.title}”?`)) return;
     setDeleting(item.id);
-    try { await deleteProduct(item.id); setItems((current) => current.filter((row) => row.id !== item.id)); setEditorOpen(false); setMessage("Đã xóa sản phẩm."); }
+    try { await deleteProduct(item.id); setItems((current) => current.filter((row) => row.id !== item.id)); closeEditor(); setMessage("Đã xóa sản phẩm."); }
     catch (caught) { setError(caught instanceof Error ? caught.message : "Không thể xóa sản phẩm."); }
     finally { setDeleting(null); }
   }
@@ -1480,7 +1501,7 @@ export function ProductManager() {
     <div className={`product-workspace${editorOpen ? " has-editor" : ""}`}>
       <section className="panel cms-list-panel product-list-panel"><div className="product-list-head"><div className="product-list-tools"><div className="cms-search"><Icon name="search" size={16} /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Tìm tên hoặc slug sản phẩm" /></div><BulkToolbar selected={selected.length} onDelete={() => void bulkDelete()} disabled={saving} /><select aria-label="Danh mục" className="product-filter" value={categoryFilter} onChange={(event) => setCategoryFilter(event.target.value)}><option value="all">{loading ? "Đang tải danh mục…" : `Tất cả danh mục (${categories.length})`}</option>{categories.map((category) => <option key={category.id} value={category.id}>{category.name}</option>)}</select><button className="btn btn-add-data" type="button" onClick={() => edit()}><Icon name="plus" size={15} />Thêm sản phẩm</button></div></div><div className="product-bulk-bar"><label><input type="checkbox" checked={allVisibleSelected} onChange={() => setSelected((current) => allVisibleSelected ? current.filter((id) => !visible.some((item) => item.id === id)) : [...new Set([...current, ...visible.map((item) => item.id)])])} /> Chọn page này</label><span>{loading ? "Đang tải sản phẩm…" : `${filtered.length} sản phẩm`}</span><select className="product-status-filter" value={statusFilter} onChange={(event) => setStatusFilter(event.target.value as typeof statusFilter)}><option value="all">Mọi trạng thái</option><option value="published">Đang hiển thị</option><option value="draft">Đang ẩn</option></select></div>{loading ? <p className="cms-empty">Đang tải sản phẩm…</p> : visible.length === 0 ? <p className="cms-empty">Không có sản phẩm phù hợp.</p> : visible.map((item) => <article key={item.id} className={`product-row${draft.id === item.id ? " active" : ""}`}><input type="checkbox" checked={selected.includes(item.id)} onChange={() => toggleSelected(item.id)} aria-label={`Chọn ${item.title}`} /><div className="product-row-thumb">{item.imageUrl ? <img src={item.imageUrl} alt="" /> : <Icon name="box" size={18} />}</div><div className="product-row-info"><strong>{item.title}</strong><span>{item.categoryName} · {item.priceText || "Liên hệ"}</span></div><select className={`product-status product-status-select ${item.isPublished ? "live" : "off"}`} aria-label={`Trạng thái ${item.title}`} value={item.isPublished ? "published" : "hidden"} disabled={saving || Boolean(deleting)} onChange={(event) => void changeVisibility(item, event.target.value === "published")}><option value="published">Đang hiển thị</option><option value="hidden">Đang ẩn</option></select><div className="product-row-actions"><button className="btn btn-ghost" type="button" onClick={() => edit(item)} disabled={Boolean(deleting) || saving} title="Sửa sản phẩm" aria-label={`Sửa ${item.title}`}><Icon name="pencil" size={15} /></button><button className="btn btn-ghost" type="button" onClick={() => void duplicate(item)} disabled={Boolean(deleting) || saving} title="Nhân bản sản phẩm" aria-label={`Nhân bản ${item.title}`}><Icon name="layers" size={15} /></button><a className="btn btn-ghost" href={`/san-pham/${item.categorySlug}/${item.slug}`} target="_blank" rel="noreferrer" title="Xem sản phẩm" aria-label={`Xem ${item.title}`}><Icon name="external" size={15} /></a><button className="btn btn-ghost cms-danger" type="button" onClick={() => void remove(item)} disabled={deleting === item.id || saving} title="Xóa sản phẩm" aria-label={`Xóa ${item.title}`}><Icon name="trash" size={15} /></button></div></article>)}<div className="product-pagination"><button className="btn" type="button" disabled={page <= 1} onClick={() => setPage((current) => current - 1)}>Trước</button><span>Trang {page}/{pageCount}</span><button className="btn" type="button" disabled={page >= pageCount} onClick={() => setPage((current) => current + 1)}>Sau</button></div></section>
       {editorOpen && <section className="panel cms-card cms-category-form product-editor">
-        <div className="cms-section-head product-editor-sticky-head"><div><p className="eyebrow">{draft.id ? "CHỈNH SỬA" : "TẠO MỚI"}</p><h2>{draft.title || "Sản phẩm mới"}</h2></div><div className="product-editor-head-actions">{draft.id && draft.slug && categories.find((category) => category.id === draft.categoryId)?.slug ? <a className="btn btn-ghost" href={`/san-pham/${categories.find((category) => category.id === draft.categoryId)?.slug}/${draft.slug}`} target="_blank" rel="noreferrer"><Icon name="external" size={15} />Xem</a> : <button className="btn btn-ghost" type="button" disabled title="Lưu sản phẩm trước khi xem live"><Icon name="external" size={15} />Xem</button>}<button className="btn btn-primary product-editor-head-save" type="button" disabled={saving} onClick={() => void persist("all")} title="Lưu toàn bộ thay đổi tiếng Việt và English">{saving ? "Đang lưu…" : "Lưu"}</button><button className="btn btn-ghost product-editor-close-button" type="button" aria-label="Đóng" title="Đóng" onClick={() => setEditorOpen(false)}><Icon name="close" size={17} /></button></div></div>
+        <div className="cms-section-head product-editor-sticky-head"><div><p className="eyebrow">{draft.id ? "CHỈNH SỬA" : "TẠO MỚI"}</p><h2>{draft.title || "Sản phẩm mới"}</h2></div><div className="product-editor-head-actions">{draft.id && draft.slug && categories.find((category) => category.id === draft.categoryId)?.slug ? <a className="btn btn-ghost" href={`/san-pham/${categories.find((category) => category.id === draft.categoryId)?.slug}/${draft.slug}`} target="_blank" rel="noreferrer"><Icon name="external" size={15} />Xem</a> : <button className="btn btn-ghost" type="button" disabled title="Lưu sản phẩm trước khi xem live"><Icon name="external" size={15} />Xem</button>}<button className="btn btn-primary product-editor-head-save" type="button" disabled={saving} onClick={() => void persist("all")} title="Lưu toàn bộ thay đổi tiếng Việt và English">{saving ? "Đang lưu…" : "Lưu"}</button><button className="btn btn-ghost product-editor-close-button" type="button" aria-label="Đóng" title="Đóng" onClick={closeEditor}><Icon name="close" size={17} /></button></div></div>
         <div className="product-editor-columns">
         <div className="product-editor-primary site-content-form-grid">
           <div className="site-content-full product-title-settings"><RichTextEditor label="Tên sản phẩm" value={draft.titleHtml || `<p><strong>${escapeHtml(draft.title)}</strong></p>`} onChange={(value) => setDraft((current) => ({ ...current, titleHtml: value, title: htmlToPlainText(value), titleFontFamily: "Arial", titleFontSize: 28, titleFontWeight: 700 }))} placeholder="Nhập tên sản phẩm…" compact onSave={() => void persist("all")} /></div>
@@ -1497,7 +1518,7 @@ export function ProductManager() {
           <div className="product-editor-media-head"><strong>Album ảnh sản phẩm</strong><span>Ảnh đầu tiên là ảnh đại diện</span></div>
           <div className="product-editor-media-main"><MediaPicker label="Chọn nguồn ảnh" value={draft.imageUrl} altText={draft.imageAlt} caption={draft.imageCaption} onSelect={selectMain} onClear={() => setDraft((current) => ({ ...current, imageUrl: "", imageAlt: "", imageCaption: "" }))} /></div>
           <div className="product-editor-media-fields"><label>Alt text VI<input value={draft.imageAlt} onChange={(event) => set("imageAlt", event.target.value)} /></label><label>Caption VI<input value={draft.imageCaption} onChange={(event) => set("imageCaption", event.target.value)} /></label></div>
-          <div className="product-editor-gallery"><div className="product-editor-media-head"><strong>{draft.gallery.length} ảnh trong album</strong></div>{draft.gallery.map((media, index) => <article className={`product-gallery-editor${draggingGalleryIndex === index ? " is-dragging" : ""}`} key={`${media.id || media.url}-${index}`} draggable onDragStart={(event) => { setDraggingGalleryIndex(index); event.dataTransfer.effectAllowed = "move"; event.dataTransfer.setData("text/plain", String(index)); }} onDragOver={(event) => { event.preventDefault(); event.dataTransfer.dropEffect = "move"; }} onDrop={(event) => { event.preventDefault(); const fromIndex = Number(event.dataTransfer.getData("text/plain")); reorderGallery(fromIndex, index); setDraggingGalleryIndex(null); }} onDragEnd={() => setDraggingGalleryIndex(null)}><img src={media.url} alt={media.altText || draft.title} /><div><label>Alt text VI<input value={media.altText} onChange={(event) => updateGallery(index, { altText: event.target.value })} /></label><label>Caption VI<input value={media.caption || ""} onChange={(event) => updateGallery(index, { caption: event.target.value })} /></label><label>Alt text EN<input value={media.altTextEn || ""} onChange={(event) => { updateGallery(index, { altTextEn: event.target.value }); set("translationMode", "MANUAL"); }} /></label><label>Caption EN<input value={media.captionEn || ""} onChange={(event) => { updateGallery(index, { captionEn: event.target.value }); set("translationMode", "MANUAL"); }} /></label></div><div className="product-gallery-controls"><span className="product-gallery-drag-hint">Kéo thả hoặc sử dụng mũi tên để sắp xếp thứ tự ảnh.</span><div className="cms-row-actions"><button type="button" className="btn product-gallery-drag-button" aria-label="Kéo thả để sắp xếp" title="Kéo thả để sắp xếp"><Icon name="move" size={15} /></button><button type="button" className="btn" disabled={index === 0} onClick={() => moveGallery(index, -1)} aria-label="Đưa ảnh lên" title="Đưa ảnh lên"><Icon name="chevron" size={15} style={{ transform: "rotate(-90deg)" }} /></button><button type="button" className="btn" disabled={index === draft.gallery.length - 1} onClick={() => moveGallery(index, 1)} aria-label="Đưa ảnh xuống" title="Đưa ảnh xuống"><Icon name="chevron" size={15} style={{ transform: "rotate(90deg)" }} /></button><button type="button" className="btn cms-danger" onClick={() => set("gallery", draft.gallery.filter((_, position) => position !== index))} aria-label="Bỏ ảnh khỏi album" title="Bỏ ảnh khỏi album"><Icon name="trash" size={14} /></button></div></div></article>)}<p className="product-gallery-add-hint">Thêm ảnh vào album</p><MediaPicker label="Ảnh album mới" value="" altText={draft.title} onSelect={addGallery} /></div>
+          <div className="product-editor-gallery"><div className="product-editor-media-head"><strong>{draft.gallery.length} ảnh trong album</strong></div>{draft.gallery.map((media, index) => <article className={`product-gallery-editor${draggingGalleryIndex === index ? " is-dragging" : ""}`} key={`${media.id || media.url}-${index}`} draggable onDragStart={(event) => { setDraggingGalleryIndex(index); event.dataTransfer.effectAllowed = "move"; event.dataTransfer.setData("text/plain", String(index)); }} onDragOver={(event) => { event.preventDefault(); event.dataTransfer.dropEffect = "move"; }} onDrop={(event) => { event.preventDefault(); const fromIndex = Number(event.dataTransfer.getData("text/plain")); reorderGallery(fromIndex, index); setDraggingGalleryIndex(null); }} onDragEnd={() => setDraggingGalleryIndex(null)}><img src={media.url} alt={media.altText || draft.title} /><MediaPicker label={`Đổi ảnh album ${index + 1}`} value={media.url} altText={media.altText || draft.title} caption={media.caption || ""} onSelect={(asset) => updateGallery(index, { id: asset.id, url: asset.url, altText: asset.altText || media.altText || draft.title })} /><div><label>Alt text VI<input value={media.altText} onChange={(event) => updateGallery(index, { altText: event.target.value })} /></label><label>Caption VI<input value={media.caption || ""} onChange={(event) => updateGallery(index, { caption: event.target.value })} /></label><label>Alt text EN<input value={media.altTextEn || ""} onChange={(event) => { updateGallery(index, { altTextEn: event.target.value }); set("translationMode", "MANUAL"); }} /></label><label>Caption EN<input value={media.captionEn || ""} onChange={(event) => { updateGallery(index, { captionEn: event.target.value }); set("translationMode", "MANUAL"); }} /></label></div><div className="product-gallery-controls"><span className="product-gallery-drag-hint">Kéo thả hoặc sử dụng mũi tên để sắp xếp thứ tự ảnh.</span><div className="cms-row-actions"><button type="button" className="btn product-gallery-drag-button" aria-label="Kéo thả để sắp xếp" title="Kéo thả để sắp xếp"><Icon name="move" size={15} /></button><button type="button" className="btn" disabled={index === 0} onClick={() => moveGallery(index, -1)} aria-label="Đưa ảnh lên" title="Đưa ảnh lên"><Icon name="chevron" size={15} style={{ transform: "rotate(-90deg)" }} /></button><button type="button" className="btn" disabled={index === draft.gallery.length - 1} onClick={() => moveGallery(index, 1)} aria-label="Đưa ảnh xuống" title="Đưa ảnh xuống"><Icon name="chevron" size={15} style={{ transform: "rotate(90deg)" }} /></button><button type="button" className="btn cms-danger" onClick={() => set("gallery", draft.gallery.filter((_, position) => position !== index))} aria-label="Bỏ ảnh khỏi album" title="Bỏ ảnh khỏi album"><Icon name="trash" size={14} /></button></div></div></article>)}<p className="product-gallery-add-hint">Thêm ảnh vào album</p><MediaPicker label="Ảnh album mới" value="" altText={draft.title} onSelect={addGallery} /></div>
         </aside>
         </div>
 
