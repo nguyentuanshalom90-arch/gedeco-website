@@ -71,7 +71,7 @@ export function sanitizeProductHtml(value: string) {
       iframe: ["src", "title", "loading", "allow", "allowfullscreen", "referrerpolicy"],
       th: ["colspan", "rowspan", "scope"],
       td: ["colspan", "rowspan"],
-      font: ["face"],
+      font: ["face", "color"],
       span: ["style"],
     },
     allowedSchemes: ["https", "mailto", "tel"],
@@ -152,7 +152,11 @@ export function sanitizeProductHtml(value: string) {
         // family survives the save/reload cycle.
         const face = (attributes.face || "").trim();
         const safeFace = /^[a-z0-9 ,.'"-]+$/i.test(face) ? face : "Arial";
-        return { tagName: "span", attribs: { style: `font-family: ${safeFace}` } };
+        const color = (attributes.color || "").trim();
+        const safeColor = /^#[0-9a-f]{6}$/i.test(color) ? color : "";
+        const styles = [`font-family: ${safeFace}`];
+        if (safeColor) styles.push(`color: ${safeColor}`);
+        return { tagName: "span", attribs: { style: styles.join("; ") } };
       },
     },
     exclusiveFilter: (frame) => frame.tag === "img" && !isAllowedImageSource(frame.attribs.src),
