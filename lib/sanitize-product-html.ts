@@ -53,7 +53,7 @@ export function sanitizeProductHtml(value: string) {
   const normalized = normalizeLegacyMediaFigures(normalizeDecorativeUnicode(value || ""));
   return sanitizeHtml(normalized, {
     allowedTags: [
-      "p", "br", "strong", "b", "em", "i", "u", "s", "font", "span", "h2", "h3", "h4",
+      "p", "div", "br", "strong", "b", "em", "i", "u", "s", "font", "span", "h2", "h3", "h4",
       "ul", "ol", "li", "blockquote", "a", "figure", "figcaption", "img",
       "table", "thead", "tbody", "tr", "th", "td", "hr", "code", "pre", "iframe",
     ],
@@ -65,6 +65,7 @@ export function sanitizeProductHtml(value: string) {
       h4: ["style"],
       blockquote: ["style"],
       li: ["style"],
+      div: ["style"],
       figure: ["class", "style"],
       img: ["src", "alt", "title", "class", "width", "height", "loading"],
       iframe: ["src", "title", "loading", "allow", "allowfullscreen", "referrerpolicy"],
@@ -108,6 +109,10 @@ export function sanitizeProductHtml(value: string) {
         "line-height": [/^(?:normal|\d+(?:\.\d+)?)$/],
       },
       li: {
+        "text-align": [/^(?:left|center|right|justify)$/],
+        "line-height": [/^(?:normal|\d+(?:\.\d+)?)$/],
+      },
+      div: {
         "text-align": [/^(?:left|center|right|justify)$/],
         "line-height": [/^(?:normal|\d+(?:\.\d+)?)$/],
       },

@@ -489,6 +489,13 @@ export function RichTextEditor({
     event.preventDefault();
   }
 
+  function rememberToolbarSelection(event: React.MouseEvent<HTMLElement>) {
+    const editor = editorRef.current;
+    if (editor && replacePlainYouTubeUrls(editor)) commitEditorHtml(cleanEditorHtml());
+    rememberSelection();
+    event.stopPropagation();
+  }
+
   function prepareClearHighlight(event: React.MouseEvent<HTMLButtonElement>) {
     event.preventDefault();
     const editor = editorRef.current;
@@ -722,6 +729,17 @@ export function RichTextEditor({
     selection.addRange(savedRange);
     const range = selection.getRangeAt(0);
     if (!editor.contains(range.commonAncestorContainer)) return;
+    if (property === "line-height") {
+      const blocks = Array.from(editor.querySelectorAll<HTMLElement>("p,h2,h3,h4,blockquote,li,div")).filter((block) => {
+        try { return range.intersectsNode(block); } catch { return false; }
+      });
+      if (blocks.length) {
+        blocks.forEach((block) => block.style.setProperty("line-height", value));
+        commitEditorHtml(cleanEditorHtml());
+        updateToolbarState();
+        return;
+      }
+    }
     if (property === "background-color" && value === "transparent") {
       document.execCommand("backColor", false, "transparent");
       editor.querySelectorAll<HTMLElement>("span[style]").forEach((span) => {
@@ -1178,20 +1196,20 @@ export function RichTextEditor({
     <div className="product-rich-editor-label"><span>{label}</span>{fullscreenVisible ? <span className="product-rich-editor-fullscreen-actions">{onSave ? <button type="button" className="btn btn-primary product-rich-editor-save" aria-label="Lưu thay đổi" title="Lưu thay đổi ngay ra frontend" onMouseDown={(event) => event.stopPropagation()} onClick={onSave}>Lưu</button> : null}<button type="button" className="product-rich-editor-close product-rich-editor-close-corner" aria-label="Đóng toàn màn hình" title="Đóng" style={{ position: "static", display: "inline-flex", alignItems: "center", justifyContent: "center", minWidth: 72, height: 34, padding: "0 14px", border: "1px solid #c7dce8", borderRadius: 8, background: "#fff", color: "#496577", fontSize: 13, fontWeight: 700, lineHeight: 1, cursor: "pointer" }} onMouseDown={(event) => event.stopPropagation()} onClick={closeFullscreen}>Đóng</button></span> : null}</div>
     <div className={`product-rich-toolbar${compact ? " product-rich-toolbar-compact" : ""}`} role="toolbar" aria-label={`Định dạng ${label}`}>
       <span className="product-rich-top-actions">
-        {!compact && <select className="product-rich-block" aria-label="Kiểu đoạn" value={toolbarState.block} onChange={(event) => { if (event.target.value !== MIXED_VALUE) command("formatBlock", event.target.value); }}>
+        {!compact && <select className="product-rich-block" aria-label="Kiểu đoạn" value={toolbarState.block} onMouseDown={rememberToolbarSelection} onChange={(event) => { if (event.target.value !== MIXED_VALUE) command("formatBlock", event.target.value); }}>
         <option value={MIXED_VALUE}>Nhiều giá trị</option><option value="p">Đoạn văn</option><option value="h2">Tiêu đề 2</option><option value="h3">Tiêu đề 3</option><option value="h4">Tiêu đề 4</option>
         </select>}
-        <select className="product-rich-font" aria-label="Phông chữ" value={toolbarState.fontFamily} onChange={(event) => { if (event.target.value !== MIXED_VALUE) command("fontName", event.target.value); }}>
+        <select className="product-rich-font" aria-label="Phông chữ" value={toolbarState.fontFamily} onMouseDown={rememberToolbarSelection} onChange={(event) => { if (event.target.value !== MIXED_VALUE) command("fontName", event.target.value); }}>
         <option value={MIXED_VALUE}>Nhiều giá trị</option>
         <option value="Arial">Arial</option><option value="Times New Roman">Times New Roman</option><option value="Roboto">Roboto</option><option value="Helvetica">Helvetica</option><option value="Montserrat">Montserrat</option><option value="Open Sans">Open Sans</option><option value="Noto Sans">Noto Sans</option><option value="Be Vietnam Pro">Be Vietnam Pro</option><option value="Tahoma">Tahoma</option><option value="Verdana">Verdana</option>
         </select>
-        <select className="product-rich-size" aria-label="Cỡ chữ" value={toolbarState.fontSize} onChange={(event) => { if (event.target.value !== MIXED_VALUE) applyInlineStyle("font-size", event.target.value); }}>
+        <select className="product-rich-size" aria-label="Cỡ chữ" value={toolbarState.fontSize} onMouseDown={rememberToolbarSelection} onChange={(event) => { if (event.target.value !== MIXED_VALUE) applyInlineStyle("font-size", event.target.value); }}>
         <option value={MIXED_VALUE}>Nhiều giá trị</option>
         <option value="12px">12 px</option><option value="14px">14 px</option><option value="15px">15 px</option><option value="16px">16 px</option><option value="18px">18 px</option><option value="20px">20 px</option><option value="24px">24 px</option><option value="28px">28 px</option><option value="32px">32 px</option><option value="36px">36 px</option><option value="40px">40 px</option><option value="42px">42 px</option><option value="48px">48 px</option><option value="56px">56 px</option><option value="64px">64 px</option>
         </select>
-        {compact && <select className="product-rich-weight" aria-label="Độ đậm" title="Độ đậm" value={toolbarState.fontWeight} onChange={(event) => { if (event.target.value !== MIXED_VALUE) applyInlineStyle("font-weight", event.target.value); }}><option value={MIXED_VALUE}>Nhiều giá trị</option><option value="400">Thường</option><option value="500">Trung bình</option><option value="600">Bán đậm</option><option value="700">Đậm</option><option value="800">Rất đậm</option><option value="900">Black</option></select>}
-        <label className={`product-rich-color${toolbarState.color === MIXED_VALUE ? " is-mixed" : ""}`} title={toolbarState.color === MIXED_VALUE ? "Màu chữ: nhiều giá trị" : "Màu chữ"}><span>Màu chữ</span><span className="product-rich-color-swatch" style={{ backgroundColor: toolbarState.color === MIXED_VALUE ? DEFAULT_TEXT_COLOR : toolbarState.color }} aria-hidden="true" /><input className="product-rich-color-input-overlay" type="color" aria-label="Màu chữ" value={toolbarState.color === MIXED_VALUE ? DEFAULT_TEXT_COLOR : toolbarState.color} onChange={(event) => applyInlineStyle("color", event.target.value)} /></label>
-        {!compact && <label className={`product-rich-color product-rich-background-color${toolbarState.backgroundColor === MIXED_VALUE ? " is-mixed" : toolbarState.backgroundColor === "transparent" ? " is-transparent" : ""}`} title={toolbarState.backgroundColor === MIXED_VALUE ? "Màu nền chữ: nhiều giá trị" : toolbarState.backgroundColor === "transparent" ? "Màu nền chữ: không có" : "Màu nền chữ"}><span>Màu nền chữ</span><span className="product-rich-color-swatch" style={toolbarState.backgroundColor !== MIXED_VALUE && toolbarState.backgroundColor !== "transparent" ? { backgroundColor: toolbarState.backgroundColor } : undefined} aria-hidden="true" /><input className="product-rich-color-input-overlay" type="color" aria-label="Màu nền chữ" value={toolbarState.backgroundColor === MIXED_VALUE || toolbarState.backgroundColor === "transparent" ? DEFAULT_HIGHLIGHT_COLOR : toolbarState.backgroundColor} onChange={(event) => applyInlineStyle("background-color", event.target.value)} /></label>}
+        {compact && <select className="product-rich-weight" aria-label="Độ đậm" title="Độ đậm" value={toolbarState.fontWeight} onMouseDown={rememberToolbarSelection} onChange={(event) => { if (event.target.value !== MIXED_VALUE) applyInlineStyle("font-weight", event.target.value); }}><option value={MIXED_VALUE}>Nhiều giá trị</option><option value="400">Thường</option><option value="500">Trung bình</option><option value="600">Bán đậm</option><option value="700">Đậm</option><option value="800">Rất đậm</option><option value="900">Black</option></select>}
+        <label className={`product-rich-color${toolbarState.color === MIXED_VALUE ? " is-mixed" : ""}`} title={toolbarState.color === MIXED_VALUE ? "Màu chữ: nhiều giá trị" : "Màu chữ"}><span>Màu chữ</span><span className="product-rich-color-swatch" style={{ backgroundColor: toolbarState.color === MIXED_VALUE ? DEFAULT_TEXT_COLOR : toolbarState.color }} aria-hidden="true" /><input className="product-rich-color-input-overlay" type="color" aria-label="Màu chữ" value={toolbarState.color === MIXED_VALUE ? DEFAULT_TEXT_COLOR : toolbarState.color} onMouseDown={rememberToolbarSelection} onChange={(event) => applyInlineStyle("color", event.target.value)} /></label>
+        {!compact && <label className={`product-rich-color product-rich-background-color${toolbarState.backgroundColor === MIXED_VALUE ? " is-mixed" : toolbarState.backgroundColor === "transparent" ? " is-transparent" : ""}`} title={toolbarState.backgroundColor === MIXED_VALUE ? "Màu nền chữ: nhiều giá trị" : toolbarState.backgroundColor === "transparent" ? "Màu nền chữ: không có" : "Màu nền chữ"}><span>Màu nền chữ</span><span className="product-rich-color-swatch" style={toolbarState.backgroundColor !== MIXED_VALUE && toolbarState.backgroundColor !== "transparent" ? { backgroundColor: toolbarState.backgroundColor } : undefined} aria-hidden="true" /><input className="product-rich-color-input-overlay" type="color" aria-label="Màu nền chữ" value={toolbarState.backgroundColor === MIXED_VALUE || toolbarState.backgroundColor === "transparent" ? DEFAULT_HIGHLIGHT_COLOR : toolbarState.backgroundColor} onMouseDown={rememberToolbarSelection} onChange={(event) => applyInlineStyle("background-color", event.target.value)} /></label>}
         {!compact && <button className="product-rich-clear-highlight" type="button" title="Xóa màu nền chữ" aria-label="Xóa màu nền chữ" onMouseDown={prepareClearHighlight} onClick={clearHighlightAction}><span>Xóa màu nền chữ</span><span className="product-rich-color-swatch product-rich-clear-highlight-icon" aria-hidden="true" /></button>}
       </span>
       <span className="product-rich-text-actions" aria-label="Định dạng chữ">
@@ -1206,7 +1224,7 @@ export function RichTextEditor({
       <button type="button" title="Căn trái" aria-label="Căn trái" onMouseDown={preserveToolbarSelection} onClick={() => command("justifyLeft")}><span className="product-rich-text-align-icon product-rich-text-align-left" aria-hidden="true"><i /><i /><i /></span></button>
       <button type="button" title="Căn giữa" aria-label="Căn giữa" onMouseDown={preserveToolbarSelection} onClick={() => command("justifyCenter")}><span className="product-rich-text-align-icon product-rich-text-align-center" aria-hidden="true"><i /><i /><i /></span></button>
       <button type="button" title="Căn phải" aria-label="Căn phải" onMouseDown={preserveToolbarSelection} onClick={() => command("justifyRight")}><span className="product-rich-text-align-icon product-rich-text-align-right" aria-hidden="true"><i /><i /><i /></span></button>
-      <select className="product-rich-line-height-control" title="Khoảng cách dòng" aria-label="Khoảng cách dòng" value="__line-height-label" onChange={(event) => { if (event.target.value !== "__line-height-label") applyInlineStyle("line-height", event.target.value); }}>
+      <select className="product-rich-line-height-control" title="Khoảng cách dòng" aria-label="Khoảng cách dòng" value="__line-height-label" onMouseDown={rememberToolbarSelection} onChange={(event) => { if (event.target.value !== "__line-height-label") applyInlineStyle("line-height", event.target.value); }}>
         <option value="__line-height-label">Khoảng cách dòng</option>
         {LINE_HEIGHT_OPTIONS.map((value) => <option key={value} value={value}>{value === "normal" ? "Mặc định" : value}</option>)}
       </select>
