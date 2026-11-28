@@ -103,9 +103,7 @@ export default async function SupportPage({ page, language = 'vi' }: { page: Sup
     const fallbackLines = section.bullets || section.paragraphs || [];
     const bodyValue = text(`${key}.body`, fallbackLines.join('\n'));
     const lines = bodyValue.split(/\r?\n/).map((line) => line.trim()).filter(Boolean);
-    const editableLines = config.pageKey === 'doi-tra-va-bao-hanh'
-      ? lines.map((line, lineIndex) => text(`${key}.item.${lineIndex + 1}`, line))
-      : lines;
+    const editableLines = lines.map((line, lineIndex) => text(`${key}.item.${lineIndex + 1}`, line));
     return { key, title: text(`${key}.title`, section.heading), lines: editableLines, bullets: Boolean(section.bullets) };
   });
   const canonical = absoluteUrl(english ? config.en : config.vi);
