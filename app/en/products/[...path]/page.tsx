@@ -320,11 +320,13 @@ export default async function EnglishProductOrCategoryPage({
                   <ShopProductStatusLabel language="en" /> <strong>{product.stockText}</strong>
                 </p>
               )}
-              <img
-                className="shop-shipper"
-                src={product.shipperImage}
-                alt={product.shipperImageAlt || product.title}
-              />
+              {product.shipperImage ? (
+                <img
+                  className="shop-shipper"
+                  src={product.shipperImage}
+                  alt={product.shipperImageAlt || product.title}
+                />
+              ) : null}
               <ShopPurchaseLink type="buy" language="en" />
               <ShopGuarantee language="en" />
             </article>

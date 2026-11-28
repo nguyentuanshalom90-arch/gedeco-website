@@ -343,11 +343,13 @@ export default async function ProductOrCategoryPage({
                   <ShopProductStatusLabel /> <strong>{product.stockText}</strong>
                 </p>
               )}
-              <img
-                className="shop-shipper"
-                src={product.shipperImage}
-                alt={product.shipperImageAlt || product.title}
-              />
+              {product.shipperImage ? (
+                <img
+                  className="shop-shipper"
+                  src={product.shipperImage}
+                  alt={product.shipperImageAlt || product.title}
+                />
+              ) : null}
               <ShopPurchaseLink type="buy" />
               <ShopGuarantee />
             </article>
