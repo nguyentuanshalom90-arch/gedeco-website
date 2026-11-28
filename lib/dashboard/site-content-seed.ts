@@ -251,6 +251,15 @@ export const dynamicSeed = [
   ["doi-tra-va-bao-hanh", "section.3", "body", "Mục 3 - nội dung", "Gửi mã đơn hàng, hình ảnh hoặc video và mô tả vấn đề qua Hotline 0914 94 3653 hoặc email info@gedeco.vn.\nGEDECO kiểm tra thông tin và có thể hướng dẫn bổ sung hình ảnh, video hoặc gửi sản phẩm về điểm tiếp nhận.\nSau khi xác minh, GEDECO thông báo phương án đổi sản phẩm, bổ sung, sửa chữa, bảo hành hoặc hoàn tiền phù hợp.", "", 31],
   ["doi-tra-va-bao-hanh", "section.4", "title", "Mục 4 - tiêu đề", "Các trường hợp không áp dụng", "H2", 40],
   ["doi-tra-va-bao-hanh", "section.4", "body", "Mục 4 - nội dung", "Chính sách không áp dụng cho hư hỏng do sử dụng sai hướng dẫn, tự ý thay đổi sản phẩm, bảo quản không đúng điều kiện, hao mòn tự nhiên hoặc yêu cầu đổi ý sau khi đơn hàng đã được xác nhận, trừ khi hai bên có thỏa thuận khác.", "", 41],
+  ["doi-tra-va-bao-hanh", "section.1", "item.1", "Mục 1 - ý 1", "", "", 11.1],
+  ["doi-tra-va-bao-hanh", "section.1", "item.2", "Mục 1 - ý 2", "", "", 11.2],
+  ["doi-tra-va-bao-hanh", "section.1", "item.3", "Mục 1 - ý 3", "", "", 11.3],
+  ["doi-tra-va-bao-hanh", "section.1", "item.4", "Mục 1 - ý 4", "", "", 11.4],
+  ["doi-tra-va-bao-hanh", "section.2", "item.1", "Mục 2 - nội dung", "", "", 21.1],
+  ["doi-tra-va-bao-hanh", "section.3", "item.1", "Mục 3 - ý 1", "", "", 31.1],
+  ["doi-tra-va-bao-hanh", "section.3", "item.2", "Mục 3 - ý 2", "", "", 31.2],
+  ["doi-tra-va-bao-hanh", "section.3", "item.3", "Mục 3 - ý 3", "", "", 31.3],
+  ["doi-tra-va-bao-hanh", "section.4", "item.1", "Mục 4 - nội dung", "", "", 41.1],
 ] as const;
 
 export const staticSeed = [
