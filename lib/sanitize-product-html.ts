@@ -59,6 +59,12 @@ export function sanitizeProductHtml(value: string) {
     ],
     allowedAttributes: {
       a: ["href", "title", "target", "rel", "class"],
+      p: ["style"],
+      h2: ["style"],
+      h3: ["style"],
+      h4: ["style"],
+      blockquote: ["style"],
+      li: ["style"],
       figure: ["class", "style"],
       img: ["src", "alt", "title", "class", "width", "height", "loading"],
       iframe: ["src", "title", "loading", "allow", "allowfullscreen", "referrerpolicy"],
@@ -72,9 +78,38 @@ export function sanitizeProductHtml(value: string) {
     allowProtocolRelative: false,
     allowedStyles: {
       span: {
+        "font-family": [/^[a-z0-9 ,.'\"-]+$/i],
         "font-size": [/^\d+(?:\.\d+)?(?:px|pt|em|rem|%)$/],
+        "line-height": [/^(?:normal|\d+(?:\.\d+)?)$/],
+        "font-weight": [/^(?:normal|bold|[1-9]00)$/],
+        "font-style": [/^(?:normal|italic|oblique)$/],
+        "text-decoration": [/^(?:none|underline|line-through|overline)(?:\s+(?:none|underline|line-through|overline))*$/],
         color: [/^#[0-9a-f]{6}$/i],
         "background-color": [/^(?:#[0-9a-f]{6}|transparent)$/i],
+      },
+      p: {
+        "text-align": [/^(?:left|center|right|justify)$/],
+        "line-height": [/^(?:normal|\d+(?:\.\d+)?)$/],
+      },
+      h2: {
+        "text-align": [/^(?:left|center|right|justify)$/],
+        "line-height": [/^(?:normal|\d+(?:\.\d+)?)$/],
+      },
+      h3: {
+        "text-align": [/^(?:left|center|right|justify)$/],
+        "line-height": [/^(?:normal|\d+(?:\.\d+)?)$/],
+      },
+      h4: {
+        "text-align": [/^(?:left|center|right|justify)$/],
+        "line-height": [/^(?:normal|\d+(?:\.\d+)?)$/],
+      },
+      blockquote: {
+        "text-align": [/^(?:left|center|right|justify)$/],
+        "line-height": [/^(?:normal|\d+(?:\.\d+)?)$/],
+      },
+      li: {
+        "text-align": [/^(?:left|center|right|justify)$/],
+        "line-height": [/^(?:normal|\d+(?:\.\d+)?)$/],
       },
       figure: {
         width: [/^\d+(?:\.\d+)?px$/],
@@ -107,10 +142,12 @@ export function sanitizeProductHtml(value: string) {
         }
       },
       font: (_tagName, attributes) => {
-        // Product content is intentionally normalized to one readable sans-serif
-        // family. Keep the text, but never reintroduce a decorative/serif face.
-        void attributes;
-        return { tagName: "span", attribs: {} };
+        // execCommand("fontName") emits <font face="…">. Convert it to the
+        // same style-bearing span used by the custom toolbar so the chosen
+        // family survives the save/reload cycle.
+        const face = (attributes.face || "").trim();
+        const safeFace = /^[a-z0-9 ,.'"-]+$/i.test(face) ? face : "Arial";
+        return { tagName: "span", attribs: { style: `font-family: ${safeFace}` } };
       },
     },
     exclusiveFilter: (frame) => frame.tag === "img" && !isAllowedImageSource(frame.attribs.src),
