@@ -39,6 +39,7 @@ export async function POST(request: Request) {
       select: { route: true },
     });
 
+    let savedCount = 0;
     for (const change of changes) {
       if (!change.id) continue;
       const data: Record<string, unknown> = {};
@@ -48,11 +49,16 @@ export async function POST(request: Request) {
       if (typeof change.imageCaption === "string") data.imageCaption = change.imageCaption;
 
       if (Object.keys(data).length > 0) {
-        await prisma.siteDynamicContent.update({
-          where: { id: change.id },
+        const result = await prisma.siteDynamicContent.updateMany({
+          where: { id: change.id, pageKey },
           data,
         });
+        savedCount += result.count;
       }
+    }
+
+    if (savedCount === 0) {
+      return Response.json({ error: "Không tìm thấy field hợp lệ của page để lưu." }, { status: 400 });
     }
 
     if (page?.route) {
@@ -62,7 +68,7 @@ export async function POST(request: Request) {
       }
     }
 
-    return Response.json({ ok: true, savedCount: changes.length });
+    return Response.json({ ok: true, savedCount });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Lỗi lưu nội dung.";
     return Response.json({ error: message }, { status: 500 });

@@ -8,6 +8,7 @@
  * 4. Verifies no missing dynamic content bindings.
  */
 import http from 'http';
+import https from 'https';
 
 const BASE_URL = process.env.BASE_URL || 'http://127.0.0.1:3000';
 
@@ -25,7 +26,8 @@ const PAGES = [
 
 function fetchUrl(url) {
   return new Promise((resolve, reject) => {
-    http.get(url, (res) => {
+    const client = new URL(url).protocol === 'https:' ? https : http;
+    client.get(url, (res) => {
       let data = '';
       res.on('data', chunk => { data += chunk; });
       res.on('end', () => resolve({ status: res.statusCode, data }));

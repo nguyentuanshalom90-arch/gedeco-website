@@ -408,7 +408,6 @@
 
     var main = document.querySelector('main') || document.body;
     var allEls = Array.from(main.querySelectorAll('*'));
-    var allImgs = Array.from(main.querySelectorAll('img'));
 
     // 1. Setup Hero Banners (background images)
     setupHeroBanners(rows);
@@ -577,50 +576,10 @@
 
       if (matched) return;
 
-      // 3. General Fallback Matchers for all pages
-      if (row.value && row.value.trim()) {
-        var needle = norm(row.value);
-        var needleClean = strip(row.value);
-
-        // A. Leaf text elements
-        allEls.forEach(function (el) {
-          if (matched || el.getAttribute('data-cms-id')) return;
-          if (el.children.length > 0) return;
-          if (norm(el.textContent) === needle || (needleClean && strip(el.textContent) === needleClean)) {
-            markTextEl(el, row);
-            matched = true;
-          }
-        });
-
-        // B. Heading or block elements with child tags (<br>, <em>, <strong>, <span>)
-        if (!matched && needleClean) {
-          allEls.forEach(function (el) {
-            if (matched || el.getAttribute('data-cms-id')) return;
-            var tag = el.tagName;
-            if (/^(H[1-6]|P|SPAN|DIV|STRONG|B|EM|A)$/.test(tag)) {
-              var elClean = strip(el.textContent || el.innerText);
-              if (elClean === needleClean || (elClean.length > 5 && (elClean.startsWith(needleClean) || needleClean.startsWith(elClean)))) {
-                markTextEl(el, row);
-                matched = true;
-              }
-            }
-          });
-        }
-      }
-
-      // 4. Image fallback matcher
-      if (!matched && row.imageUrl) {
-        var file = row.imageUrl.split('/').pop().split('?')[0];
-        allImgs.forEach(function (img) {
-          if (img.getAttribute('data-cms-id')) return;
-          var src = img.getAttribute('src') || '';
-          var alt = norm(img.getAttribute('alt') || '');
-          if (src.includes(file) || (row.altText && alt === norm(row.altText))) {
-            markImgEl(img, row);
-            matched = true;
-          }
-        });
-      }
+      // 3. No content-based fallback is allowed. A row may only be attached
+      // through an explicit data-cms-key or a page-specific structural mapping
+      // above. Matching by current text/URL is unsafe because edited values can
+      // collide with another field and silently save to the wrong database row.
     });
 
     setEditMode(isEditMode);
