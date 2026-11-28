@@ -24,8 +24,8 @@ import { sanitizeProductHtml } from "@/lib/sanitize-product-html";
 
 export const dynamic = "force-dynamic";
 
-function localize(html: string) {
-  return html
+function localizeText(value: string) {
+  return value
     .replace(/Status:\s*In stock/gi, "Tình trạng: Còn hàng")
     .replace(/Made in Vietnam/gi, "Sản xuất tại Việt Nam")
     .replace(
@@ -48,6 +48,11 @@ function localize(html: string) {
       /Contact for details about product information/gi,
       "Liên hệ để biết thêm thông tin sản phẩm",
     );
+}
+function localize(html: string) {
+  return html.replace(/(<[^>]*>)|([^<]+)/g, (match, tag, text) =>
+    tag ? match : localizeText(text),
+  );
 }
 function displayTitle(value: string) {
   return value
