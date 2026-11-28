@@ -71,13 +71,16 @@ export function BimiSidebar({
           rel="noopener noreferrer"
           aria-label="Mở website Vimigo.vn trong tab mới"
         >
-          <Image
+          <img
             className="logo-image"
-            src="/bimi-panel/dashboard-logo.webp"
+            src="/bimi-panel/dashboard-logo.optimized.webp"
             alt="Vimigo.vn"
             width={616}
             height={154}
-            unoptimized
+            onError={(event) => {
+              event.currentTarget.onerror = null;
+              event.currentTarget.src = "/vimigo-admin-logo.webp";
+            }}
           />
         </a>
       </div>
