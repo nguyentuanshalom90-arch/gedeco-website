@@ -2312,6 +2312,8 @@ body.dashboard-page-active {
 .lw.vimigo .product-editor .site-content-seo-grid > label:has(input[type="number"]) { display: none; }
 .lw.vimigo .product-editor > .site-content-seo:not(:has(.product-media-columns)):not(:has(.site-content-form-grid)) { background: #f7fbfd; }
 .lw.vimigo .product-rich-editor-label { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 7px; color: #496577; font-size: 13px; font-weight: 700; }
+.lw.vimigo .product-rich-editor-fullscreen-actions { display: inline-flex; align-items: center; gap: 8px; }
+.lw.vimigo .product-rich-editor-save { min-width: 72px; min-height: 34px; padding: 0 14px; }
 .lw.vimigo .product-rich-editor-label small { color: #8293a0; font-size: 11px; font-weight: 500; }
 .lw.vimigo .product-rich-word-count { margin: 7px 2px 4px; color: #8293a0; font-size: 12px; font-weight: 600; line-height: 1.2; text-align: right; }
 .lw.vimigo .product-rich-toolbar { display: flex; align-items: center; flex-wrap: wrap; gap: 2px; padding: 6px; border: 1px solid #c7dce8; border-bottom: 0; border-radius: 10px 10px 0 0; background: #f6fafc; }

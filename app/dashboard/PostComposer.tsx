@@ -288,7 +288,7 @@ function editorHtmlToMarkdown(value: string) {
   return (container.innerText || container.textContent || "").replace(/\n{3,}/g, "\n\n").trim();
 }
 
-function PostRichTextEditor({ value, onChange, label, placeholder, mediaLabel }: { value: string; onChange: (value: string) => void; label: string; placeholder: string; mediaLabel?: string }) {
+function PostRichTextEditor({ value, onChange, label, placeholder, mediaLabel, onSave }: { value: string; onChange: (value: string) => void; label: string; placeholder: string; mediaLabel?: string; onSave?: () => void }) {
   const [html, setHtml] = useState(() => markdownToEditorHtml(value));
   const lastValue = useRef(value);
   useEffect(() => {
@@ -302,7 +302,7 @@ function PostRichTextEditor({ value, onChange, label, placeholder, mediaLabel }:
       onChange(markdown);
     }
   }, [html, onChange, value]);
-  return <RichTextEditor label={label} value={html} onChange={(nextHtml) => { setHtml(nextHtml); const markdown = editorHtmlToMarkdown(nextHtml); lastValue.current = markdown; onChange(markdown); }} placeholder={placeholder} mediaLabel={mediaLabel} />;
+  return <RichTextEditor label={label} value={html} onChange={(nextHtml) => { setHtml(nextHtml); const markdown = editorHtmlToMarkdown(nextHtml); lastValue.current = markdown; onChange(markdown); }} placeholder={placeholder} mediaLabel={mediaLabel} onSave={onSave} />;
 }
 
 export function PostComposer() {
@@ -411,12 +411,12 @@ export function PostComposer() {
     window.history.replaceState(null, "", `${window.location.pathname}?${params.toString()}`);
     void refresh();
   }
-  async function persist(mode: "vietnamese" | "english" = "vietnamese") {
+  async function persist(mode: "all" | "vietnamese" | "english" = "vietnamese") {
     setSaving(true);
     setError("");
     try {
-      const payload = mode === "english" ? { ...postRef.current, translationMode: "MANUAL" as const } : { ...postRef.current, translationMode: "AUTO" as const };
-      const result = await savePost(payload, { preserveEnglish: mode === "vietnamese" });
+      const payload = mode === "english" ? { ...postRef.current, translationMode: "MANUAL" as const } : mode === "vietnamese" ? { ...postRef.current, translationMode: "AUTO" as const } : postRef.current;
+      const result = await savePost(payload, mode === "vietnamese" ? { preserveEnglish: true } : undefined);
       if (!result.ok) {
         setError(result.error);
         return;
@@ -435,7 +435,7 @@ export function PostComposer() {
         result.post,
         ...current.filter((item) => item.id !== result.post.id),
       ]);
-      setMessage(mode === "vietnamese" ? "Đã lưu bài viết tiếng Việt; bản English hiện tại được giữ nguyên." : "Đã lưu bài viết English.");
+      setMessage(mode === "vietnamese" ? "Đã lưu bài viết tiếng Việt; bản English hiện tại được giữ nguyên." : mode === "english" ? "Đã lưu bài viết English." : "Đã lưu toàn bộ thay đổi bài viết Việt và English.");
     } catch (reason) {
       setError(
         reason instanceof Error ? reason.message : "Lưu bài viết thất bại.",
@@ -583,7 +583,7 @@ export function PostComposer() {
           <h2>{post.title || "Bài viết mới"}</h2>
         </div>
         <div className="product-editor-head-actions">
-          {post.status === "PUBLISHED" && post.slug ? <a className="btn btn-ghost" href={`/tin-tuc/${post.slug}`} target="_blank" rel="noreferrer"><Icon name="external" size={15} />Xem</a> : <button className="btn btn-ghost" type="button" disabled title="Lưu bài viết trước khi xem live"><Icon name="external" size={15} />Xem</button>}
+                    {post.status === "PUBLISHED" && post.slug ? <a className="btn btn-ghost" href={`/tin-tuc/${post.slug}`} target="_blank" rel="noreferrer"><Icon name="external" size={15} />Xem</a> : <button className="btn btn-ghost" type="button" disabled title="Lưu bài viết trước khi xem live"><Icon name="external" size={15} />Xem</button>}<button className="btn btn-primary product-editor-head-save" type="button" disabled={saving} onClick={() => void persist("all")} title="Lưu toàn bộ thay đổi tiếng Việt và English">{saving ? "Đang lưu…" : "Lưu"}</button>
           <button className="btn btn-ghost product-editor-close-button" type="button" aria-label="Đóng" title="Đóng" onClick={closeEditor}><Icon name="close" size={17} /></button>
         </div>
       </div>
@@ -602,6 +602,7 @@ export function PostComposer() {
                 value={markdownToEditorHtml(post.title)}
                 onChange={(value) => set("title", editorHtmlToMarkdown(value).replace(/\s+/g, " ").trim())}
                 placeholder="Nhập tiêu đề rõ ràng, thu hút…"
+                onSave={() => void persist("all")}
               />
             </div>
             <label className="field">
@@ -638,10 +639,10 @@ export function PostComposer() {
               </select>
             </label>
             <div className="site-content-full post-short-excerpt">
-              <PostRichTextEditor label="Mô tả ngắn" value={post.shortDesc} onChange={(value) => set("shortDesc", value.slice(0, 160))} placeholder="Tóm tắt nội dung bài viết…" />
+              <PostRichTextEditor label="Mô tả ngắn" value={post.shortDesc} onChange={(value) => set("shortDesc", value.slice(0, 160))} placeholder="Tóm tắt nội dung bài viết…" onSave={() => void persist("all")} />
             </div>
             <div className="site-content-full">
-              <PostRichTextEditor label="Nội dung chi tiết" value={post.content} onChange={(value) => set("content", value)} placeholder="Soạn nội dung bài viết…" mediaLabel="Ảnh trong nội dung bài viết" />
+              <PostRichTextEditor label="Nội dung chi tiết" value={post.content} onChange={(value) => set("content", value)} placeholder="Soạn nội dung bài viết…" mediaLabel="Ảnh trong nội dung bài viết" onSave={() => void persist("all")} />
             </div>
           </section>
           <section className="panel cms-card">
@@ -744,12 +745,13 @@ export function PostComposer() {
                     value={markdownToEditorHtml(post.titleEn)}
                     onChange={(value) => setEnglish("titleEn", editorHtmlToMarkdown(value).replace(/\s+/g, " ").trim())}
                     placeholder="Write a clear English title…"
+                    onSave={() => void persist("all")}
                   />
                 </div>
                 <label className="field"><span>English slug</span><input className="input" value={post.slugEn} onChange={(event) => setEnglish("slugEn", event.target.value)} placeholder="generated-from-title" /></label>
                 <label className="field"><span>English category</span><input className="input" value={categories.find((item) => item.id === post.categoryId)?.nameEn || "News"} readOnly /></label>
-                <div className="site-content-full post-short-excerpt"><PostRichTextEditor label="English excerpt" value={post.shortDescEn} onChange={(value) => setEnglish("shortDescEn", value.slice(0, 160))} placeholder="Write a short English article description…" /></div>
-                <div className="site-content-full"><PostRichTextEditor label="English content" value={post.contentEn} onChange={(value) => setEnglish("contentEn", value)} placeholder="Write English article content…" mediaLabel="English article image" /></div>
+                <div className="site-content-full post-short-excerpt"><PostRichTextEditor label="English excerpt" value={post.shortDescEn} onChange={(value) => setEnglish("shortDescEn", value.slice(0, 160))} placeholder="Write a short English article description…" onSave={() => void persist("all")} /></div>
+                <div className="site-content-full"><PostRichTextEditor label="English content" value={post.contentEn} onChange={(value) => setEnglish("contentEn", value)} placeholder="Write English article content…" mediaLabel="English article image" onSave={() => void persist("all")} /></div>
               </div>
               <div className="cms-seo-grid">
                 <label className="field"><span>English tags</span><ChipInput items={post.tagsEn} onChange={(value) => setEnglish("tagsEn", value)} /></label>
