@@ -8,7 +8,7 @@ import {
 } from "../../components/inner-pages";
 import { prisma } from "@/lib/prisma";
 import { absoluteUrl, siteConfig } from "@/lib/site-config";
-import { ArticleContent } from "@/app/components/article-content";
+import { ArticleContent, ArticleExcerpt } from "@/app/components/article-content";
 import { redirectDestination } from "@/lib/url-redirects";
 import { optimizedStaticMediaUrl } from "@/lib/static-media";
 
@@ -167,7 +167,7 @@ export default async function CmsArticlePage({
       <article className="article-layout">
         <div className="container article-grid">
           <div className="article-main">
-            <p className="article-lead">{article.excerpt || "Cập nhật những câu chuyện và cơ hội mới nhất từ GEDECO."}</p>
+            <p className="article-lead"><ArticleExcerpt content={article.excerpt} fallback="Cập nhật những câu chuyện và cơ hội mới nhất từ GEDECO." /></p>
             {articleImage && (
               <figure>
                 <img className="article-cover" src={articleImage} alt={article.imageAlt || article.title} />

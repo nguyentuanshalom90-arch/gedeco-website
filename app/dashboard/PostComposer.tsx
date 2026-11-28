@@ -288,21 +288,20 @@ function editorHtmlToMarkdown(value: string) {
   return (container.innerText || container.textContent || "").replace(/\n{3,}/g, "\n\n").trim();
 }
 
+function storedArticleToEditorHtml(value: string) {
+  return /<(?:p|div|span|h[1-6]|ul|ol|blockquote|figure|img|br)\b/i.test(value)
+    ? value
+    : markdownToEditorHtml(value);
+}
+
 function PostRichTextEditor({ value, onChange, label, placeholder, mediaLabel, onSave }: { value: string; onChange: (value: string) => void; label: string; placeholder: string; mediaLabel?: string; onSave?: () => void }) {
-  const [html, setHtml] = useState(() => markdownToEditorHtml(value));
+  const [html, setHtml] = useState(() => storedArticleToEditorHtml(value));
   const lastValue = useRef(value);
   useEffect(() => {
-    if (value !== lastValue.current && editorHtmlToMarkdown(html) !== value) setHtml(markdownToEditorHtml(value));
+    if (value !== lastValue.current) setHtml(storedArticleToEditorHtml(value));
     lastValue.current = value;
-  }, [value, html]);
-  useEffect(() => {
-    const markdown = editorHtmlToMarkdown(html);
-    if (markdown !== value) {
-      lastValue.current = markdown;
-      onChange(markdown);
-    }
-  }, [html, onChange, value]);
-  return <RichTextEditor label={label} value={html} onChange={(nextHtml) => { setHtml(nextHtml); const markdown = editorHtmlToMarkdown(nextHtml); lastValue.current = markdown; onChange(markdown); }} placeholder={placeholder} mediaLabel={mediaLabel} onSave={onSave} />;
+  }, [value]);
+  return <RichTextEditor label={label} value={html} onChange={(nextHtml) => { setHtml(nextHtml); lastValue.current = nextHtml; onChange(nextHtml); }} placeholder={placeholder} mediaLabel={mediaLabel} onSave={onSave} />;
 }
 
 export function PostComposer() {

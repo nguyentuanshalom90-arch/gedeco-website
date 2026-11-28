@@ -4,7 +4,7 @@ import { notFound, permanentRedirect } from "next/navigation";
 import { Icon, InnerPage } from "../../../components/inner-pages";
 import { getEnglishArticleBySlug, listEnglishArticles } from "@/lib/public-news";
 import { absoluteUrl, siteConfig } from "@/lib/site-config";
-import { ArticleContent } from "@/app/components/article-content";
+import { ArticleContent, ArticleExcerpt } from "@/app/components/article-content";
 import { redirectDestination } from "@/lib/url-redirects";
 import { optimizedStaticMediaUrl } from "@/lib/static-media";
 
@@ -50,7 +50,7 @@ export default async function EnglishArticlePage({ params }: { params: Promise<{
       <div className="article-meta"><span>▣ {published.toLocaleDateString("en-GB")}</span><span>◉ {article.source.authorName || siteConfig.brand}</span><span>Share:</span><a href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(canonical)}`} target="_blank" rel="noopener noreferrer" aria-label="Share on Facebook"><Icon name="facebook" /></a><a href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(canonical)}`} target="_blank" rel="noopener noreferrer" aria-label="Share on LinkedIn"><Icon name="linkedin" /></a></div>
     </div></section>
     <article className="article-layout"><div className="container article-grid"><div className="article-main">
-      {article.excerpt && <p className="article-lead">{article.excerpt}</p>}
+      {article.excerpt && <p className="article-lead"><ArticleExcerpt content={article.excerpt} fallback="" /></p>}
       {article.source.imageUrl && <figure><img className="article-cover" src={optimizedStaticMediaUrl(article.source.imageUrl)} alt={article.imageAlt} />{article.imageCaption && <figcaption>{article.imageCaption}</figcaption>}</figure>}
       <ArticleContent content={article.content} emptyText="This article is being updated." />
       {article.tags.length > 0 && <div className="article-tags"><strong>Keywords:</strong>{article.tags.map((tag) => <a key={tag} href={`/en/news?tag=${encodeURIComponent(tag)}`}>#{tag}</a>)}</div>}

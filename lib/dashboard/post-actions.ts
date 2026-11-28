@@ -12,6 +12,7 @@ import { requireDashboardSession } from "./auth";
 import { validateOfficialCanonical } from "./canonical-url";
 import { validateManagedMediaUrl } from "./media-url";
 import { DashboardValidationError, dashboardActionError } from "./action-errors";
+import { sanitizeProductHtml } from "@/lib/sanitize-product-html";
 
 function slugify(value: string): string {
   const out = value
@@ -116,9 +117,13 @@ export async function savePost(
   const preserveEnglish = Boolean(options?.preserveEnglish);
   try {
     const title = input.title.trim();
+    const shortDesc = sanitizeProductHtml(input.shortDesc);
+    const content = sanitizeProductHtml(input.content);
+    const shortDescEn = sanitizeProductHtml(input.shortDescEn);
+    const contentEn = sanitizeProductHtml(input.contentEn);
     if (!title) throw new DashboardValidationError("Tiêu đề bài viết không được để trống.");
-    if (["PUBLISHED", "SCHEDULED"].includes(input.status) && !input.shortDesc.trim()) throw new DashboardValidationError("Bài xuất bản hoặc lên lịch phải có mô tả ngắn.");
-    if (["PUBLISHED", "SCHEDULED"].includes(input.status) && !input.content.trim()) throw new DashboardValidationError("Bài xuất bản hoặc lên lịch phải có nội dung chi tiết.");
+    if (["PUBLISHED", "SCHEDULED"].includes(input.status) && !shortDesc.trim()) throw new DashboardValidationError("Bài xuất bản hoặc lên lịch phải có mô tả ngắn.");
+    if (["PUBLISHED", "SCHEDULED"].includes(input.status) && !content.trim()) throw new DashboardValidationError("Bài xuất bản hoặc lên lịch phải có nội dung chi tiết.");
     if (input.coverImage && !input.coverImageAlt.trim()) throw new DashboardValidationError("Ảnh bìa phải có alt text mô tả.");
     if (input.metaTitle.trim().length > 65) throw new DashboardValidationError("Tiêu đề SEO không được vượt quá 65 ký tự.");
     if (input.metaDescription.trim().length > 160) throw new DashboardValidationError("Mô tả SEO không được vượt quá 160 ký tự.");
@@ -127,7 +132,7 @@ export async function savePost(
     if (scheduledAt && scheduledAt <= new Date()) throw new DashboardValidationError("Thời gian lên lịch phải ở tương lai.");
     const imageLines = input.content.split(/\r?\n/).filter((line) => line.trim().startsWith("!["));
     const inlineImages = articleImageTokens(input.content);
-    if (imageLines.length !== inlineImages.length) throw new DashboardValidationError("Ảnh trong nội dung có cú pháp không hợp lệ. Hãy chèn ảnh bằng thư viện media.");
+    if (!/<(?:img|figure)\b/i.test(input.content) && imageLines.length !== inlineImages.length) throw new DashboardValidationError("Ảnh trong nội dung có cú pháp không hợp lệ. Hãy chèn ảnh bằng thư viện media.");
     if (inlineImages.some((image) => !image.alt || !safeArticleImageSrc(image.src))) throw new DashboardValidationError("Ảnh trong nội dung phải có alt text và dùng media nội bộ hoặc domain chính thức.");
     const slug = slugify(input.slug.trim() || title);
     const duplicate = await prisma.newsArticle.findFirst({ where: { slug, ...(input.id ? { NOT: { id: input.id } } : {}) } });
@@ -139,14 +144,14 @@ export async function savePost(
     const previousTranslation = input.id ? await prisma.translationEntry.findUnique({ where: { entityType_entityId_locale: { entityType: "NEWS_ARTICLE", entityId: input.id, locale: "en" } } }) : null;
     if (input.translationMode === "MANUAL") {
       if (!input.titleEn.trim()) throw new DashboardValidationError("Bản English phải có tiêu đề.");
-      if (["PUBLISHED", "SCHEDULED"].includes(input.status) && (!input.shortDescEn.trim() || !input.contentEn.trim())) throw new DashboardValidationError("Bản English của bài xuất bản phải có mô tả ngắn và nội dung.");
+      if (["PUBLISHED", "SCHEDULED"].includes(input.status) && (!shortDescEn.trim() || !contentEn.trim())) throw new DashboardValidationError("Bản English của bài xuất bản phải có mô tả ngắn và nội dung.");
       if (input.coverImage && !input.coverImageAltEn.trim()) throw new DashboardValidationError("Bản English phải có alt text cho ảnh bìa.");
       if (input.metaTitleEn.trim().length > 65) throw new DashboardValidationError("English SEO title không được vượt quá 65 ký tự.");
       if (input.metaDescriptionEn.trim().length > 160) throw new DashboardValidationError("English meta description không được vượt quá 160 ký tự.");
       validateOfficialCanonical(input.canonicalUrlEn, { fieldLabel: "Canonical English", pathPrefix: "/en/news/" });
       const englishImageLines = input.contentEn.split(/\r?\n/).filter((line) => line.trim().startsWith("!["));
       const englishInlineImages = articleImageTokens(input.contentEn);
-      if (englishImageLines.length !== englishInlineImages.length || englishInlineImages.some((image) => !image.alt || !safeArticleImageSrc(image.src))) throw new DashboardValidationError("Ảnh trong nội dung English phải có cú pháp hợp lệ, alt text và media an toàn.");
+      if ((!/<(?:img|figure)\b/i.test(input.contentEn) && englishImageLines.length !== englishInlineImages.length) || englishInlineImages.some((image) => !image.alt || !safeArticleImageSrc(image.src))) throw new DashboardValidationError("Ảnh trong nội dung English phải có cú pháp hợp lệ, alt text và media an toàn.");
       const slugEn = slugify(input.slugEn.trim() || input.titleEn);
       const duplicateEnglish = await prisma.translationEntry.findFirst({ where: { entityType: "NEWS_ARTICLE", locale: "en", slug: slugEn, ...(input.id ? { NOT: { entityId: input.id } } : {}) } });
       if (duplicateEnglish) throw new DashboardValidationError("English slug của bài viết đã tồn tại.");
@@ -156,8 +161,8 @@ export async function savePost(
     title,
     category: category?.name || input.categoryName.trim() || "Tin tức",
     categoryId: category?.id || null,
-    excerpt: input.shortDesc.trim() || null,
-    content: input.content.trim() || null,
+    excerpt: shortDesc.trim() || null,
+    content: content.trim() || null,
     imageUrl: validateManagedMediaUrl(input.coverImage || "", "Ảnh bìa bài viết"),
     imageAlt: input.coverImageAlt.trim() || null,
     imageCaption: input.coverImageCaption.trim() || null,
@@ -184,7 +189,7 @@ export async function savePost(
     if (input.translationMode === "MANUAL") {
       const slugEn = slugify(input.slugEn.trim() || input.titleEn);
       const payload = {
-        title: input.titleEn.trim(), category: category?.nameEn || "News", excerpt: input.shortDescEn.trim(), content: input.contentEn.trim(),
+        title: input.titleEn.trim(), category: category?.nameEn || "News", excerpt: shortDescEn.trim(), content: contentEn.trim(),
         imageAlt: input.coverImageAltEn.trim(), imageCaption: input.coverImageCaptionEn.trim(), ogImageAlt: input.ogImageAltEn.trim() || input.coverImageAltEn.trim(),
         metaTitle: input.metaTitleEn.trim() || input.titleEn.trim(), metaDescription: input.metaDescriptionEn.trim() || input.shortDescEn.trim(), focusKeyword: input.focusKeywordEn.trim(),
         canonicalUrl: validateOfficialCanonical(input.canonicalUrlEn, { fieldLabel: "Canonical English", pathPrefix: "/en/news/" }) || "",

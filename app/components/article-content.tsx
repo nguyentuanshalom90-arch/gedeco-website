@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { runtimeEnv } from "@/lib/runtime-env";
+import { sanitizeProductHtml } from "@/lib/sanitize-product-html";
 
 const imagePattern = /^!\[([^\]]*)\]\((\S+?)(?:\s+"([^"]*)")?\)$/;
 const inlinePattern = /(!?\[[^\]]+\]\([^\s)]+\)|\*\*[^*]+\*\*|`[^`]+`)/g;
@@ -51,6 +52,9 @@ export function articleImageTokens(content: string) {
 
 export function ArticleContent({ content, emptyText }: { content: string | null | undefined; emptyText: string }) {
   if (!content?.trim()) return <p>{emptyText}</p>;
+  if (/<(?:p|div|span|h[1-6]|ul|ol|blockquote|figure|img|br)\b/i.test(content)) {
+    return <div className="article-rich-html" dangerouslySetInnerHTML={{ __html: sanitizeProductHtml(content) }} />;
+  }
   const lines = content.split(/\r?\n/);
   const blocks: ReactNode[] = [];
   for (let index = 0; index < lines.length;) {
@@ -83,4 +87,12 @@ export function ArticleContent({ content, emptyText }: { content: string | null 
     index += 1;
   }
   return <>{blocks}</>;
+}
+
+export function ArticleExcerpt({ content, fallback }: { content: string | null | undefined; fallback: string }) {
+  if (!content?.trim()) return <>{fallback}</>;
+  if (/<(?:p|div|span|h[1-6]|ul|ol|blockquote|figure|img|br)\b/i.test(content)) {
+    return <span className="article-rich-excerpt" dangerouslySetInnerHTML={{ __html: sanitizeProductHtml(content) }} />;
+  }
+  return <>{content}</>;
 }
